@@ -1,1 +1,1 @@
-# gym-crm
+# Gym CRM Application

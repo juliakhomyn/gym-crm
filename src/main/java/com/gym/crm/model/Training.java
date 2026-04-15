@@ -14,8 +14,8 @@ import java.time.LocalDate;
 public class Training {
     private final Long traineeId;
     private final Long trainerId;
-    private final String name;
-    private final TrainingType type;
-    private final LocalDate date;
-    private final int duration;
+    private final String trainingName;
+    private final TrainingType trainingType;
+    private final LocalDate trainingDate;
+    private final int trainingDuration;
 }

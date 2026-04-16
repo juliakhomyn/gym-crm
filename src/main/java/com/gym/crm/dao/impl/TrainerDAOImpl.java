@@ -19,10 +19,6 @@ public class TrainerDAOImpl implements TrainerDAO {
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
 
-    private Map<Long, Trainer> trainerStorage() {
-        return (Map<Long, Trainer>) inMemoryStorage.getStorage(StorageNamespace.TRAINER);
-    }
-
     @Override
     public Trainer save(Trainer trainer) {
         return trainerStorage().put(trainer.getUserId(), trainer);
@@ -48,5 +44,9 @@ public class TrainerDAOImpl implements TrainerDAO {
     @Override
     public List<Trainer> findAll() {
         return trainerStorage().values().stream().toList();
+    }
+
+    private Map<Long, Trainer> trainerStorage() {
+        return (Map<Long, Trainer>) inMemoryStorage.getStorage(StorageNamespace.TRAINER);
     }
 }

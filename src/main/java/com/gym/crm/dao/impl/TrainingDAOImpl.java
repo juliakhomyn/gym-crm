@@ -19,10 +19,6 @@ public class TrainingDAOImpl implements TrainingDAO {
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
 
-    private Map<Long, Training> trainingStorage() {
-        return (Map<Long, Training>) inMemoryStorage.getStorage(StorageNamespace.TRAINING);
-    }
-
     @Override
     public Training save(Training training) {
         return trainingStorage().put(training.getId(), training);
@@ -40,5 +36,9 @@ public class TrainingDAOImpl implements TrainingDAO {
     @Override
     public List<Training> findAll() {
         return trainingStorage().values().stream().toList();
+    }
+
+    private Map<Long, Training> trainingStorage() {
+        return (Map<Long, Training>) inMemoryStorage.getStorage(StorageNamespace.TRAINING);
     }
 }

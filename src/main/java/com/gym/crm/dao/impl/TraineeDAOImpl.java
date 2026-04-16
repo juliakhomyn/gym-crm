@@ -19,10 +19,6 @@ public class TraineeDAOImpl implements TraineeDAO {
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
 
-    private Map<Long, Trainee> traineeStorage() {
-        return (Map<Long, Trainee>) inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
-    }
-
     @Override
     public Trainee save(Trainee trainee) {
         return traineeStorage().put(trainee.getUserId(), trainee);
@@ -56,5 +52,9 @@ public class TraineeDAOImpl implements TraineeDAO {
     @Override
     public List<Trainee> findAll() {
         return traineeStorage().values().stream().toList();
+    }
+
+    private Map<Long, Trainee> traineeStorage() {
+        return (Map<Long, Trainee>) inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
     }
 }

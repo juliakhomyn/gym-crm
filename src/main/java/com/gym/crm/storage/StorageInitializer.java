@@ -43,7 +43,7 @@ public class StorageInitializer {
             loadTrainers();
             loadTrainings();
         } catch (IllegalArgumentException | IOException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

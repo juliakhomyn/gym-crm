@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class Training {
+    private final Long id;
     private final Long traineeId;
     private final Long trainerId;
     private final String trainingName;

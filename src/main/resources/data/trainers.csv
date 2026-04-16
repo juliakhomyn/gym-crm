@@ -1,0 +1,4 @@
+userId,firstName,lastName,username,password,isActive,specialization
+1,Olivia,Turner,Olivia.Turner,alex789,true,Pilates
+2,Emily,White,Emily.White,emily321,true,Yoga
+3,Michael,Green,Michael.Green,mgpass,true,Strength Training

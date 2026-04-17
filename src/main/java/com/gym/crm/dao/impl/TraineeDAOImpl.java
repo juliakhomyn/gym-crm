@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public class TraineeDAOImpl implements TraineeDAO {
-    private static final String TRAINEE_NOT_FOUND_BY_ID = "Trainee not found by id: %s";
+    private static final String INVALID_ID_EXCEPTION_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
@@ -26,27 +26,26 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public Trainee update(Trainee trainee) {
-        if (!traineeStorage().containsKey(trainee.getUserId())) {
-            throw new IllegalArgumentException(String.format(TRAINEE_NOT_FOUND_BY_ID, trainee.getUserId()));
+        if (trainee.getUserId() == null || trainee.getUserId() <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, trainee.getUserId()));
         }
         return traineeStorage().put(trainee.getUserId(), trainee);
     }
 
     @Override
     public void delete(Long id) {
-        if (!traineeStorage().containsKey(id)) {
-            throw new IllegalArgumentException(String.format(TRAINEE_NOT_FOUND_BY_ID, id));
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, id));
         }
         traineeStorage().remove(id);
     }
 
     @Override
     public Optional<Trainee> findById(Long id) {
-        Optional<Trainee> trainee = Optional.ofNullable(traineeStorage().get(id));
-        if (trainee.isEmpty()) {
-            throw new IllegalArgumentException(String.format(TRAINEE_NOT_FOUND_BY_ID, id));
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, id));
         }
-        return trainee;
+        return Optional.ofNullable(traineeStorage().get(id));
     }
 
     @Override

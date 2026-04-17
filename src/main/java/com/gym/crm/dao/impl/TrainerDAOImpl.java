@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public class TrainerDAOImpl implements TrainerDAO {
-    private static final String TRAINER_NOT_FOUND_BY_ID = "Trainer not found by id: %s";
+    private static final String INVALID_ID_EXCEPTION_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
@@ -26,19 +26,18 @@ public class TrainerDAOImpl implements TrainerDAO {
 
     @Override
     public Trainer update(Trainer trainer) {
-        if (!trainerStorage().containsKey(trainer.getUserId())) {
-            throw new IllegalArgumentException(String.format(TRAINER_NOT_FOUND_BY_ID, trainer.getUserId()));
+        if (trainer.getUserId() == null || trainer.getUserId() <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, trainer.getUserId()));
         }
         return trainerStorage().put(trainer.getUserId(), trainer);
     }
 
     @Override
     public Optional<Trainer> findById(Long id) {
-        Optional<Trainer> trainer = Optional.ofNullable(trainerStorage().get(id));
-        if (trainer.isEmpty()) {
-            throw new IllegalArgumentException(String.format(TRAINER_NOT_FOUND_BY_ID, id));
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, id));
         }
-        return trainer;
+        return Optional.ofNullable(trainerStorage().get(id));
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public class TrainingDAOImpl implements TrainingDAO {
-    private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by is: %s";
+    private static final String INVALID_ID_EXCEPTION_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
@@ -26,11 +26,10 @@ public class TrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Optional<Training> findById(Long id) {
-        Optional<Training> training = Optional.ofNullable(trainingStorage().get(id));
-        if (training.isEmpty()) {
-            throw new IllegalArgumentException(String.format(TRAINING_NOT_FOUND_BY_ID, id));
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, id));
         }
-        return training;
+        return Optional.ofNullable(trainingStorage().get(id));
     }
 
     @Override

@@ -1,19 +1,24 @@
-package com.gym.crm.model;
+package com.gym.crm.dto;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDate;
 
 @Getter
-@SuperBuilder(toBuilder = true)
+@Builder
 @ToString
 @EqualsAndHashCode
-public class User {
+public class TraineeResponseDTO {
+    private final Long userId;
     private final String firstName;
     private final String lastName;
     private final String username;
     @ToString.Exclude
     private final String password;
-    private final Boolean isActive;
+    private final LocalDate dateOfBirth;
+    private final String address;
+    private final boolean isActive;
 }

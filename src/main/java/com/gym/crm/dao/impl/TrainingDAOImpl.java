@@ -4,6 +4,7 @@ import com.gym.crm.dao.TrainingDAO;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.enums.StorageNamespace;
 import com.gym.crm.storage.InMemoryStorage;
+import com.gym.crm.util.Validator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -14,21 +15,24 @@ import java.util.Optional;
 
 @Repository
 public class TrainingDAOImpl implements TrainingDAO {
-    private static final String INVALID_ID_EXCEPTION_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Setter(onMethod_={@Autowired})
     private InMemoryStorage inMemoryStorage;
 
     @Override
     public Training save(Training training) {
-        return trainingStorage().put(training.getId(), training);
+        Training toSave = training.getId() == null
+                ? training.toBuilder().id(generateId()).build()
+                : training;
+        trainingStorage().put(toSave.getId(), toSave);
+
+        return toSave;
     }
 
     @Override
     public Optional<Training> findById(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(String.format(INVALID_ID_EXCEPTION_MESSAGE, id));
-        }
+        Validator.validateId(id);
+
         return Optional.ofNullable(trainingStorage().get(id));
     }
 
@@ -39,5 +43,9 @@ public class TrainingDAOImpl implements TrainingDAO {
 
     private Map<Long, Training> trainingStorage() {
         return (Map<Long, Training>) inMemoryStorage.getStorage(StorageNamespace.TRAINING);
+    }
+
+    private long generateId() {
+        return trainingStorage().keySet().stream().max(Long::compareTo).orElse(0L) + 1;
     }
 }

@@ -1,19 +1,20 @@
-package com.gym.crm.model;
+package com.gym.crm.dto;
 
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 @Getter
-@SuperBuilder(toBuilder = true)
+@Builder
 @ToString
 @EqualsAndHashCode
-public class User {
+public class TrainerUpdateDTO {
     private final String firstName;
     private final String lastName;
     private final String username;
     @ToString.Exclude
     private final String password;
-    private final Boolean isActive;
+    private final String specialization;
+    private final boolean isActive;
 }

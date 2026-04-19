@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
 
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Trainee extends User {

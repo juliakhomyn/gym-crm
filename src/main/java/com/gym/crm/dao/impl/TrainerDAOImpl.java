@@ -25,19 +25,23 @@ public class TrainerDAOImpl implements TrainerDAO {
                 ? trainer.toBuilder().userId(generateId()).build()
                 : trainer;
         trainerStorage().put(toSave.getUserId(), toSave);
+
         return toSave;
     }
 
     @Override
     public Trainer update(Trainer trainer) {
         Validator.validateId(trainer.getUserId());
+
         trainerStorage().put(trainer.getUserId(), trainer);
+
         return trainer;
     }
 
     @Override
     public Optional<Trainer> findById(Long id) {
         Validator.validateId(id);
+
         return Optional.ofNullable(trainerStorage().get(id));
     }
 

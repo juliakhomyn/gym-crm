@@ -39,6 +39,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .password(passwordEncoder.encode(rawPassword))
                 .isActive(true)
                 .build();
+
         return trainerDAO.save(withCredentials);
     }
 

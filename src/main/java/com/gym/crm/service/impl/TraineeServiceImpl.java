@@ -39,6 +39,7 @@ public class TraineeServiceImpl implements TraineeService {
                 .password(passwordEncoder.encode(rawPassword))
                 .isActive(true)
                 .build();
+
         return traineeDAO.save(withCredentials);
     }
 
@@ -53,6 +54,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public void deleteTrainee(Long id) {
         getTraineeById(id);
+
         traineeDAO.delete(id);
     }
 

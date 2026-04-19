@@ -26,25 +26,30 @@ public class TraineeDAOImpl implements TraineeDAO {
                 ? trainee.toBuilder().userId(generateId()).build()
                 : trainee;
         traineeStorage().put(toSave.getUserId(), toSave);
+
         return toSave;
     }
 
     @Override
     public Trainee update(Trainee trainee) {
         Validator.validateId(trainee.getUserId());
+
         traineeStorage().put(trainee.getUserId(), trainee);
+
         return trainee;
     }
 
     @Override
     public void delete(Long id) {
         Validator.validateId(id);
+
         traineeStorage().remove(id);
     }
 
     @Override
     public Optional<Trainee> findById(Long id) {
         Validator.validateId(id);
+
         return Optional.ofNullable(traineeStorage().get(id));
     }
 

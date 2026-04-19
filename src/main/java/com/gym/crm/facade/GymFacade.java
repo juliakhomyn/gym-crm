@@ -37,12 +37,14 @@ public class GymFacade {
     public TraineeResponseDTO createTrainee(TraineeRequestDTO traineeRequestDTO) {
         Trainee trainee = traineeMapper.toEntity(traineeRequestDTO);
         Trainee saved = traineeService.createTrainee(trainee);
+
         return traineeMapper.toDto(saved);
     }
 
     public TraineeResponseDTO updateTrainee(TraineeUpdateDTO traineeUpdateDTO) {
         Trainee trainee = traineeMapper.toEntity(traineeUpdateDTO);
         Trainee saved = traineeService.updateTrainee(trainee);
+
         return traineeMapper.toDto(saved);
     }
 
@@ -52,6 +54,7 @@ public class GymFacade {
 
     public TraineeResponseDTO getTraineeById(Long id) {
         Trainee trainee = traineeService.getTraineeById(id);
+
         return traineeMapper.toDto(trainee);
     }
 
@@ -65,17 +68,20 @@ public class GymFacade {
     public TrainerResponseDTO createTrainer(TrainerRequestDTO trainerRequestDTO) {
         Trainer trainer = trainerMapper.toEntity(trainerRequestDTO);
         Trainer saved = trainerService.createTrainer(trainer);
+
         return trainerMapper.toDto(saved);
     }
 
     public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO) {
         Trainer trainer = trainerMapper.toEntity(trainerUpdateDTO);
         Trainer saved = trainerService.createTrainer(trainer);
+
         return trainerMapper.toDto(saved);
     }
 
     public TrainerResponseDTO getTrainerById(Long id) {
         Trainer trainer = trainerService.getTrainerById(id);
+
         return trainerMapper.toDto(trainer);
     }
 
@@ -89,11 +95,13 @@ public class GymFacade {
     public TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO) {
         Training training = trainingMapper.toEntity(trainingRequestDTO);
         Training saved = trainingService.createTraining(training);
+
         return trainingMapper.toDto(saved);
     }
 
     public TrainingResponseDTO getTrainingById(Long id) {
         Training training = trainingService.getTrainingById(id);
+
         return trainingMapper.toDto(training);
     }
 

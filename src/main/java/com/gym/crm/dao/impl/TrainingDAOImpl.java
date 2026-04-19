@@ -25,12 +25,14 @@ public class TrainingDAOImpl implements TrainingDAO {
                 ? training.toBuilder().id(generateId()).build()
                 : training;
         trainingStorage().put(toSave.getId(), toSave);
+
         return toSave;
     }
 
     @Override
     public Optional<Training> findById(Long id) {
         Validator.validateId(id);
+
         return Optional.ofNullable(trainingStorage().get(id));
     }
 

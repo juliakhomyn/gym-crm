@@ -126,7 +126,7 @@ public class StorageInitializerTest {
         assertTrue(trainingStorage.isEmpty());
     }
 
-    private void stubAllStorages() throws IOException {
+    private void stubAllStorages() {
         when(storage.getStorage(StorageNamespace.TRAINEE)).thenReturn((Map) traineeStorage);
         when(storage.getStorage(StorageNamespace.TRAINER)).thenReturn((Map) trainerStorage);
         when(storage.getStorage(StorageNamespace.TRAINING)).thenReturn((Map) trainingStorage);

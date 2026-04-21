@@ -1,0 +1,6 @@
+id,firstName,lastName,username,password,isActive,dateOfBirth,address
+1,Callum,Whitfield,test123,true,2004-05-15,123 Main St
+
+
+
+2,Nora,Pemberton,test456,false,1999-11-30,456 Oak Ave

@@ -1,0 +1,99 @@
+package com.gym.crm.mapper;
+
+import com.gym.crm.dto.TraineeRequestDTO;
+import com.gym.crm.dto.TraineeResponseDTO;
+import com.gym.crm.dto.TraineeUpdateDTO;
+import com.gym.crm.model.Trainee;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class TraineeMapperTest {
+    private static final String FIRST_NAME = "Ellis";
+    private static final String LAST_NAME = "Hargrove";
+    private static final String USERNAME = "Ellis.Hargrove";
+    private static final String PASSWORD = "encodedPassword";
+    private static final String ADDRESS = "123 Oak Street";
+    private static final LocalDate DATE_OF_BIRTH = LocalDate.of(2000, 1, 1);
+
+    private final TraineeMapper mapper = Mappers.getMapper(TraineeMapper.class);
+
+    @Test
+    void toEntity_shouldMapAllFields_whenMapFromTraineeRequestDTO() {
+        TraineeRequestDTO traineeRequestDTO = buildTraineeRequestDTO();
+
+        Trainee entity = mapper.toEntity(traineeRequestDTO);
+
+        assertEquals(FIRST_NAME, entity.getFirstName());
+        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(DATE_OF_BIRTH, entity.getDateOfBirth());
+        assertEquals(ADDRESS, entity.getAddress());
+    }
+
+    @Test
+    void toEntity_fromTraineeUpdateDTO() {
+        TraineeUpdateDTO traineeUpdateDTO = buildTraineeUpdateDTO();
+
+        Trainee entity = mapper.toEntity(traineeUpdateDTO);
+
+        assertEquals(USERNAME, entity.getUsername());
+        assertEquals(PASSWORD, entity.getPassword());
+        assertEquals(FIRST_NAME, entity.getFirstName());
+        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(DATE_OF_BIRTH, entity.getDateOfBirth());
+        assertEquals(ADDRESS, entity.getAddress());
+        assertEquals(true, entity.getIsActive());
+    }
+
+    @Test
+    void toDto_fromTraineeEntity() {
+        Trainee trainee = buildTrainee();
+
+        TraineeResponseDTO responseDTO = mapper.toDto(trainee);
+
+        assertEquals(USERNAME, responseDTO.getUsername());
+        assertEquals(PASSWORD, responseDTO.getPassword());
+        assertEquals(FIRST_NAME, responseDTO.getFirstName());
+        assertEquals(LAST_NAME, responseDTO.getLastName());
+        assertEquals(DATE_OF_BIRTH, responseDTO.getDateOfBirth());
+        assertEquals(ADDRESS, responseDTO.getAddress());
+        assertEquals(true, responseDTO.getIsActive());
+    }
+
+    private TraineeRequestDTO buildTraineeRequestDTO() {
+        return TraineeRequestDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .dateOfBirth(DATE_OF_BIRTH)
+                .address(ADDRESS)
+                .build();
+    }
+
+    private TraineeUpdateDTO buildTraineeUpdateDTO() {
+        return TraineeUpdateDTO.builder()
+                .username(USERNAME)
+                .password(PASSWORD)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .dateOfBirth(DATE_OF_BIRTH)
+                .address(ADDRESS)
+                .isActive(true)
+                .build();
+    }
+
+    private Trainee buildTrainee() {
+        return Trainee.builder()
+                .userId(1L)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .dateOfBirth(DATE_OF_BIRTH)
+                .address(ADDRESS)
+                .isActive(true)
+                .build();
+    }
+}

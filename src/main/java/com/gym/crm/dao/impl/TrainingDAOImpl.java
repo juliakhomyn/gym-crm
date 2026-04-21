@@ -21,6 +21,8 @@ public class TrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Training save(Training training) {
+        Validator.validateNotNull(training, "Training");
+
         Training toSave = training.getId() == null
                 ? training.toBuilder().id(generateId()).build()
                 : training;
@@ -42,7 +44,7 @@ public class TrainingDAOImpl implements TrainingDAO {
     }
 
     private Map<Long, Training> trainingStorage() {
-        return (Map<Long, Training>) inMemoryStorage.getStorage(StorageNamespace.TRAINING);
+        return inMemoryStorage.getStorage(StorageNamespace.TRAINING);
     }
 
     private long generateId() {

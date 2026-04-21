@@ -27,12 +27,15 @@ public class StorageInitializer {
     @Setter(onMethod_={@Autowired})
     private CsvParser csvParser;
 
+    @Setter
     @Value("${storage.data.trainee}")
     private String traineeFilePath;
 
+    @Setter
     @Value("${storage.data.trainer}")
     private String trainerFilePath;
 
+    @Setter
     @Value("${storage.data.training}")
     private String trainingFilePath;
 
@@ -48,7 +51,7 @@ public class StorageInitializer {
     }
 
     private void loadTrainees() throws IOException, IllegalArgumentException {
-        Map<Long, Trainee> storage = (Map<Long, Trainee>) inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
+        Map<Long, Trainee> storage = inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
         csvReader.readCsv(traineeFilePath, true)
                 .stream()
                 .map(line -> csvParser.parseTrainee(line))
@@ -56,7 +59,7 @@ public class StorageInitializer {
     }
 
     private void loadTrainers() throws IOException, IllegalArgumentException {
-        Map<Long, Trainer> storage = (Map<Long, Trainer>) inMemoryStorage.getStorage(StorageNamespace.TRAINER);
+        Map<Long, Trainer> storage = inMemoryStorage.getStorage(StorageNamespace.TRAINER);
         csvReader.readCsv(trainerFilePath, true)
                 .stream()
                 .map(line -> csvParser.parseTrainer(line))
@@ -64,7 +67,7 @@ public class StorageInitializer {
     }
 
     private void loadTrainings() throws IOException, IllegalArgumentException {
-        Map<Long, Training> storage = (Map<Long, Training>) inMemoryStorage.getStorage(StorageNamespace.TRAINING);
+        Map<Long, Training> storage = inMemoryStorage.getStorage(StorageNamespace.TRAINING);
         csvReader.readCsv(trainingFilePath, true)
                 .stream()
                 .map(line -> csvParser.parseTraining(line))

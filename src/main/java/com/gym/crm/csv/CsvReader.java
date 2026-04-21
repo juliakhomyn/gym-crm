@@ -15,7 +15,7 @@ public class CsvReader {
     private static final String FILE_NOT_FOUND_EXCEPTION = "File not found: %s";
     private static final String READ_FROM_FILE_ERROR = "Failed to read from file: %s";
 
-    public List<String> readCsv(String fileName, boolean isHeader) throws IOException, IllegalArgumentException {
+    public List<String> readCsv(String fileName, boolean isHeader) throws IOException {
         if (fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException(EMPTY_FILE_NAME_EXCEPTION);
         }

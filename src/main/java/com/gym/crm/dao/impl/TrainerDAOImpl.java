@@ -21,6 +21,8 @@ public class TrainerDAOImpl implements TrainerDAO {
 
     @Override
     public Trainer save(Trainer trainer) {
+        Validator.validateNotNull(trainer, "Trainer");
+
         Trainer toSave = trainer.getUserId() == null
                 ? trainer.toBuilder().userId(generateId()).build()
                 : trainer;
@@ -51,7 +53,7 @@ public class TrainerDAOImpl implements TrainerDAO {
     }
 
     private Map<Long, Trainer> trainerStorage() {
-        return (Map<Long, Trainer>) inMemoryStorage.getStorage(StorageNamespace.TRAINER);
+        return inMemoryStorage.getStorage(StorageNamespace.TRAINER);
     }
 
     private long generateId() {

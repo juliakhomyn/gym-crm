@@ -14,18 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CsvParserTest {
 
-    private CsvParser csvParser;
+    private CsvParser parser;
 
     @BeforeEach
     void setUp() {
-        csvParser = new CsvParser();
+        parser = new CsvParser();
     }
 
     @Test
     void parseTrainee_shouldBuildTraineeFromValidCsvLine() {
         String line = "1,Callum,Whitfield,Callum.Whitfield,password123,true,2000-01-01,123 Main St";
 
-        Trainee actual = csvParser.parseTrainee(line);
+        Trainee actual = parser.parseTrainee(line);
 
         assertEquals(1L, actual.getUserId());
         assertEquals("Callum", actual.getFirstName());
@@ -41,7 +41,7 @@ public class CsvParserTest {
     void parseTrainee_shouldParseTraineeWithIsActiveFalse() {
         String line = "2,Nora,Pemberton,Nora.Pemberton,pass456,false,1999-11-30,456 Oak Ave";
 
-        Trainee actual = csvParser.parseTrainee(line);
+        Trainee actual = parser.parseTrainee(line);
 
         assertFalse(actual.getIsActive());
     }
@@ -50,7 +50,7 @@ public class CsvParserTest {
     void parseTrainee_shouldTrimWhitespace() {
         String line = " 1 , Callum , Whitfield , Callum.Whitfield , password , true , 2000-01-01 , 123 Main St ";
 
-        Trainee actual = csvParser.parseTrainee(line);
+        Trainee actual = parser.parseTrainee(line);
 
         assertEquals("Callum", actual.getFirstName());
         assertEquals("Whitfield", actual.getLastName());
@@ -60,7 +60,7 @@ public class CsvParserTest {
     void parseTrainer_shouldBuildTrainerFromValidCsvLine() {
         String line = "1,Callum,Whitfield,Callum.Whitfield,password123,true,Cardio";
 
-        Trainer actual = csvParser.parseTrainer(line);
+        Trainer actual = parser.parseTrainer(line);
 
         assertEquals(1L, actual.getUserId());
         assertEquals("Callum", actual.getFirstName());
@@ -75,7 +75,7 @@ public class CsvParserTest {
     void parseTrainer_shouldTrimWhitespace() {
         String line = " 1 , Callum , Whitfield , Callum.Whitfield , password , true , Cardio ";
 
-        Trainer actual = csvParser.parseTrainer(line);
+        Trainer actual = parser.parseTrainer(line);
 
         assertEquals("Cardio", actual.getSpecialization().getTrainingTypeName());
     }
@@ -84,7 +84,7 @@ public class CsvParserTest {
     void parseTraining_shouldBuildTrainingFromValidCsvLine() {
         String line = "1,1,2,Morning Cardio,Cardio,2024-01-15,60";
 
-        Training actual = csvParser.parseTraining(line);
+        Training actual = parser.parseTraining(line);
 
         assertEquals(1L, actual.getId());
         assertEquals(1L, actual.getTraineeId());
@@ -99,7 +99,7 @@ public class CsvParserTest {
     void parseTraining_shouldTrimWhitespace() {
         String line = " 1 , 1 , 2 , Morning Cardio , Cardio , 2024-01-15 , 60 ";
 
-        Training actual = csvParser.parseTraining(line);
+        Training actual = parser.parseTraining(line);
 
         assertEquals("Morning Cardio", actual.getTrainingName());
         assertEquals(60, actual.getTrainingDuration());

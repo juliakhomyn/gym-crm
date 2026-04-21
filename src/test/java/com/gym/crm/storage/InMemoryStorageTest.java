@@ -14,26 +14,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class InMemoryStorageTest {
-    private InMemoryStorage inMemoryStorage;
+    private InMemoryStorage storage;
     private Map<Long, Trainee> traineeStorage;
     private Map<Long, Trainer> trainerStorage;
     private Map<Long, Training> trainingStorage;
 
     @BeforeEach
     void setUp() {
-        inMemoryStorage = new InMemoryStorage();
+        storage = new InMemoryStorage();
         traineeStorage = new HashMap<>();
         trainerStorage = new HashMap<>();
         trainingStorage = new HashMap<>();
 
-        inMemoryStorage.setTraineeStorage(traineeStorage);
-        inMemoryStorage.setTrainerStorage(trainerStorage);
-        inMemoryStorage.setTrainingStorage(trainingStorage);
+        storage.setTraineeStorage(traineeStorage);
+        storage.setTrainerStorage(trainerStorage);
+        storage.setTrainingStorage(trainingStorage);
     }
 
     @Test
     void getStorage_shouldReturnTraineeStorage() {
-        Map<Long, Trainee> actual = inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
+        Map<Long, Trainee> actual = storage.getStorage(StorageNamespace.TRAINEE);
 
         assertNotNull(actual);
         assertSame(traineeStorage, actual);
@@ -41,7 +41,7 @@ public class InMemoryStorageTest {
 
     @Test
     void getStorage_shouldReturnTrainerStorage() {
-        Map<Long, Trainer> actual = inMemoryStorage.getStorage(StorageNamespace.TRAINER);
+        Map<Long, Trainer> actual = storage.getStorage(StorageNamespace.TRAINER);
 
         assertNotNull(actual);
         assertSame(trainerStorage, actual);
@@ -49,7 +49,7 @@ public class InMemoryStorageTest {
 
     @Test
     void getStorage_shouldReturnTrainingStorage() {
-        Map<Long, Training> actual = inMemoryStorage.getStorage(StorageNamespace.TRAINING);
+        Map<Long, Training> actual = storage.getStorage(StorageNamespace.TRAINING);
 
         assertNotNull(actual);
         assertSame(trainingStorage, actual);

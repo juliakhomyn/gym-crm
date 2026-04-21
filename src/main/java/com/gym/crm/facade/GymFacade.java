@@ -74,7 +74,7 @@ public class GymFacade {
 
     public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO) {
         Trainer trainer = trainerMapper.toEntity(trainerUpdateDTO);
-        Trainer saved = trainerService.createTrainer(trainer);
+        Trainer saved = trainerService.updateTrainer(trainer);
 
         return trainerMapper.toDto(saved);
     }

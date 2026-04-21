@@ -22,6 +22,8 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public Trainee save(Trainee trainee) {
+        Validator.validateNotNull(trainee, "Trainee");
+
         Trainee toSave = Objects.isNull(trainee.getUserId())
                 ? trainee.toBuilder().userId(generateId()).build()
                 : trainee;
@@ -59,7 +61,7 @@ public class TraineeDAOImpl implements TraineeDAO {
     }
 
     private Map<Long, Trainee> traineeStorage() {
-        return (Map<Long, Trainee>) inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
+        return inMemoryStorage.getStorage(StorageNamespace.TRAINEE);
     }
 
     private long generateId() {

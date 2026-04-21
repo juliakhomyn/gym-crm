@@ -30,7 +30,7 @@ public class InMemoryStorage {
         storage.put(StorageNamespace.TRAINING, trainingStorage);
     }
 
-    public Map<Long, ?> getStorage(StorageNamespace namespace) {
-        return storage.get(namespace);
+    public <T> Map<Long, T> getStorage(StorageNamespace namespace) {
+        return (Map<Long, T>) storage.get(namespace);
     }
 }

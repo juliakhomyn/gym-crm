@@ -17,5 +17,5 @@ public class TrainerResponseDTO {
     @ToString.Exclude
     private final String password;
     private final String specialization;
-    private final boolean isActive;
+    private final Boolean isActive;
 }

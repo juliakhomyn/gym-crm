@@ -20,5 +20,5 @@ public class TraineeResponseDTO {
     private final String password;
     private final LocalDate dateOfBirth;
     private final String address;
-    private final boolean isActive;
+    private final Boolean isActive;
 }

@@ -88,7 +88,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void updateTrainer_shouldUpdateTrainer_whenTrainerExists() {
-        Trainer expected = trainer.toBuilder()
+        Trainer expected = savedTrainer.toBuilder()
                 .specialization(new TrainingType("new type"))
                 .build();
 

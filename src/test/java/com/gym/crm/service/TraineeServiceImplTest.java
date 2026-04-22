@@ -1,22 +1,29 @@
 package com.gym.crm.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,6 +57,7 @@ public class TraineeServiceImplTest {
 
     private Trainee trainee;
     private Trainee savedTrainee;
+    private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +69,17 @@ public class TraineeServiceImplTest {
                 .password(ENCODED_PASSWORD)
                 .isActive(true)
                 .build();
+
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        logger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
+        logger.detachAppender(logAppender);
     }
 
     @Test
@@ -80,15 +99,14 @@ public class TraineeServiceImplTest {
 
     @Test
     void createTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.createTrainee(null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createTrainee(null));
 
         assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
     }
 
     @Test
     void updateTrainee_shouldUpdateTrainee_whenTraineeExists() {
-        Trainee expected = trainee.toBuilder()
+        Trainee expected = savedTrainee.toBuilder()
                 .address("new address")
                 .build();
 
@@ -103,8 +121,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.updateTrainee(null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateTrainee(null));
 
         assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
     }
@@ -114,8 +131,7 @@ public class TraineeServiceImplTest {
         Trainee nonExistent = savedTrainee.toBuilder().userId(NOT_FOUND_ID).build();
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.updateTrainee(nonExistent));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainee(nonExistent));
 
         assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
         verify(dao, never()).update(any(Trainee.class));
@@ -134,8 +150,7 @@ public class TraineeServiceImplTest {
     void deleteTrainee_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> service.deleteTrainee(NOT_FOUND_ID));
+        assertThrows(EntityNotFoundException.class, () -> service.deleteTrainee(NOT_FOUND_ID));
         verify(dao, never()).delete(any());
     }
 
@@ -152,8 +167,7 @@ public class TraineeServiceImplTest {
     void findById_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.getTraineeById(NOT_FOUND_ID));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTraineeById(NOT_FOUND_ID));
         assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
     }
 
@@ -173,6 +187,22 @@ public class TraineeServiceImplTest {
         List<Trainee> actual = service.getAllTrainees();
 
         assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    void createTrainee_shouldLogInfo_whenCreatingTrainee() {
+        when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
+
+        service.createTrainee(trainee);
+
+        assertThat(logAppender.list)
+                .filteredOn(log -> log.getLevel() == Level.INFO)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .anyMatch(message -> message.contains(FIRST_NAME) && message.contains(LAST_NAME))
+                .anyMatch(message -> message.contains(USERNAME));
     }
 
     private Trainee buildTrainee() {

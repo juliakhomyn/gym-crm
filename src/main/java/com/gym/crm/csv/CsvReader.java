@@ -1,5 +1,6 @@
 package com.gym.crm.csv;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class CsvReader {
     private static final String EMPTY_FILE_NAME_EXCEPTION = "File name must not be empty";
@@ -35,6 +37,10 @@ public class CsvReader {
             throw new FileNotFoundException(String.format(FILE_NOT_FOUND_EXCEPTION, fileName));
         } catch (IOException e) {
             throw new IOException(String.format(READ_FROM_FILE_ERROR, fileName), e);
+        }
+
+        if (lines.isEmpty()) {
+            log.warn("No data found in file: {}", fileName);
         }
 
         return lines;

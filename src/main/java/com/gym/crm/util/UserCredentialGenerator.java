@@ -4,12 +4,14 @@ import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.model.User;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
+@Slf4j
 @Component
 public class UserCredentialGenerator {
     private static final String FIRST_NAME = "First name";
@@ -32,6 +34,10 @@ public class UserCredentialGenerator {
 
         String username = toCamelCase(firstName) + SEPARATOR + toCamelCase(lastName);
         long serialNumber = getSerialNumber(username);
+
+        if (serialNumber > 0) {
+            log.warn("Username {} already exists, serial number {} will be appended", username, serialNumber);
+        }
 
         return username + (serialNumber == 0 ? "" : serialNumber);
     }

@@ -1,5 +1,9 @@
 package com.gym.crm.storage;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.csv.CsvParser;
 import com.gym.crm.csv.CsvReader;
 import com.gym.crm.model.Trainee;
@@ -7,12 +11,14 @@ import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.enums.StorageNamespace;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +58,8 @@ public class StorageInitializerTest {
     private Trainer trainer;
     private Training training;
 
+    private ListAppender<ILoggingEvent> logAppender;
+
     @BeforeEach
     void setUp() {
         traineeStorage = new HashMap<>();
@@ -64,6 +73,17 @@ public class StorageInitializerTest {
         trainee = buildTrainee();
         trainer = buildTrainer();
         training = buildTraining();
+
+        Logger logger = (Logger) LoggerFactory.getLogger(StorageInitializer.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        logger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Logger logger = (Logger) LoggerFactory.getLogger(StorageInitializer.class);
+        logger.detachAppender(logAppender);
     }
 
     @Test
@@ -124,6 +144,15 @@ public class StorageInitializerTest {
         assertTrue(traineeStorage.isEmpty());
         assertTrue(trainerStorage.isEmpty());
         assertTrue(trainingStorage.isEmpty());
+    }
+
+    @Test
+    void shouldLogErrorWhenInitFails() throws IOException {
+        when(storage.getStorage(StorageNamespace.TRAINEE)).thenReturn((Map) traineeStorage);
+        when(csvReader.readCsv(any(), anyBoolean())).thenThrow(new IOException("error"));
+
+        assertThrows(RuntimeException.class, () -> storageInitializer.init());
+        assertTrue(logAppender.list.stream().anyMatch(log -> log.getLevel() == Level.WARN));
     }
 
     private void stubAllStorages() {

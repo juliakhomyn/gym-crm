@@ -7,19 +7,21 @@ import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UserCredentialGenerator;
 import com.gym.crm.util.Validator;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class TraineeServiceImpl implements TraineeService {
     private static final String TRAINEE_NOT_FOUND_BY_ID = "Trainee not found by id: %s";
     private static final String TRAINEE = "Trainee";
 
     @Setter(onMethod_={@Autowired})
-    private TraineeDAO traineeDAO;
+    private TraineeDAO dao;
 
     @Setter(onMethod_={@Autowired})
     private UserCredentialGenerator userCredentialGenerator;
@@ -31,6 +33,8 @@ public class TraineeServiceImpl implements TraineeService {
     public Trainee createTrainee(Trainee trainee) {
         Validator.validateNotNull(trainee, TRAINEE);
 
+        log.info("Creating trainee: firstName={} lastName{}", trainee.getFirstName(), trainee.getLastName());
+
         String username = userCredentialGenerator.generateUsername(trainee.getFirstName(), trainee.getLastName());
         String rawPassword = userCredentialGenerator.generatePassword();
 
@@ -40,32 +44,39 @@ public class TraineeServiceImpl implements TraineeService {
                 .isActive(true)
                 .build();
 
-        return traineeDAO.save(withCredentials);
+        Trainee saved = dao.save(withCredentials);
+        log.info("Trainee created successfully: username={}", saved.getUsername());
+
+        return saved;
     }
 
     @Override
     public Trainee updateTrainee(Trainee trainee) {
         Validator.validateNotNull(trainee, TRAINEE);
+
+        log.info("Updating trainee: id={}", trainee.getUserId());
         getTraineeById(trainee.getUserId());
 
-        return traineeDAO.update(trainee);
+        return dao.update(trainee);
     }
 
     @Override
     public void deleteTrainee(Long id) {
+        log.info("Deleting trainee: id={}", id);
         getTraineeById(id);
 
-        traineeDAO.delete(id);
+        dao.delete(id);
+        log.info("Trainee deleted successfully: id={}", id);
     }
 
     @Override
     public Trainee getTraineeById(Long id) {
-        return traineeDAO.findById(id)
+        return dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_ID, id)));
     }
 
     @Override
     public List<Trainee> getAllTrainees() {
-        return traineeDAO.findAll();
+        return dao.findAll();
     }
 }

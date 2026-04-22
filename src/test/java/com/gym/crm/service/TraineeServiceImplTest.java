@@ -1,16 +1,22 @@
 package com.gym.crm.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -50,6 +56,7 @@ public class TraineeServiceImplTest {
 
     private Trainee trainee;
     private Trainee savedTrainee;
+    private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +68,17 @@ public class TraineeServiceImplTest {
                 .password(ENCODED_PASSWORD)
                 .isActive(true)
                 .build();
+
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        logger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
+        logger.detachAppender(logAppender);
     }
 
     @Test
@@ -173,6 +191,24 @@ public class TraineeServiceImplTest {
         List<Trainee> actual = service.getAllTrainees();
 
         assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    void createTrainee_shouldLogInfo_whenCreatingTrainee() {
+        when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
+
+        service.createTrainee(trainee);
+
+        List<ILoggingEvent> infoLogs = logAppender.list.stream()
+                .filter(log -> log.getLevel() == Level.INFO)
+                .toList();
+
+        assertTrue(infoLogs.get(0).getFormattedMessage().contains(FIRST_NAME));
+        assertTrue(infoLogs.get(0).getFormattedMessage().contains(LAST_NAME));
+        assertTrue(infoLogs.get(1).getFormattedMessage().contains(USERNAME));
     }
 
     private Trainee buildTrainee() {

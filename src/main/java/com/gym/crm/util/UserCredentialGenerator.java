@@ -36,8 +36,7 @@ public class UserCredentialGenerator {
         long serialNumber = getSerialNumber(username);
 
         if (serialNumber > 0) {
-            log.warn("Username {} already exists, serial number {} will be appended",
-                    username, serialNumber);
+            log.warn("Username {} already exists, serial number {} will be appended", username, serialNumber);
         }
 
         return username + (serialNumber == 0 ? "" : serialNumber);

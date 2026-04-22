@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -120,8 +121,7 @@ public class StorageInitializerTest {
 
     @Test
     void shouldThrowRuntimeExceptionWhenFileNotFound() throws IOException {
-        when(csvReader.readCsv(TRAINEE_FILE_NAME, true))
-                .thenThrow(new FileNotFoundException(TRAINEE_FILE_NAME));
+        when(csvReader.readCsv(TRAINEE_FILE_NAME, true)).thenThrow(new FileNotFoundException(TRAINEE_FILE_NAME));
 
         assertThrows(RuntimeException.class, () -> storageInitializer.init());
     }
@@ -129,8 +129,7 @@ public class StorageInitializerTest {
     @Test
     void shouldThrowRuntimeExceptionWhenCsvLineIsInvalid() throws IOException {
         when(csvReader.readCsv(TRAINEE_FILE_NAME, true)).thenReturn(List.of("invalid,data"));
-        when(csvParser.parseTrainee("invalid,data"))
-                .thenThrow(new IllegalArgumentException("Failed to parse line"));
+        when(csvParser.parseTrainee("invalid,data")).thenThrow(new IllegalArgumentException("Failed to parse line"));
 
         assertThrows(RuntimeException.class, () -> storageInitializer.init());
     }
@@ -152,7 +151,9 @@ public class StorageInitializerTest {
         when(csvReader.readCsv(any(), anyBoolean())).thenThrow(new IOException("error"));
 
         assertThrows(RuntimeException.class, () -> storageInitializer.init());
-        assertTrue(logAppender.list.stream().anyMatch(log -> log.getLevel() == Level.WARN));
+        assertThat(logAppender.list)
+                .extracting(ILoggingEvent::getLevel)
+                .contains(Level.WARN);
     }
 
     private void stubAllStorages() {

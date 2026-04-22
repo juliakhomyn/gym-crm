@@ -57,7 +57,10 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Updating trainer: id={}", trainer.getUserId());
         getTrainerById(trainer.getUserId());
 
-        return dao.update(trainer);
+        Trainer updated = dao.update(trainer);
+        log.info("Trainer updated successfully: id={}", updated.getUserId());
+
+        return updated;
     }
 
     @Override

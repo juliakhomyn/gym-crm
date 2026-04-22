@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,15 +99,14 @@ public class TraineeServiceImplTest {
 
     @Test
     void createTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.createTrainee(null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createTrainee(null));
 
         assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
     }
 
     @Test
     void updateTrainee_shouldUpdateTrainee_whenTraineeExists() {
-        Trainee expected = trainee.toBuilder()
+        Trainee expected = savedTrainee.toBuilder()
                 .address("new address")
                 .build();
 
@@ -121,8 +121,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.updateTrainee(null));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateTrainee(null));
 
         assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
     }
@@ -132,8 +131,7 @@ public class TraineeServiceImplTest {
         Trainee nonExistent = savedTrainee.toBuilder().userId(NOT_FOUND_ID).build();
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.updateTrainee(nonExistent));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainee(nonExistent));
 
         assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
         verify(dao, never()).update(any(Trainee.class));
@@ -152,8 +150,7 @@ public class TraineeServiceImplTest {
     void deleteTrainee_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> service.deleteTrainee(NOT_FOUND_ID));
+        assertThrows(EntityNotFoundException.class, () -> service.deleteTrainee(NOT_FOUND_ID));
         verify(dao, never()).delete(any());
     }
 
@@ -170,8 +167,7 @@ public class TraineeServiceImplTest {
     void findById_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.getTraineeById(NOT_FOUND_ID));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTraineeById(NOT_FOUND_ID));
         assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
     }
 
@@ -202,13 +198,11 @@ public class TraineeServiceImplTest {
 
         service.createTrainee(trainee);
 
-        List<ILoggingEvent> infoLogs = logAppender.list.stream()
-                .filter(log -> log.getLevel() == Level.INFO)
-                .toList();
-
-        assertTrue(infoLogs.get(0).getFormattedMessage().contains(FIRST_NAME));
-        assertTrue(infoLogs.get(0).getFormattedMessage().contains(LAST_NAME));
-        assertTrue(infoLogs.get(1).getFormattedMessage().contains(USERNAME));
+        assertThat(logAppender.list)
+                .filteredOn(log -> log.getLevel() == Level.INFO)
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .anyMatch(message -> message.contains(FIRST_NAME) && message.contains(LAST_NAME))
+                .anyMatch(message -> message.contains(USERNAME));
     }
 
     private Trainee buildTrainee() {

@@ -57,7 +57,10 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Updating trainee: id={}", trainee.getUserId());
         getTraineeById(trainee.getUserId());
 
-        return dao.update(trainee);
+        Trainee updated = dao.update(trainee);
+        log.info("Trainee updated successfully: id={}", updated.getUserId());
+
+        return updated;
     }
 
     @Override

@@ -18,6 +18,8 @@ import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,9 +32,12 @@ public class GymFacade {
     private final TrainerService trainerService;
     private final TrainingService trainingService;
 
-    private final TraineeMapper traineeMapper;
-    private final TrainerMapper trainerMapper;
-    private final TrainingMapper trainingMapper;
+    @Setter(onMethod_={@Autowired})
+    private TraineeMapper traineeMapper;
+    @Setter(onMethod_={@Autowired})
+    private TrainerMapper trainerMapper;
+    @Setter(onMethod_={@Autowired})
+    private TrainingMapper trainingMapper;
 
     public TraineeResponseDTO createTrainee(TraineeRequestDTO traineeRequestDTO) {
         Trainee trainee = traineeMapper.toEntity(traineeRequestDTO);

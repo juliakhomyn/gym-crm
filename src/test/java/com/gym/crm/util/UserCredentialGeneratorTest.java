@@ -89,4 +89,22 @@ public class UserCredentialGeneratorTest {
         assertNotEquals(password1, password2);
     }
 
+    @Test
+    public void generateUsername_shouldReturnUniqueUsername_whenGapExists() {
+        Trainee trainee1 = Trainee.builder()
+                .username(USERNAME)
+                .build();
+        Trainee trainee3 = Trainee.builder()
+                .username(USERNAME_WITH_SUFFIX_2)
+                .build();
+
+        when(traineeDAO.findAll()).thenReturn(List.of(trainee1, trainee3));
+        when(trainerDAO.findAll()).thenReturn(List.of());
+
+        String generatedUsername = userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME);
+
+        assertNotEquals(USERNAME, generatedUsername);
+        assertNotEquals(USERNAME_WITH_SUFFIX_2, generatedUsername);
+    }
+
 }

@@ -21,7 +21,6 @@ import com.gym.crm.service.TrainingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -58,9 +57,7 @@ public class GymFacadeTest {
     @Mock
     private TrainingMapper trainingMapper;
 
-    @InjectMocks
     private GymFacade facade;
-
     private Trainee trainee;
     private Trainer trainer;
     private Training training;
@@ -75,83 +72,22 @@ public class GymFacadeTest {
 
     @BeforeEach
     void setUp() {
-        trainee = Trainee.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .dateOfBirth(LocalDate.of(1980, 1, 1))
-                .address("123 Oak St")
-                .build();
+        facade = new GymFacade(traineeService, trainerService, trainingService);
+        facade.setTraineeMapper(traineeMapper);
+        facade.setTrainerMapper(trainerMapper);
+        facade.setTrainingMapper(trainingMapper);
 
-        traineeRequestDTO = TraineeRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-
-        traineeUpdateDTO = TraineeUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-
-        traineeResponseDTO = TraineeResponseDTO.builder()
-                .userId(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-
-        trainer = Trainer.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .specialization(new TrainingType(TRAINING_TYPE_NAME))
-                .build();
-
-        trainerRequestDTO = TrainerRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-
-        trainerUpdateDTO = TrainerUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-
-        trainerResponseDTO = TrainerResponseDTO.builder()
-                .userId(2L)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-
-        training = Training.builder()
-                .id(VALID_ID)
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
-                .trainingName(TRAINING_NAME)
-                .trainingType(new TrainingType(TRAINING_TYPE_NAME))
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-
-        trainingRequestDTO = TrainingRequestDTO.builder()
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-
-        trainingResponseDTO = TrainingResponseDTO.builder()
-                .id(VALID_ID)
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
+        trainee = buildTrainee();
+        traineeRequestDTO = buildTraineeRequestDTO();
+        traineeUpdateDTO = buildTraineeUpdateDTO();
+        traineeResponseDTO = buildTraineeResponseDTO();
+        trainer = buildTrainer();
+        trainerRequestDTO = buildTrainerRequestDTO();
+        trainerUpdateDTO = buildTrainerUpdateDTO();
+        trainerResponseDTO = buildTrainerResponseDTO();
+        training = buildTraining();
+        trainingRequestDTO = buildTrainingRequestDTO();
+        trainingResponseDTO = buildTrainingResponseDTO();
     }
 
     @Test
@@ -363,5 +299,105 @@ public class GymFacadeTest {
         assertTrue(actual.isEmpty());
         verify(trainingService).getAllTrainings();
         verify(trainingMapper, never()).toDto(training);
+    }
+
+    private Trainee buildTrainee() {
+        return Trainee.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .dateOfBirth(LocalDate.of(1980, 1, 1))
+                .address("123 Oak St")
+                .build();
+    }
+
+    private TraineeRequestDTO buildTraineeRequestDTO() {
+        return TraineeRequestDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TraineeUpdateDTO buildTraineeUpdateDTO() {
+        return TraineeUpdateDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TraineeResponseDTO buildTraineeResponseDTO() {
+        return TraineeResponseDTO.builder()
+                .userId(VALID_ID)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
+                .build();
+    }
+
+    private Trainer buildTrainer() {
+        return Trainer.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .specialization(new TrainingType(TRAINING_TYPE_NAME))
+                .build();
+    }
+
+    private TrainerRequestDTO buildTrainerRequestDTO() {
+        return TrainerRequestDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TrainerUpdateDTO buildTrainerUpdateDTO() {
+        return TrainerUpdateDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TrainerResponseDTO buildTrainerResponseDTO() {
+        return TrainerResponseDTO.builder()
+                .userId(2L)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
+                .build();
+    }
+
+    private Training buildTraining() {
+        return Training.builder()
+                .id(VALID_ID)
+                .traineeId(VALID_ID)
+                .trainerId(VALID_ID)
+                .trainingName(TRAINING_NAME)
+                .trainingType(new TrainingType(TRAINING_TYPE_NAME))
+                .trainingDate(LocalDate.of(2024, 1, 15))
+                .trainingDuration(60)
+                .build();
+    }
+
+    private TrainingRequestDTO buildTrainingRequestDTO() {
+        return TrainingRequestDTO.builder()
+                .traineeId(VALID_ID)
+                .trainerId(VALID_ID)
+                .trainingName(TRAINING_NAME)
+                .trainingTypeName(TRAINING_TYPE_NAME)
+                .trainingDate(LocalDate.of(2024, 1, 15))
+                .trainingDuration(60)
+                .build();
+    }
+
+    private TrainingResponseDTO buildTrainingResponseDTO() {
+        return TrainingResponseDTO.builder()
+                .id(VALID_ID)
+                .traineeId(VALID_ID)
+                .trainerId(VALID_ID)
+                .trainingName(TRAINING_NAME)
+                .trainingTypeName(TRAINING_TYPE_NAME)
+                .trainingDate(LocalDate.of(2024, 1, 15))
+                .trainingDuration(60)
+                .build();
     }
 }

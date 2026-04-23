@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -33,13 +35,22 @@ public class UserCredentialGenerator {
         Validator.validateNotBlank(lastName, LAST_NAME);
 
         String username = toCamelCase(firstName) + SEPARATOR + toCamelCase(lastName);
-        long serialNumber = getSerialNumber(username);
 
-        if (serialNumber > 0) {
-            log.warn("Username {} already exists, serial number {} will be appended", username, serialNumber);
+        Set<String> existingUsernames = getAllUsernames()
+                .filter(usernameValue -> !usernameValue.isBlank())
+                .collect(Collectors.toSet());
+
+        if (!existingUsernames.contains(username)) {
+            return username;
         }
 
-        return username + (serialNumber == 0 ? "" : serialNumber);
+        long serialNumber = 1;
+        while (existingUsernames.contains(username + serialNumber)) {
+            serialNumber++;
+        }
+
+        log.warn("Username {} already exists, serial number {} will be appended", username, serialNumber);
+        return username + serialNumber;
     }
 
     public String generatePassword() {
@@ -59,18 +70,10 @@ public class UserCredentialGenerator {
         return Character.toUpperCase(username.charAt(0)) + username.substring(1).toLowerCase();
     }
 
-    private long getSerialNumber(String usernameToFind) {
-        return getAllUsernames()
-                .filter(Objects::nonNull)
-                .filter(username -> !username.isBlank())
-                .filter(username -> username.matches(usernameToFind + "\\d*"))
-                .count();
-    }
-
     private Stream<String> getAllUsernames() {
         return Stream.concat(
-                    traineeDAO.findAll().stream().map(User::getUsername),
-                    trainerDAO.findAll().stream().map(User::getUsername)
+                        traineeDAO.findAll().stream().map(User::getUsername),
+                        trainerDAO.findAll().stream().map(User::getUsername)
                 )
                 .filter(Objects::nonNull);
     }

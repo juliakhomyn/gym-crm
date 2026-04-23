@@ -66,7 +66,7 @@ public class StorageInitializer {
     }
 
     private void loadTrainers() throws IOException, IllegalArgumentException {
-        log.info("Loading trainers from: {}", traineeFilePath);
+        log.info("Loading trainers from: {}", trainerFilePath);
 
         Map<Long, Trainer> storage = inMemoryStorage.getStorage(StorageNamespace.TRAINER);
         csvReader.readCsv(trainerFilePath, true)
@@ -78,7 +78,7 @@ public class StorageInitializer {
     }
 
     private void loadTrainings() throws IOException, IllegalArgumentException {
-        log.info("Loading trainings from: {}", traineeFilePath);
+        log.info("Loading trainings from: {}", trainingFilePath);
 
         Map<Long, Training> storage = inMemoryStorage.getStorage(StorageNamespace.TRAINING);
         csvReader.readCsv(trainingFilePath, true)

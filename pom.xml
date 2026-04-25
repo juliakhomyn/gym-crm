@@ -33,6 +33,18 @@
           <version>6.4.5</version>
       </dependency>
 
+      <!-- DB -->
+      <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>8.0.33</version>
+      </dependency>
+      <dependency>
+          <groupId>org.hibernate.orm</groupId>
+          <artifactId>hibernate-core</artifactId>
+          <version>6.4.1.Final</version>
+      </dependency>
+
       <!-- Jakarta -->
       <dependency>
           <groupId>jakarta.annotation</groupId>
@@ -65,18 +77,6 @@
           <groupId>ch.qos.logback</groupId>
           <artifactId>logback-classic</artifactId>
           <version>1.5.32</version>
-      </dependency>
-
-      <!-- DB -->
-      <dependency>
-          <groupId>org.hibernate.orm</groupId>
-          <artifactId>hibernate-core</artifactId>
-          <version>6.4.1.Final</version>
-      </dependency>
-      <dependency>
-          <groupId>mysql</groupId>
-          <artifactId>mysql-connector-java</artifactId>
-          <version>8.0.33</version>
       </dependency>
 
       <!-- Tests -->

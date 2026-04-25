@@ -13,6 +13,6 @@ Run the following script to create the database and add a user:
 
 ```sql
 CREATE DATABASE "gym_db";
-CREATE USER user WITH PASSWORD 'password';
-GRANT ALL PRIVILEGES ON DATABASE "gym_db" TO user;
+CREATE USER gymuser WITH PASSWORD 'gympass';
+GRANT ALL PRIVILEGES ON DATABASE "gym_db" TO gymuser;
 ```

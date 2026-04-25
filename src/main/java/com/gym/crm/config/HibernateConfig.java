@@ -21,8 +21,8 @@ public class HibernateConfig {
         Properties properties = new Properties();
         properties.put("hibernate.connection.driver_class", "com.mysql.cj.jdbc.Driver");
         properties.put("hibernate.connection.url", "jdbc:mysql://localhost:3306/gym_db");
-        properties.put("hibernate.connection.username", "user");
-        properties.put("hibernate.connection.password", "password");
+        properties.put("hibernate.connection.username", "gymuser");
+        properties.put("hibernate.connection.password", "gympass");
         properties.put("hibernate.hbm2ddl.auto", "create-drop");
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.format_sql", "true");

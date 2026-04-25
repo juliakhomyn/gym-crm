@@ -12,13 +12,13 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @Getter
-@Setter
+@SuperBuilder(toBuilder = true)
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
@@ -31,6 +31,15 @@ public class Training {
     @Column
     private Long id;
 
+    @Column(name = "training_name", nullable = false, length = 100)
+    private String trainingName;
+
+    @Column(name = "training_date", nullable = false)
+    private LocalDate trainingDate;
+
+    @Column(name = "training_duration", nullable = false)
+    private int trainingDuration;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "trainee_id", nullable = false)
     private Trainee trainee;
@@ -39,16 +48,7 @@ public class Training {
     @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
 
-    @Column(name = "training_name", nullable = false)
-    private String trainingName;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "training_type_id", nullable = false)
     private TrainingType trainingType;
-
-    @Column(name = "training_date", nullable = false)
-    private LocalDate trainingDate;
-
-    @Column(name = "training_duration", nullable = false)
-    private int trainingDuration;
 }

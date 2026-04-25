@@ -14,14 +14,14 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Getter
-@Setter
+@SuperBuilder(toBuilder = true)
 @ToString(exclude = "trainees")
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
@@ -34,8 +34,8 @@ public class Trainer {
     @Column
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "specialization")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "specialization", nullable = false)
     private TrainingType specialization;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)

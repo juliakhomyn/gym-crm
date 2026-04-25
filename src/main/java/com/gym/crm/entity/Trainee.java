@@ -15,16 +15,16 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Getter
-@Setter
 @ToString(exclude = {"trainers", "trainings"})
+@SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @Entity
@@ -36,10 +36,10 @@ public class Trainee {
     @Column
     private Long id;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth", nullable = true)
     private LocalDate dateOfBirth;
 
-    @Column
+    @Column(nullable = true, length = 255)
     private String address;
 
     @OneToOne(cascade = CascadeType.ALL, optional = false)

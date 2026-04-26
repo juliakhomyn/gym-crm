@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AppConfig.class)
         }
 )
-@PropertySource("classpath:application.properties")
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 public class TestAppConfig {
 
     @Bean

@@ -12,12 +12,24 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestAppConfig.class, DataSourceConfig.class, LiquibaseConfig.class, HibernateConfig.class})
 class LiquibaseConfigTest {
+
+    private static final String USERS_TABLE = "users";
+    private static final String TRAINEES_TABLE = "trainees";
+    private static final String TRAINERS_TABLE = "trainers";
+    private static final String TRAININGS_TABLE = "trainings";
+    private static final String TRAINING_TYPES_TABLE = "training_types";
+    private static final String TRAINEES_TRAINERS_TABLE = "trainees_trainers";
 
     @Autowired
     private DataSource dataSource;
@@ -27,12 +39,12 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(tableExists(metaData, "users"));
-            assertTrue(tableExists(metaData, "trainees"));
-            assertTrue(tableExists(metaData, "trainers"));
-            assertTrue(tableExists(metaData, "trainings"));
-            assertTrue(tableExists(metaData, "training_types"));
-            assertTrue(tableExists(metaData, "trainees_trainers"));
+            assertTrue(tableExists(metaData, USERS_TABLE));
+            assertTrue(tableExists(metaData, TRAINEES_TABLE));
+            assertTrue(tableExists(metaData, TRAINERS_TABLE));
+            assertTrue(tableExists(metaData, TRAININGS_TABLE));
+            assertTrue(tableExists(metaData, TRAINING_TYPES_TABLE));
+            assertTrue(tableExists(metaData, TRAINEES_TRAINERS_TABLE));
         }
     }
 
@@ -41,12 +53,12 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "users", "id"));
-            assertTrue(columnExists(metaData, "users", "first_name"));
-            assertTrue(columnExists(metaData, "users", "last_name"));
-            assertTrue(columnExists(metaData, "users", "username"));
-            assertTrue(columnExists(metaData, "users", "password"));
-            assertTrue(columnExists(metaData, "users", "is_active"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "id"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "first_name"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "last_name"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "username"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "password"));
+            assertTrue(columnExists(metaData, USERS_TABLE, "is_active"));
         }
     }
 
@@ -55,10 +67,10 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "trainees", "id"));
-            assertTrue(columnExists(metaData, "trainees", "date_of_birth"));
-            assertTrue(columnExists(metaData, "trainees", "address"));
-            assertTrue(columnExists(metaData, "trainees", "user_id"));
+            assertTrue(columnExists(metaData, TRAINEES_TABLE, "id"));
+            assertTrue(columnExists(metaData, TRAINEES_TABLE, "date_of_birth"));
+            assertTrue(columnExists(metaData, TRAINEES_TABLE, "address"));
+            assertTrue(columnExists(metaData, TRAINEES_TABLE, "user_id"));
         }
     }
 
@@ -67,9 +79,9 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "trainers", "id"));
-            assertTrue(columnExists(metaData, "trainers", "specialization"));
-            assertTrue(columnExists(metaData, "trainers", "user_id"));
+            assertTrue(columnExists(metaData, TRAINERS_TABLE, "id"));
+            assertTrue(columnExists(metaData, TRAINERS_TABLE, "specialization_id"));
+            assertTrue(columnExists(metaData, TRAINERS_TABLE, "user_id"));
         }
     }
 
@@ -78,8 +90,8 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "trainees_trainers", "trainee_id"));
-            assertTrue(columnExists(metaData, "trainees_trainers", "trainer_id"));
+            assertTrue(columnExists(metaData, TRAINEES_TRAINERS_TABLE, "trainee_id"));
+            assertTrue(columnExists(metaData, TRAINEES_TRAINERS_TABLE, "trainer_id"));
         }
     }
 
@@ -88,8 +100,8 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "training_types", "id"));
-            assertTrue(columnExists(metaData, "training_types", "training_type_name"));
+            assertTrue(columnExists(metaData, TRAINING_TYPES_TABLE, "id"));
+            assertTrue(columnExists(metaData, TRAINING_TYPES_TABLE, "training_type_name"));
         }
     }
 
@@ -98,13 +110,134 @@ class LiquibaseConfigTest {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            assertTrue(columnExists(metaData, "trainings", "id"));
-            assertTrue(columnExists(metaData, "trainings", "trainee_id"));
-            assertTrue(columnExists(metaData, "trainings", "trainer_id"));
-            assertTrue(columnExists(metaData, "trainings", "training_name"));
-            assertTrue(columnExists(metaData, "trainings", "training_type_id"));
-            assertTrue(columnExists(metaData, "trainings", "training_date"));
-            assertTrue(columnExists(metaData, "trainings", "training_duration"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "id"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "trainee_id"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "trainer_id"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "training_name"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "training_type_id"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "training_date"));
+            assertTrue(columnExists(metaData, TRAININGS_TABLE, "training_duration"));
+        }
+    }
+
+    @Test
+    void shouldInsertThreeTrainingTypes() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM training_types")) {
+            rs.next();
+
+            assertEquals(3, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldInsertExpectedTrainingTypeNames() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                     "SELECT training_type_name FROM training_types ORDER BY id")) {
+            List<String> names = new ArrayList<>();
+            while (rs.next()) {
+                names.add(rs.getString("training_type_name"));
+            }
+
+            assertThat(names).containsExactly("Yoga", "Pilates", "Cardio");
+        }
+    }
+
+    @Test
+    void shouldInsertThreeUsers() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
+            rs.next();
+
+            assertEquals(3, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldInsertUsersWithCorrectUsernames() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                     "SELECT username FROM users ORDER BY id")) {
+            List<String> names = new ArrayList<>();
+            while (rs.next()) {
+                names.add(rs.getString("username"));
+            }
+
+            assertThat(names).containsExactly("Callum.Whitfield", "Nora.Pemberton", "Ellis.Hargrove");
+        }
+    }
+
+    @Test
+    void shouldInsertOneTrainer() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainers")) {
+            rs.next();
+
+            assertEquals(1, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldLinkTrainerToCorrectUser() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT u.username FROM trainers t JOIN users u ON t.user_id = u.id")) {
+            rs.next();
+
+            assertEquals("Callum.Whitfield", rs.getString(1));
+        }
+    }
+
+    @Test
+    void shouldInsertTwoTrainees() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainees")) {
+            rs.next();
+
+            assertEquals(2, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldInsertTwoTrainings() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainings")) {
+            rs.next();
+
+            assertEquals(2, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldLinkTrainingsToCorrectTraineeAndTrainer() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                     "SELECT COUNT(*) FROM trainings t " +
+                             "JOIN trainees tne ON t.trainee_id = tne.id " +
+                             "JOIN trainers tnr ON t.trainer_id = tnr.id")) {
+            rs.next();
+
+            assertEquals(2, rs.getInt(1));
+        }
+    }
+
+    @Test
+    void shouldInsertTwoTraineesTrainersRelationships() throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainees_trainers")) {
+            rs.next();
+
+            assertEquals(2, rs.getInt(1));
         }
     }
 

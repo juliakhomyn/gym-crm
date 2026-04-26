@@ -8,37 +8,26 @@ import com.gym.crm.entity.User;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
+import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@ComponentScan("com.gym.crm")
 public class HibernateConfig {
 
-    @Value("${hibernate.connection.driver_class}")
-    private String driverClass;
-
-    @Value("${hibernate.connection.url}")
-    private String url;
-
-    @Value("${hibernate.connection.username}")
-    private String username;
-
-    @Value("${hibernate.connection.password}")
-    private String password;
+    @Value("${hibernate.hbm2ddl.auto}")
+    private String hbm2ddlAuto;
 
     @Bean
-    public SessionFactory sessionFactory() {
+    @DependsOn("liquibase")
+    public SessionFactory sessionFactory(DataSource dataSource) {
         Properties properties = new Properties();
-        properties.put("hibernate.connection.driver_class", driverClass);
-        properties.put("hibernate.connection.url", url);
-        properties.put("hibernate.connection.username", username);
-        properties.put("hibernate.connection.password", password);
-        properties.put("hibernate.hbm2ddl.auto", "create-drop");
+        properties.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.format_sql", "true");
+        properties.put("hibernate.connection.datasource", dataSource);
 
         return new org.hibernate.cfg.Configuration()
                 .addProperties(properties)

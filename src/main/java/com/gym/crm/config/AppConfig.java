@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @ComponentScan(basePackages = "com.gym.crm")
-@PropertySource("classpath:application.properties")
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 public class AppConfig {
 
     @Bean

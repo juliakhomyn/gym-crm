@@ -4,7 +4,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
 
-    <changeSet id="01-create-users-table" author="julia">
+    <changeSet id="GIA-56 01-create-users-table" author="julia">
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
@@ -27,14 +27,14 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="02-add-pk-users" author="julia">
+    <changeSet id="GIA-56 02-add-pk-users" author="julia">
         <addUniqueConstraint
                 tableName="users"
                 columnNames="username"
                 constraintName="uk_users_username"/>
     </changeSet>
 
-    <changeSet id="03-create-training-types-table" author="julia">
+    <changeSet id="GIA-56 03-create-training-types-table" author="julia">
         <createTable tableName="training_types">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_training_types"/>
@@ -45,14 +45,14 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="04-add-constraints-training-types" author="julia">
+    <changeSet id="GIA-56 04-add-constraints-training-types" author="julia">
         <addUniqueConstraint
                 tableName="training_types"
                 columnNames="training_type_name"
                 constraintName="uk_training_types_training_type_name"/>
     </changeSet>
 
-    <changeSet id="05-create-trainees-table" author="julia">
+    <changeSet id="GIA-56 05-create-trainees-table" author="julia">
         <createTable tableName="trainees">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_trainees"/>
@@ -65,7 +65,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="06-add-constraints-trainees" author="julia">
+    <changeSet id="GIA-56 06-add-constraints-trainees" author="julia">
         <addForeignKeyConstraint
                 baseTableName="trainees"
                 baseColumnNames="user_id"
@@ -78,7 +78,7 @@
                 constraintName="uk_trainees_user"/>
     </changeSet>
 
-    <changeSet id="07-create-trainers-table" author="julia">
+    <changeSet id="GIA-56 07-create-trainers-table" author="julia">
         <createTable tableName="trainers">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_trainers"/>
@@ -92,7 +92,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="08-add-constraints-trainers" author="julia">
+    <changeSet id="GIA-56 08-add-constraints-trainers" author="julia">
         <addForeignKeyConstraint
                 baseTableName="trainers"
                 baseColumnNames="specialization_id"
@@ -111,7 +111,7 @@
                 constraintName="uk_trainers_user"/>
     </changeSet>
 
-    <changeSet id="09-create-trainings-table" author="julia">
+    <changeSet id="GIA-56 09-create-trainings-table" author="julia">
         <createTable tableName="trainings">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_trainings"/>
@@ -137,7 +137,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="10-add-constraints-trainings" author="julia">
+    <changeSet id="GIA-56 10-add-constraints-trainings" author="julia">
         <addForeignKeyConstraint
                 baseTableName="trainings"
                 baseColumnNames="trainee_id"
@@ -159,7 +159,7 @@
                 constraintName="fk_trainings_training_type"/>
     </changeSet>
 
-    <changeSet id="11-create-trainees-trainers-table" author="julia">
+    <changeSet id="GIA-56 11-create-trainees-trainers-table" author="julia">
         <createTable tableName="trainees_trainers">
             <column name="trainee_id" type="BIGINT">
                 <constraints nullable="false"/>
@@ -170,7 +170,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="12-add-constraints-trainees-trainers" author="julia">
+    <changeSet id="GIA-56 12-add-constraints-trainees-trainers" author="julia">
         <addPrimaryKey
                 tableName="trainees_trainers"
                 columnNames="trainee_id, trainer_id"

@@ -122,123 +122,74 @@ class LiquibaseConfigTest {
 
     @Test
     void shouldInsertThreeTrainingTypes() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM training_types")) {
-            rs.next();
-
-            assertEquals(3, rs.getInt(1));
-        }
+        assertEquals(3, countRows(TRAINING_TYPES_TABLE));
     }
 
     @Test
     void shouldInsertExpectedTrainingTypeNames() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                     "SELECT training_type_name FROM training_types ORDER BY id")) {
-            List<String> names = new ArrayList<>();
-            while (rs.next()) {
-                names.add(rs.getString("training_type_name"));
-            }
+        List<String> actual = findColumnValues(
+                "SELECT training_type_name FROM training_types ORDER BY id",
+                "training_type_name"
+        );
 
-            assertThat(names).containsExactly("Yoga", "Pilates", "Cardio");
-        }
+        assertThat(actual).containsExactly("Yoga", "Pilates", "Cardio");
     }
 
     @Test
     void shouldInsertThreeUsers() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users")) {
-            rs.next();
-
-            assertEquals(3, rs.getInt(1));
-        }
+        assertEquals(3, countRows(USERS_TABLE));
     }
 
     @Test
     void shouldInsertUsersWithCorrectUsernames() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                     "SELECT username FROM users ORDER BY id")) {
-            List<String> names = new ArrayList<>();
-            while (rs.next()) {
-                names.add(rs.getString("username"));
-            }
+        List<String> actual = findColumnValues(
+                "SELECT username FROM users ORDER BY id",
+                "username"
+        );
 
-            assertThat(names).containsExactly("Callum.Whitfield", "Nora.Pemberton", "Ellis.Hargrove");
-        }
+        assertThat(actual).containsExactly("Callum.Whitfield", "Nora.Pemberton", "Ellis.Hargrove");
     }
 
     @Test
     void shouldInsertOneTrainer() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainers")) {
-            rs.next();
-
-            assertEquals(1, rs.getInt(1));
-        }
+        assertEquals(1, countRows(TRAINERS_TABLE));
     }
 
     @Test
     void shouldLinkTrainerToCorrectUser() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT u.username FROM trainers t JOIN users u ON t.user_id = u.id")) {
-            rs.next();
+        String actual = findOneColumnValue(
+                "SELECT u.username FROM trainers t JOIN users u ON t.user_id = u.id",
+                1
+        );
 
-            assertEquals("Callum.Whitfield", rs.getString(1));
-        }
+        assertEquals("Callum.Whitfield", actual);
     }
 
     @Test
     void shouldInsertTwoTrainees() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainees")) {
-            rs.next();
-
-            assertEquals(2, rs.getInt(1));
-        }
+        assertEquals(2, countRows(TRAINEES_TABLE));
     }
 
     @Test
     void shouldInsertTwoTrainings() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainings")) {
-            rs.next();
-
-            assertEquals(2, rs.getInt(1));
-        }
+        assertEquals(2, countRows(TRAININGS_TABLE));
     }
 
     @Test
     void shouldLinkTrainingsToCorrectTraineeAndTrainer() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                     "SELECT COUNT(*) FROM trainings t " +
-                             "JOIN trainees tne ON t.trainee_id = tne.id " +
-                             "JOIN trainers tnr ON t.trainer_id = tnr.id")) {
-            rs.next();
+        String actual = findOneColumnValue(
+                "SELECT COUNT(*) FROM trainings t " +
+                        "JOIN trainees tne ON t.trainee_id = tne.id " +
+                        "JOIN trainers tnr ON t.trainer_id = tnr.id",
+                1
+        );
 
-            assertEquals(2, rs.getInt(1));
-        }
+        assertEquals(2, Integer.parseInt(actual));
     }
 
     @Test
     void shouldInsertTwoTraineesTrainersRelationships() throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM trainees_trainers")) {
-            rs.next();
-
-            assertEquals(2, rs.getInt(1));
-        }
+        assertEquals(2, countRows(TRAINEES_TRAINERS_TABLE));
     }
 
     private boolean tableExists(DatabaseMetaData metaData, String tableName) throws SQLException {
@@ -260,6 +211,43 @@ class LiquibaseConfigTest {
         }
         try (ResultSet rs = metaData.getColumns(null, null, tableName.toLowerCase(), columnName.toLowerCase())) {
             return rs.next();
+        }
+    }
+
+    private int countRows(String tableName) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM " + tableName;
+
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            rs.next();
+
+            return rs.getInt(1);
+        }
+    }
+
+    private List<String> findColumnValues(String sql, String columnName) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)
+        ) {
+            List<String> values = new ArrayList<>();
+            while (rs.next()) {
+                values.add(rs.getString(columnName));
+            }
+
+            return values;
+        }
+    }
+
+    private String findOneColumnValue(String sql, int columnIndex) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)
+        ) {
+            rs.next();
+
+            return rs.getString(columnIndex);
         }
     }
 }

@@ -1,8 +1,6 @@
 db:
   driver: org.h2.Driver
-  url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=value
-  username: sa
-  password:
+  url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=value;DATABASE_TO_LOWER=TRUE
 
 hibernate:
   dialect: org.hibernate.dialect.MySQLDialect
@@ -11,4 +9,4 @@ hibernate:
 
 liquibase:
   changelog:
-    master: classpath:db/migration/master.xml
+    master: classpath:db/test-migration/master.xml

@@ -5,34 +5,31 @@ import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
 import com.gym.crm.entity.User;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestAppConfig.class, DataSourceConfig.class, LiquibaseConfig.class, HibernateConfig.class})
+@SpringJUnitConfig(TestAppConfig.class)
 public class HibernateConfigTest {
 
     @Autowired
-    private SessionFactory factory;
+    private EntityManagerFactory factory;
 
     @Test
-    void shouldCreateSessionFactory() {
+    void shouldCreateEntityManagerFactory() {
         assertNotNull(factory);
     }
 
     @Test
     void shouldOpenSession() {
-        try (Session session = factory.openSession()) {
-            assertNotNull(session);
-            assertTrue(session.isOpen());
+        try (EntityManager manager = factory.createEntityManager()) {
+            assertNotNull(manager);
+            assertTrue(manager.isOpen());
         }
     }
 

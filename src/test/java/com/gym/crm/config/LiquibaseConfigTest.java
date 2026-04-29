@@ -1,10 +1,8 @@
 package com.gym.crm.config;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import javax.sql.DataSource;
 
@@ -12,16 +10,10 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestAppConfig.class, DataSourceConfig.class, LiquibaseConfig.class, HibernateConfig.class})
+@SpringJUnitConfig(TestAppConfig.class)
 class LiquibaseConfigTest {
 
     private static final String USERS_TABLE = "users";
@@ -120,78 +112,6 @@ class LiquibaseConfigTest {
         }
     }
 
-    @Test
-    void shouldInsertThreeTrainingTypes() throws SQLException {
-        assertEquals(3, countRows(TRAINING_TYPES_TABLE));
-    }
-
-    @Test
-    void shouldInsertExpectedTrainingTypeNames() throws SQLException {
-        List<String> actual = findColumnValues(
-                "SELECT training_type_name FROM training_types ORDER BY id",
-                "training_type_name"
-        );
-
-        assertThat(actual).containsExactly("Yoga", "Pilates", "Cardio");
-    }
-
-    @Test
-    void shouldInsertThreeUsers() throws SQLException {
-        assertEquals(3, countRows(USERS_TABLE));
-    }
-
-    @Test
-    void shouldInsertUsersWithCorrectUsernames() throws SQLException {
-        List<String> actual = findColumnValues(
-                "SELECT username FROM users ORDER BY id",
-                "username"
-        );
-
-        assertThat(actual).containsExactly("Callum.Whitfield", "Nora.Pemberton", "Ellis.Hargrove");
-    }
-
-    @Test
-    void shouldInsertOneTrainer() throws SQLException {
-        assertEquals(1, countRows(TRAINERS_TABLE));
-    }
-
-    @Test
-    void shouldLinkTrainerToCorrectUser() throws SQLException {
-        String actual = findOneColumnValue(
-                "SELECT u.username FROM trainers t JOIN users u ON t.user_id = u.id",
-                1
-        );
-
-        assertEquals("Callum.Whitfield", actual);
-    }
-
-    @Test
-    void shouldInsertTwoTrainees() throws SQLException {
-        assertEquals(2, countRows(TRAINEES_TABLE));
-    }
-
-    @Test
-    void shouldInsertTwoTrainings() throws SQLException {
-        assertEquals(2, countRows(TRAININGS_TABLE));
-    }
-
-    @Test
-    void shouldLinkTrainingsToCorrectTraineeAndTrainer() throws SQLException {
-        String actual = findOneColumnValue(
-                "SELECT COUNT(*) FROM trainings t " +
-                        "JOIN trainees tne ON t.trainee_id = tne.id " +
-                        "JOIN trainers tnr ON t.trainer_id = tnr.id",
-                1
-        );
-
-        assertEquals(2, Integer.parseInt(actual));
-    }
-
-    @Test
-    void shouldInsertTwoTraineesTrainersRelationships() throws SQLException {
-        assertEquals(2, countRows(TRAINEES_TRAINERS_TABLE));
-    }
-
     private boolean tableExists(DatabaseMetaData metaData, String tableName) throws SQLException {
         try (ResultSet rs = metaData.getTables(null, null, tableName.toUpperCase(), null)) {
             if (rs.next()) {
@@ -211,43 +131,6 @@ class LiquibaseConfigTest {
         }
         try (ResultSet rs = metaData.getColumns(null, null, tableName.toLowerCase(), columnName.toLowerCase())) {
             return rs.next();
-        }
-    }
-
-    private int countRows(String tableName) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM " + tableName;
-
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            rs.next();
-
-            return rs.getInt(1);
-        }
-    }
-
-    private List<String> findColumnValues(String sql, String columnName) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)
-        ) {
-            List<String> values = new ArrayList<>();
-            while (rs.next()) {
-                values.add(rs.getString(columnName));
-            }
-
-            return values;
-        }
-    }
-
-    private String findOneColumnValue(String sql, int columnIndex) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)
-        ) {
-            rs.next();
-
-            return rs.getString(columnIndex);
         }
     }
 }

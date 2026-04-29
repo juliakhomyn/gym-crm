@@ -1,53 +1,48 @@
 package com.gym.crm.config;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Component
+@RequiredArgsConstructor
 public class TransactionManager {
 
-    private final SessionFactory sessionFactory;
+    private final EntityManagerFactory entityManagerFactory;
 
-    public TransactionManager(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
-    public void performWithinTx(Consumer<Session> action) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
+    public void performWithinTx(Consumer<EntityManager> action) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
 
         try {
-            action.accept(session);
-            tx.commit();
+            action.accept(entityManager);
+            entityManager.getTransaction().commit();
         } catch (Exception e) {
-            tx.rollback();
-
+            entityManager.getTransaction().rollback();
             throw e;
         } finally {
-            session.close();
+            entityManager.close();
         }
     }
 
-    public <T> T performReturningWithinTx(Function<Session, T> action) {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
+    public <T> T performReturningWithinTx(Function<EntityManager, T> action) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
 
         try {
-            T result = action.apply(session);
-            tx.commit();
+            T result = action.apply(entityManager);
+            entityManager.getTransaction().commit();
 
             return result;
         } catch (Exception e) {
-            tx.rollback();
-
+            entityManager.getTransaction().rollback();
             throw e;
         } finally {
-            session.close();
+            entityManager.close();
         }
     }
 }

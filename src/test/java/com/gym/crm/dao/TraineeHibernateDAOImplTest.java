@@ -1,5 +1,6 @@
 package com.gym.crm.dao;
 
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.dao.impl.TraineeHibernateDAOImpl;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.User;
@@ -10,11 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DatabaseSetup(value = "/dataset/trainee-dataset.xml")
 public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernateDAOImpl> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
 
@@ -24,8 +23,14 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
 
         Trainee actual = dao.save(trainee);
 
-        assertNotNull(actual.getId());
-        assertTrue(dao.findById(actual.getId()).isPresent());
+        assertThat(actual.getId()).isNotNull();
+        assertThat(dao.findById(actual.getId())).isPresent();
+        assertThat(actual.getUser().getUsername()).isEqualTo("Simone.Radcliffe");
+        assertThat(actual.getUser().getFirstName()).isEqualTo("Simone");
+        assertThat(actual.getUser().getLastName()).isEqualTo("Radcliffe");
+        assertThat(actual.getUser().getIsActive()).isEqualTo(true);
+        assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 3, 10));
+        assertThat(actual.getAddress()).isEqualTo("123 Main St");
     }
 
     @Test
@@ -33,7 +38,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.save(null));
 
-        assertEquals("Trainee cannot be null", exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo("Trainee cannot be null");
     }
 
     @Test
@@ -44,7 +49,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         Trainee saved = dao.update(updated);
         Trainee actual = dao.findById(saved.getId()).orElseThrow(() -> new AssertionError("Trainee not found"));
 
-        assertEquals("new address", actual.getAddress());
+        assertThat(actual.getAddress()).isEqualTo("new address");
     }
 
     @Test
@@ -52,15 +57,15 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.update(buildTrainee()));
 
-        assertEquals(String.format(INVALID_ID_MESSAGE, "null"), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_ID_MESSAGE, "null"));
     }
 
     @Test
     void delete_shouldDeleteTrainee_whenExists() {
         dao.delete(1L);
 
-        assertTrue(dao.findById(1L).isEmpty());
-        assertEquals(1, dao.findAll().size());
+        assertThat(dao.findById(1L)).isEmpty();
+        assertThat(dao.findAll().size()).isEqualTo(1);
     }
 
     @Test
@@ -68,7 +73,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.delete(null));
 
-        assertEquals(String.format(INVALID_ID_MESSAGE, "null"), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_ID_MESSAGE, "null"));
     }
 
 
@@ -76,15 +81,15 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
     void findById_shouldReturnTrainee_whenExists() {
         Optional<Trainee> actual = dao.findById(1L);
 
-        assertTrue(actual.isPresent());
-        assertEquals("Nora.Pemberton", actual.get().getUser().getUsername());
+        assertThat(actual).isPresent();
+        assertThat(actual.get().getUser().getUsername()).isEqualTo("Nora.Pemberton");
     }
 
     @Test
     void findById_shouldReturnEmptyOptional_whenNotFound() {
         Optional<Trainee> actual = dao.findById(999L);
 
-        assertTrue(actual.isEmpty());
+        assertThat(actual).isEmpty();
     }
 
     @Test
@@ -92,14 +97,13 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findById(0L));
 
-        assertEquals(String.format(INVALID_ID_MESSAGE, "0"), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_ID_MESSAGE, "0"));
     }
 
     @Test
     void findAll_shouldReturnAllTrainees_whenExist() {
         List<Trainee> actual = dao.findAll();
 
-        assertEquals(2, actual.size());
         assertThat(actual)
                 .hasSize(2)
                 .extracting(t -> t.getUser().getUsername())

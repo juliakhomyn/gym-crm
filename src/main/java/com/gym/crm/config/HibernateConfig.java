@@ -5,7 +5,7 @@ import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
 import com.gym.crm.entity.User;
-import org.hibernate.SessionFactory;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class HibernateConfig {
 
     @Bean
     @DependsOn("liquibase")
-    public SessionFactory sessionFactory(DataSource dataSource) {
+    public EntityManagerFactory entityManagerFactory(DataSource dataSource) {
         Properties properties = new Properties();
         properties.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
         properties.put("hibernate.show_sql", "true");

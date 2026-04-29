@@ -42,7 +42,7 @@ public class Trainee {
     @Column(nullable = true, length = 255)
     private String address;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

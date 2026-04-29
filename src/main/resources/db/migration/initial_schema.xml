@@ -189,4 +189,18 @@
                 constraintName="fk_trainees_trainers_trainer"/>
     </changeSet>
 
+    <changeSet id="GIA-57 19-add-cascade-on-trainee-trainees-trainers" author="julia">
+        <dropForeignKeyConstraint
+                baseTableName="trainees_trainers"
+                constraintName="fk_trainees_trainers_trainee"/>
+
+        <addForeignKeyConstraint
+                baseTableName="trainees_trainers"
+                baseColumnNames="trainee_id"
+                referencedTableName="trainees"
+                referencedColumnNames="id"
+                constraintName="fk_trainees_trainers_trainee"
+                onDelete="CASCADE"/>
+    </changeSet>
+
 </databaseChangeLog>

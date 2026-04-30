@@ -1,7 +1,6 @@
 package com.gym.crm.dao;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.gym.crm.dao.impl.TrainingTypeHibernateDAOImpl;
 import com.gym.crm.entity.TrainingType;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +10,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DatabaseSetup(value = "/dataset/training-type-dataset.xml")
-public class TrainingTypeHibernateDAOImplTest extends AbstractDaoTest<TrainingTypeHibernateDAOImpl> {
+@DatabaseSetup(value = "/dataset/training-type.xml")
+public class TrainingTypeHibernateDAOImplTest extends AbstractDaoTest<TrainingTypeDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
     private static final String EMPTY_STRING_EXCEPTION_MESSAGE = "%s cannot be null or empty";
 
@@ -70,10 +69,5 @@ public class TrainingTypeHibernateDAOImplTest extends AbstractDaoTest<TrainingTy
                 .hasSize(3)
                 .extracting(TrainingType::getTrainingTypeName)
                 .containsExactlyInAnyOrder("Yoga", "Pilates", "Cardio");
-    }
-
-    @Override
-    protected Class<TrainingTypeHibernateDAOImpl> getDaoClass() {
-        return TrainingTypeHibernateDAOImpl.class;
     }
 }

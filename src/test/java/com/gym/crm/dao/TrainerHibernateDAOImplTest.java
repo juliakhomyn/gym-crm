@@ -107,7 +107,7 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
     private Trainer buildTrainer() {
         return Trainer.builder()
                 .user(buildUser())
-                .specialization(TrainingType.builder().id(1L).trainingTypeName("Yoga").build())
+                .specialization(buildTrainingType())
                 .build();
     }
 
@@ -121,11 +121,18 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
                 .build();
     }
 
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder()
+                .id(1L)
+                .trainingTypeName("Yoga")
+                .build();
+    }
+
     private Trainer buildExpectedTrainer() {
         return Trainer.builder()
                 .id(1L)
                 .user(buildExpectedUser())
-                .specialization(TrainingType.builder().id(1L).trainingTypeName("Yoga").build())
+                .specialization(buildTrainingType())
                 .build();
     }
 
@@ -152,7 +159,7 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
         Trainer trainer = Trainer.builder()
                 .id(2L)
                 .user(user)
-                .specialization(TrainingType.builder().id(2L).trainingTypeName("Pilates").build())
+                .specialization(buildTrainingType())
                 .build();
 
         return List.of(buildExpectedTrainer(), trainer);

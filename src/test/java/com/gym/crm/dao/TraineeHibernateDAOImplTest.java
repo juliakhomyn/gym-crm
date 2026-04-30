@@ -154,16 +154,17 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
     }
 
     private List<Trainee> buildExpectedTrainees() {
+        User user = User.builder()
+                .id(3L)
+                .firstName("Ellis")
+                .lastName("Pemberton")
+                .username("Ellis.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
         Trainee trainee = Trainee.builder()
                 .id(2L)
-                .user(User.builder()
-                        .id(3L)
-                        .firstName("Ellis")
-                        .lastName("Pemberton")
-                        .username("Ellis.Pemberton")
-                        .password("pass222")
-                        .isActive(true)
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(2002, 7, 15))
                 .address("567 Oak St")
                 .build();

@@ -141,16 +141,17 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
     }
 
     private List<Trainer> buildExpectedTrainers() {
+        User user = User.builder()
+                .id(2L)
+                .firstName("Nora")
+                .lastName("Pemberton")
+                .username("Nora.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
         Trainer trainer = Trainer.builder()
                 .id(2L)
-                .user(User.builder()
-                        .id(2L)
-                        .firstName("Nora")
-                        .lastName("Pemberton")
-                        .username("Nora.Pemberton")
-                        .password("pass222")
-                        .isActive(true)
-                        .build())
+                .user(user)
                 .specialization(TrainingType.builder().id(2L).trainingTypeName("Pilates").build())
                 .build();
 

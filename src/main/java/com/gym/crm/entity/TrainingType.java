@@ -11,11 +11,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Getter
+@SuperBuilder
 @ToString(exclude = "trainings")
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor

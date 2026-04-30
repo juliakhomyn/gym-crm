@@ -1,7 +1,6 @@
 package com.gym.crm.dao;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
-import com.gym.crm.dao.impl.TraineeHibernateDAOImpl;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.User;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DatabaseSetup(value = "/dataset/trainee-dataset.xml")
-public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernateDAOImpl> {
+@DatabaseSetup(value = "/dataset/trainee.xml")
+public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernateDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Test
@@ -79,10 +78,13 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
 
     @Test
     void findById_shouldReturnTrainee_whenExists() {
+        Trainee expected = buildExpectedTrainee();
+
         Optional<Trainee> actual = dao.findById(1L);
 
         assertThat(actual).isPresent();
         assertThat(actual.get().getUser().getUsername()).isEqualTo("Nora.Pemberton");
+        assertThat(actual.get()).isEqualTo(expected);
     }
 
     @Test
@@ -102,12 +104,15 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
 
     @Test
     void findAll_shouldReturnAllTrainees_whenExist() {
+        List<Trainee> expected = buildExpectedTrainees();
+
         List<Trainee> actual = dao.findAll();
 
         assertThat(actual)
                 .hasSize(2)
                 .extracting(t -> t.getUser().getUsername())
                 .containsExactlyInAnyOrder("Nora.Pemberton", "Ellis.Hargrove");
+        assertThat(actual).containsAll(expected);
     }
 
     private Trainee buildTrainee() {
@@ -128,8 +133,42 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
                 .build();
     }
 
-    @Override
-    protected Class<TraineeHibernateDAOImpl> getDaoClass() {
-        return TraineeHibernateDAOImpl.class;
+    private Trainee buildExpectedTrainee() {
+        return Trainee.builder()
+                .id(1L)
+                .user(buildExpectedUser())
+                .dateOfBirth(LocalDate.of(2000, 3, 10))
+                .address("123 Main St")
+                .build();
+    }
+
+    private User buildExpectedUser() {
+        return User.builder()
+                .id(2L)
+                .firstName("Nora")
+                .lastName("Pemberton")
+                .username("Nora.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
+    }
+
+    private List<Trainee> buildExpectedTrainees() {
+        User user = User.builder()
+                .id(3L)
+                .firstName("Ellis")
+                .lastName("Pemberton")
+                .username("Ellis.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
+        Trainee trainee = Trainee.builder()
+                .id(2L)
+                .user(user)
+                .dateOfBirth(LocalDate.of(2002, 7, 15))
+                .address("567 Oak St")
+                .build();
+
+        return List.of(buildExpectedTrainee(), trainee);
     }
 }

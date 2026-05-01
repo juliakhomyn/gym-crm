@@ -19,7 +19,7 @@ import java.time.LocalDate;
 
 @Getter
 @SuperBuilder(toBuilder = true)
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @Entity
@@ -28,16 +28,19 @@ public class Training {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @ToString.Include
     private Long id;
 
     @Column(name = "training_name", nullable = false, length = 100)
+    @ToString.Include
     private String trainingName;
 
     @Column(name = "training_date", nullable = false)
+    @ToString.Include
     private LocalDate trainingDate;
 
     @Column(name = "training_duration", nullable = false)
+    @ToString.Include
     private int trainingDuration;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

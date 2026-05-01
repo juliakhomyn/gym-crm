@@ -1,10 +1,10 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.config.TransactionManager;
-import com.gym.crm.criteria.TraineeTrainingCriteriaBuilder;
-import com.gym.crm.criteria.TrainerTrainingCriteriaBuilder;
-import com.gym.crm.filter.TraineeTrainingFilter;
-import com.gym.crm.filter.TrainerTrainingFilter;
+import com.gym.crm.search.criteria.TraineeTrainingCriteriaBuilder;
+import com.gym.crm.search.criteria.TrainerTrainingCriteriaBuilder;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.dao.TrainingHibernateDAO;
 import com.gym.crm.entity.Training;
 import com.gym.crm.util.Validator;

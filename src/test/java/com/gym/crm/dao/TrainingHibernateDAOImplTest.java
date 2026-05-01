@@ -6,8 +6,8 @@ import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
 import com.gym.crm.entity.User;
-import com.gym.crm.filter.TraineeTrainingFilter;
-import com.gym.crm.filter.TrainerTrainingFilter;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -151,220 +151,189 @@ public class TrainingHibernateDAOImplTest extends AbstractDaoTest<TrainingHibern
     }
 
     @ParameterizedTest
-    @MethodSource("traineeFilterProvider")
-    void findByTraineeCriteria_shouldReturnCorrectTrainings(TraineeTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
-        List<Training> result = dao.findByTraineeCriteria(filter);
+    @MethodSource("traineeFilterProviderExisting")
+    void findByTraineeCriteria_shouldReturnCorrectTrainings_whenExist(TraineeTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
+        List<Training> actual = dao.findByTraineeCriteria(filter);
 
-        assertThat(result).hasSize(expectedSize);
-        if (!expectedIds.isEmpty()) {
-            assertThat(result)
-                    .extracting(Training::getId)
-                    .containsExactlyInAnyOrderElementsOf(expectedIds);
-        }
+        assertThat(actual).hasSize(expectedSize);
+        assertThat(actual)
+                .extracting(Training::getId)
+                .containsExactlyInAnyOrderElementsOf(expectedIds);
     }
 
     @ParameterizedTest
-    @MethodSource("trainerFilterProvider")
-    void findByTrainerCriteria_shouldReturnCorrectTrainings(TrainerTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
-        List<Training> result = dao.findByTrainerCriteria(filter);
+    @MethodSource("traineeFilterProviderNonExisting")
+    void findByTraineeCriteria_shouldReturnCorrectTrainings_whenNotExist(TraineeTrainingFilter filter) {
+        List<Training> actual = dao.findByTraineeCriteria(filter);
 
-        assertThat(result).hasSize(expectedSize);
-        if (!expectedIds.isEmpty()) {
-            assertThat(result)
-                    .extracting(Training::getId)
-                    .containsExactlyInAnyOrderElementsOf(expectedIds);
-        }
+        assertThat(actual).isEmpty();
     }
 
-    static Stream<Arguments> traineeFilterProvider() {
+    @ParameterizedTest
+    @MethodSource("trainerFilterProviderExisting")
+    void findByTrainerCriteria_shouldReturnCorrectTrainings_whenExist(TrainerTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
+        List<Training> actual = dao.findByTrainerCriteria(filter);
+
+        assertThat(actual).hasSize(expectedSize);
+        assertThat(actual)
+                .extracting(Training::getId)
+                .containsExactlyInAnyOrderElementsOf(expectedIds);
+    }
+
+    @ParameterizedTest
+    @MethodSource("trainerFilterProviderNonExisting")
+    void findByTrainerCriteria_shouldReturnCorrectTrainings_whenNotExist(TrainerTrainingFilter filter) {
+        List<Training> actual = dao.findByTrainerCriteria(filter);
+
+        assertThat(actual).isEmpty();
+    }
+
+    private static Stream<Arguments> traineeFilterProviderExisting() {
         return Stream.of(
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                        List.of(1L)),
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Ellis.Hargrove")
                                 .build(),
                         1,
-                        List.of(2L)
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                        List.of(2L)),
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .fromDate(LocalDate.of(2026, 4, 1))
                                 .toDate(LocalDate.of(2026, 4, 30))
                                 .build(),
                         1,
                         List.of(1L)),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .fromDate(LocalDate.of(2020, 1, 1))
-                                .toDate(LocalDate.of(2020, 12, 31))
-                                .build(),
-                        0,
-                        List.of()),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .trainingTypeName("Yoga")
                                 .build(),
                         1,
                         List.of(1L)),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .trainingTypeName("Cardio")
-                                .build(),
-                        0,
-                        List.of()
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .firstName("Callum")
                                 .lastName("Whitfield")
                                 .build(),
                         1,
                         List.of(1L)),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .firstName("Callum")
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                        List.of(1L)),
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .lastName("Whitfield")
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                        List.of(1L))
+        );
+    }
+
+    private static Stream<Arguments> traineeFilterProviderNonExisting() {
+        return Stream.of(
+                Arguments.of(TraineeTrainingFilter.builder()
+                                .username("Nora.Pemberton")
+                                .fromDate(LocalDate.of(2020, 1, 1))
+                                .toDate(LocalDate.of(2020, 12, 31))
+                                .build()),
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .trainingTypeName("Cardio")
-                                .build(),
-                        0,
-                        List.of()
-                ),
-                Arguments.of(
-                        TraineeTrainingFilter.builder()
+                                .build()),
+                Arguments.of(TraineeTrainingFilter.builder()
+                                .username("Nora.Pemberton")
+                                .trainingTypeName("Cardio")
+                                .build()),
+                Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
                                 .firstName("Callum")
                                 .lastName("Whitfield")
                                 .fromDate(LocalDate.of(2026, 4, 16))
                                 .toDate(LocalDate.of(2026, 4, 30))
                                 .trainingTypeName("Yoga")
-                                .build(),
-                        0,
-                        List.of()
-                )
+                                .build())
         );
     }
 
-    static Stream<Arguments> trainerFilterProvider() {
+    private static Stream<Arguments> trainerFilterProviderExisting() {
         return Stream.of(
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .build(),
                         2,
                         List.of(1L, 2L)),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .firstName("Nora")
                                 .lastName("Pemberton")
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(1L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .lastName("Hargrove")
                                 .build(),
                         1,
-                        List.of(2L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(2L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .firstName("Ellis")
                                 .lastName("Hargrove")
                                 .build(),
                         1,
-                        List.of(2L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
-                                .firstName("NonExistent")
-                                .build(),
-                        0,
-                        List.of()
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(2L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .fromDate(LocalDate.of(2026, 4, 16))
                                 .build(),
                         1,
-                        List.of(2L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(2L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .toDate(LocalDate.of(2026, 4, 18))
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(1L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .fromDate(LocalDate.of(2026, 4, 14))
                                 .toDate(LocalDate.of(2026, 4, 16))
                                 .build(),
                         1,
-                        List.of(1L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
-                                .fromDate(LocalDate.of(2026, 4, 21))
-                                .build(),
-                        0,
-                        List.of()
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(1L)),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .firstName("Ellis")
                                 .lastName("Hargrove")
                                 .fromDate(LocalDate.of(2026, 4, 19))
                                 .build(),
                         1,
-                        List.of(2L)
-                ),
-                Arguments.of(
-                        TrainerTrainingFilter.builder()
+                        List.of(2L))
+        );
+    }
+
+    private static Stream<Arguments> trainerFilterProviderNonExisting() {
+        return Stream.of(
+                Arguments.of(TrainerTrainingFilter.builder()
+                                .username("Callum.Whitfield")
+                                .firstName("NonExistent")
+                                .build()),
+                Arguments.of(TrainerTrainingFilter.builder()
+                                .username("Callum.Whitfield")
+                                .fromDate(LocalDate.of(2026, 4, 21))
+                                .build()),
+                Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
                                 .firstName("Nora")
                                 .lastName("Pemberton")
                                 .fromDate(LocalDate.of(2026, 4, 16))
-                                .build(),
-                        0,
-                        List.of()
-                )
+                                .build())
         );
     }
 
@@ -377,6 +346,7 @@ public class TrainingHibernateDAOImplTest extends AbstractDaoTest<TrainingHibern
                 .password("pass111")
                 .isActive(true)
                 .build();
+
         return Trainer.builder()
                 .id(1L)
                 .user(user)
@@ -393,6 +363,7 @@ public class TrainingHibernateDAOImplTest extends AbstractDaoTest<TrainingHibern
                 .password("pass222")
                 .isActive(true)
                 .build();
+
         return Trainee.builder()
                 .id(1L)
                 .user(user)

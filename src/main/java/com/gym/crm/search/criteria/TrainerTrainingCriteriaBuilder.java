@@ -1,4 +1,4 @@
-package com.gym.crm.criteria;
+package com.gym.crm.search.criteria;
 
 import org.springframework.stereotype.Component;
 

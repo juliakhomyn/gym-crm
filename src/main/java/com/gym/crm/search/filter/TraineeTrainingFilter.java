@@ -1,4 +1,4 @@
-package com.gym.crm.filter;
+package com.gym.crm.search.filter;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;

@@ -1,7 +1,7 @@
 package com.gym.crm.dao;
 
-import com.gym.crm.filter.TraineeTrainingFilter;
-import com.gym.crm.filter.TrainerTrainingFilter;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.entity.Training;
 
 import java.util.List;

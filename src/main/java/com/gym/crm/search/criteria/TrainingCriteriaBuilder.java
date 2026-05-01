@@ -1,7 +1,7 @@
-package com.gym.crm.criteria;
+package com.gym.crm.search.criteria;
 
 import com.gym.crm.entity.Training;
-import com.gym.crm.filter.TrainingFilter;
+import com.gym.crm.search.filter.TrainingFilter;
 import com.gym.crm.util.Validator;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;

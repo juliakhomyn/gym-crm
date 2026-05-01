@@ -80,9 +80,12 @@ public class TrainingHibernateDAOImplTest extends AbstractDaoTest<TrainingHibern
 
     @Test
     void findAll_shouldReturnAllTrainings_whenExist() {
+        List<Training> expected = buildExpectedTrainings();
+
         List<Training> actual = dao.findAll();
 
         assertThat(actual).isNotEmpty();
+        assertThat(actual).containsAll(expected);
         assertThat(actual)
                 .hasSize(2)
                 .extracting(Training::getTrainingName)

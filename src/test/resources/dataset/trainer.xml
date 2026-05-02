@@ -5,12 +5,21 @@
 
     <users id="1" first_name="Callum" last_name="Whitfield" username="Callum.Whitfield" password="pass111" is_active="true"/>
     <users id="2" first_name="Nora" last_name="Pemberton" username="Nora.Pemberton" password="pass222" is_active="true"/>
+    <users id="3" first_name="Ellis" last_name="Hargrove" username="Ellis.Hargrove" password="pass444" is_active="true"/>
+    <users id="4" first_name="Owen" last_name="Castleberry" username="Owen.Castleberry" password="pass555" is_active="true"/>
+    <users id="5" first_name="Petra" last_name="Dunmore" username="Petra.Dunmore" password="pass555" is_active="true"/>
 
     <trainers id="1" specialization_id="1" user_id="1"/>
     <trainers id="2" specialization_id="2" user_id="2"/>
 
-    <trainees />
+    <trainees id="1" date_of_birth="2000-03-10" address="123 Main St" user_id="3"/>
+    <trainees id="2" date_of_birth="2002-07-15" address="567 Oak St" user_id="4"/>
+    <trainees id="3" date_of_birth="2000-06-11" address="890 Wall St" user_id="5"/>
+
+    <trainees_trainers trainee_id="1" trainer_id="2"/>
+    <trainees_trainers trainee_id="2" trainer_id="1"/>
+    <trainees_trainers trainee_id="2" trainer_id="2"/>
+
     <trainings />
-    <trainees_trainers />
 
 </dataset>

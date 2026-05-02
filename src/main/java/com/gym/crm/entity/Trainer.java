@@ -38,7 +38,7 @@ public class Trainer {
     @JoinColumn(name = "specialization_id", nullable = false)
     private TrainingType specialization;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

@@ -92,6 +92,31 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
     }
 
     @Test
+    void findByUsername_shouldReturnTrainer_whenExists() {
+        Trainer expected = buildExpectedTrainer();
+
+        Optional<Trainer> actual = dao.findByUsername("Callum.Whitfield");
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get()).isEqualTo(expected);
+    }
+
+    @Test
+    void findByUsername_shouldReturnEmptyOptional_whenNotFound() {
+        Optional<Trainer> actual = dao.findByUsername("Owen.Castleberry");
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void findByUsername_shouldThrowException_whenUsernameIsBlank() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> dao.findByUsername(" "));
+
+        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+    }
+
+    @Test
     void findAll_shouldReturnAllTrainers_whenExist() {
         List<Trainer> expected = buildExpectedTrainers();
 
@@ -101,6 +126,37 @@ public class TrainerHibernateDAOImplTest extends AbstractDaoTest<TrainerHibernat
                 .hasSize(2)
                 .extracting(t -> t.getUser().getUsername())
                 .contains("Callum.Whitfield");
+        assertThat(actual).containsAll(expected);
+    }
+
+    @Test
+    void findNotAssignedToTrainee_shouldReturnAllTrainers_whenNoAssigned() {
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Petra.Dunmore");
+
+        assertThat(actual)
+                .isNotEmpty()
+                .extracting(t -> t.getUser().getUsername())
+                .containsExactlyInAnyOrder("Callum.Whitfield", "Nora.Pemberton");
+        assertThat(actual).containsAll(buildExpectedTrainers());
+    }
+
+    @Test
+    void findNotAssignedToTrainee_shouldReturnNoTrainers_whenAllAssigned() {
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Owen.Castleberry");
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void findNotAssignedToTrainee_shouldReturnAUnassignedTrainers_whenAssigned() {
+        List<Trainer> expected = List.of(buildExpectedTrainer());
+
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Ellis.Hargrove");
+
+        assertThat(actual)
+                .isNotEmpty()
+                .extracting(t -> t.getUser().getUsername())
+                .containsExactlyInAnyOrder("Callum.Whitfield");
         assertThat(actual).containsAll(expected);
     }
 

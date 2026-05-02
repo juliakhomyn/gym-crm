@@ -5,15 +5,11 @@ import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.User;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DatabaseSetup(value = "/dataset/trainee.xml")
 public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernateDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
+    private static final String NULL_OR_EMPTY_USERNAME_MESSAGE = "Username cannot be null or empty";
 
     @Autowired
     private TrainerHibernateDAO trainerDao;
@@ -97,7 +94,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.deleteByUsername(" "));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(NULL_OR_EMPTY_USERNAME_MESSAGE);
     }
 
     @Test
@@ -105,7 +102,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.deleteByUsername(null));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(NULL_OR_EMPTY_USERNAME_MESSAGE);
     }
 
     @Test
@@ -146,7 +143,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findByUsername(" "));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(NULL_OR_EMPTY_USERNAME_MESSAGE);
     }
 
     @Test
@@ -154,7 +151,7 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findByUsername(null));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(NULL_OR_EMPTY_USERNAME_MESSAGE);
     }
 
     @Test
@@ -204,38 +201,57 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
                 () -> dao.updateTrainersList("NonExistent.User", List.of()));
     }
 
+    @Test
+    void updateTrainersList_shouldReplaceWithSingleTrainer_whenUpdatingWithOneTrainerAssignedBefore() {
+        String username = "Nora.Pemberton";
+        Trainer expectedTrainer = findTrainerById(2L);
+        List<Trainer> newTrainers = List.of(expectedTrainer);
 
-    @ParameterizedTest
-    @MethodSource("updateTrainersListProvider")
-    void updateTrainersList_shouldUpdateCorrectly(String traineeUsername, List<Long> newTrainerIds, List<String> expectedTrainerUsernames) {
-        List<Trainer> newTrainers = newTrainerIds.stream()
-                .map(id -> trainerDao.findById(id).orElseThrow())
-                .toList();
+        dao.updateTrainersList(username, newTrainers);
 
-        dao.updateTrainersList(traineeUsername, newTrainers);
-
-        Trainee updated = dao.findByUsernameWithTrainers(traineeUsername).orElseThrow();
-
+        Trainee updated = dao.findByUsernameWithTrainers(username).orElseThrow();
+        assertThat(updated.getTrainers()).hasSize(1);
         assertThat(updated.getTrainers())
-                .extracting(t -> t.getUser().getUsername())
-                .containsExactlyInAnyOrderElementsOf(expectedTrainerUsernames);
+                .containsExactlyInAnyOrderElementsOf(newTrainers);
     }
 
-    private static Stream<Arguments> updateTrainersListProvider() {
-        return Stream.of(
-                Arguments.of("Nora.Pemberton",
-                        List.of(2L),
-                        List.of("Owen.Castleberry")),
-                Arguments.of("Nora.Pemberton",
-                        List.of(1L, 2L),
-                        List.of("Callum.Whitfield", "Owen.Castleberry")),
-                Arguments.of("Nora.Pemberton",
-                        List.of(),
-                        List.of()),
-                Arguments.of("Ellis.Hargrove",
-                        List.of(3L),
-                        List.of("Petra.Dunmore"))
-        );
+    @Test
+    void updateTrainersList_shouldReplaceWithMultipleTrainers_whenUpdatingWithMultipleTrainers() {
+        String username = "Nora.Pemberton";
+        Trainer trainer1 = findTrainerById(1L);
+        Trainer trainer2 = findTrainerById(2L);
+        List<Trainer> newTrainers = List.of(trainer1, trainer2);
+
+        dao.updateTrainersList(username, newTrainers);
+
+        Trainee updated = dao.findByUsernameWithTrainers(username).orElseThrow();
+        assertThat(updated.getTrainers()).hasSize(2);
+        assertThat(updated.getTrainers())
+                .containsExactlyInAnyOrderElementsOf(newTrainers);
+    }
+
+    @Test
+    void updateTrainersList_shouldClearTrainers_whenEmptyListProvided() {
+        String username = "Nora.Pemberton";
+
+        dao.updateTrainersList(username, List.of());
+
+        Trainee updated = dao.findByUsernameWithTrainers(username).orElseThrow();
+        assertThat(updated.getTrainers()).isEmpty();
+    }
+
+    @Test
+    void updateTrainersList_shouldReplaceWithNewTrainer_whenUpdatingWithNewTrainer() {
+        String username = "Ellis.Hargrove";
+        Trainer trainer = findTrainerById(3L);
+        List<Trainer> newTrainers = List.of(trainer);
+
+        dao.updateTrainersList(username, newTrainers);
+
+        Trainee updated = dao.findByUsernameWithTrainers(username).orElseThrow();
+        assertThat(updated.getTrainers()).hasSize(1);
+        assertThat(updated.getTrainers())
+                .containsExactlyInAnyOrderElementsOf(newTrainers);
     }
 
     private Trainee buildTrainee() {
@@ -293,5 +309,9 @@ public class TraineeHibernateDAOImplTest extends AbstractDaoTest<TraineeHibernat
                 .build();
 
         return List.of(buildExpectedTrainee(), trainee);
+    }
+
+    private Trainer findTrainerById(Long id) {
+        return trainerDao.findById(id).orElseThrow();
     }
 }

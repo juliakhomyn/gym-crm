@@ -3,7 +3,6 @@ package com.gym.crm.dao;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
-import com.gym.crm.entity.TrainingType;
 import com.gym.crm.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

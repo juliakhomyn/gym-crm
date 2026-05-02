@@ -16,6 +16,7 @@ public class TrainerHibernateDAOImpl implements TrainerHibernateDAO {
 
     private final TransactionManager transactionManager;
 
+    @Override
     public Trainer save(Trainer trainer) {
         Validator.validateNotNull(trainer, "Trainer");
 
@@ -24,6 +25,7 @@ public class TrainerHibernateDAOImpl implements TrainerHibernateDAO {
         return trainer;
     }
 
+    @Override
     public Trainer update(Trainer trainer) {
         Validator.validateId(trainer.getId());
 
@@ -32,6 +34,7 @@ public class TrainerHibernateDAOImpl implements TrainerHibernateDAO {
         return trainer;
     }
 
+    @Override
     public Optional<Trainer> findById(Long id) {
         Validator.validateId(id);
 
@@ -39,10 +42,37 @@ public class TrainerHibernateDAOImpl implements TrainerHibernateDAO {
                 Optional.ofNullable(manager.find(Trainer.class, id)));
     }
 
+    @Override
+    public Optional<Trainer> findByUsername(String username) {
+        Validator.validateNotBlank(username, "Username");
+
+        return transactionManager.performReturningWithinTx(manager ->
+            manager.createQuery("FROM Trainer t JOIN FETCH t.user WHERE t.user.username = :username", Trainer.class)
+                    .setParameter("username", username)
+                    .getResultStream()
+                    .findFirst()
+        );
+    }
+
+    @Override
     public List<Trainer> findAll() {
         return transactionManager.performReturningWithinTx(manager -> manager
                 .createQuery("from Trainer", Trainer.class)
                 .getResultList()
+        );
+    }
+
+    @Override
+    public List<Trainer> findNotAssignedToTrainee(String traineeUsername) {
+        Validator.validateNotBlank(traineeUsername, "Trainee Username");
+
+        return transactionManager.performReturningWithinTx(manager ->
+                manager.createQuery("SELECT t FROM Trainer t " +
+                                        "LEFT JOIN t.trainees trn WITH trn.user.username = :username " +
+                                        "WHERE trn IS NULL",
+                            Trainer.class)
+                    .setParameter("username", traineeUsername)
+                    .getResultList()
         );
     }
 }

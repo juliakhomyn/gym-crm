@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 public interface TrainerMapper {
     @Mapping(target = "user.firstName", source = "firstName")
     @Mapping(target = "user.lastName", source = "lastName")
-    Trainer toEntity(TrainerRequestDTO dto);
+    Trainer toEntity(TrainerRequestDTO trainerRequestDTO);
 
     @Mapping(target = "user.username", source = "username")
     @Mapping(target = "user.password", source = "password")
@@ -20,7 +20,7 @@ public interface TrainerMapper {
     @Mapping(target = "user.lastName", source = "lastName")
     @Mapping(target = "user.isActive", source = "isActive")
     @Mapping(target = "specialization", source = "specialization")
-    Trainer toEntity(TrainerUpdateDTO dto);
+    Trainer toEntity(TrainerUpdateDTO trainerUpdateDTO);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "username", source = "user.username")

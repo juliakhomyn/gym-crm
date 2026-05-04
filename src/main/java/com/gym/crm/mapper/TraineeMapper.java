@@ -13,7 +13,7 @@ public interface TraineeMapper {
     @Mapping(target = "user.lastName", source = "lastName")
     @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "address", source = "address")
-    Trainee toEntity(TraineeRequestDTO dto);
+    Trainee toEntity(TraineeRequestDTO traineeRequestDTO);
 
     @Mapping(target = "user.username", source = "username")
     @Mapping(target = "user.password", source = "password")

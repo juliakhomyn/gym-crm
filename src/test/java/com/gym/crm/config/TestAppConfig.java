@@ -1,6 +1,7 @@
 package com.gym.crm.config;
 
 import liquibase.integration.spring.SpringLiquibase;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.sql.DataSource;
 
@@ -38,5 +40,13 @@ public class TestAppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public jakarta.validation.Validator validator() {
+        LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
+        factoryBean.setMessageInterpolator(new ParameterMessageInterpolator());
+
+        return factoryBean;
     }
 }

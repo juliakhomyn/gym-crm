@@ -3,6 +3,7 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.Trainee;
+import com.gym.crm.model.User;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UserCredentialGenerator;
 import com.gym.crm.util.Validator;
@@ -33,19 +34,22 @@ public class TraineeServiceImpl implements TraineeService {
     public Trainee createTrainee(Trainee trainee) {
         Validator.validateNotNull(trainee, TRAINEE);
 
-        log.info("Creating trainee: firstName={} lastName{}", trainee.getFirstName(), trainee.getLastName());
+        log.info("Creating trainee: firstName={} lastName{}", trainee.getUser().getFirstName(), trainee.getUser().getLastName());
 
-        String username = userCredentialGenerator.generateUsername(trainee.getFirstName(), trainee.getLastName());
+        String username = userCredentialGenerator.generateUsername(trainee.getUser().getFirstName(), trainee.getUser().getLastName());
         String rawPassword = userCredentialGenerator.generatePassword();
 
-        Trainee withCredentials = trainee.toBuilder()
+        User user = trainee.getUser().toBuilder()
                 .username(username)
                 .password(passwordEncoder.encode(rawPassword))
                 .isActive(true)
                 .build();
+        Trainee withCredentials = trainee.toBuilder()
+                .user(user)
+                .build();
 
         Trainee saved = dao.save(withCredentials);
-        log.info("Trainee created successfully: username={}", saved.getUsername());
+        log.info("Trainee created successfully: username={}", saved.getUser().getUsername());
 
         return saved;
     }
@@ -54,11 +58,11 @@ public class TraineeServiceImpl implements TraineeService {
     public Trainee updateTrainee(Trainee trainee) {
         Validator.validateNotNull(trainee, TRAINEE);
 
-        log.info("Updating trainee: id={}", trainee.getUserId());
-        getTraineeById(trainee.getUserId());
+        log.info("Updating trainee: id={}", trainee.getId());
+        getTraineeById(trainee.getId());
 
         Trainee updated = dao.update(trainee);
-        log.info("Trainee updated successfully: id={}", updated.getUserId());
+        log.info("Trainee updated successfully: id={}", updated.getId());
 
         return updated;
     }

@@ -1,6 +1,6 @@
 package com.gym.crm.search.criteria;
 
-import com.gym.crm.entity.Training;
+import com.gym.crm.model.Training;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainingFilter;
 import jakarta.persistence.criteria.CriteriaBuilder;

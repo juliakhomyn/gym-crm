@@ -1,62 +1,34 @@
 package com.gym.crm.dao;
 
-import com.gym.crm.dao.impl.TrainerDAOImpl;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
-import com.gym.crm.model.enums.StorageNamespace;
-import com.gym.crm.storage.InMemoryStorage;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.model.User;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class TrainerDAOImplTest {
+@DatabaseSetup(value = "/dataset/trainer.xml")
+public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
 
-    private TrainerDAOImpl dao;
-    private Map<Long, Trainer> map;
-
-    @BeforeEach
-    void setUp() {
-        InMemoryStorage inMemoryStorage = mock(InMemoryStorage.class);
-
-        map = new HashMap<>();
-        when(inMemoryStorage.getStorage(StorageNamespace.TRAINER)).thenReturn((Map) map);
-
-        dao = new TrainerDAOImpl();
-        dao.setInMemoryStorage(inMemoryStorage);
-    }
-
     @Test
-    void save_shouldSaveTrainerAndGenerateId_whenIdIsNull() {
+    void save_shouldSaveTrainer_whenValid() {
         Trainer trainer = buildTrainer();
 
         Trainer actual = dao.save(trainer);
 
-        assertNotNull(actual.getUserId());
-        assertEquals(1L, actual.getUserId());
-        assertTrue(map.containsKey(actual.getUserId()));
-    }
-
-    @Test
-    void save_shouldSaveTrainer_whenIdIsNotNull() {
-        Trainer trainer = buildTrainer().toBuilder().userId(4L).build();
-
-        Trainer actual = dao.save(trainer);
-
-        assertNotNull(actual.getUserId());
-        assertEquals(4L, actual.getUserId());
-        assertTrue(map.containsKey(actual.getUserId()));
+        assertThat(actual.getId()).isNotNull();
+        assertThat(dao.findById(actual.getId())).isPresent();
+        assertThat(actual.getUser().getUsername()).isEqualTo("Simone.Radcliffe");
+        assertThat(actual.getUser().getFirstName()).isEqualTo("Simone");
+        assertThat(actual.getUser().getLastName()).isEqualTo("Radcliffe");
+        assertThat(actual.getUser().getIsActive()).isEqualTo(true);
+        assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Yoga");
     }
 
     @Test
@@ -64,19 +36,25 @@ public class TrainerDAOImplTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.save(null));
 
-        assertEquals("Trainer cannot be null", exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo("Trainer cannot be null");
     }
 
     @Test
     void update_shouldUpdateExistingTrainer_whenExists() {
-        Trainer trainer = buildTrainer();
-        Trainer saved = dao.save(trainer);
-        Trainer updated = saved.toBuilder().specialization(new TrainingType("Pilates")).build();
+        TrainingType newTrainingType = TrainingType.builder()
+                .id(2L)
+                .trainingTypeName("Pilates")
+                .build();
 
-        Trainer actual = dao.update(updated);
+        Trainer Trainer = dao.findById(1L).orElseThrow(() -> new AssertionError("Trainer not found"));
+        Trainer updated = Trainer.toBuilder()
+                .specialization(newTrainingType)
+                .build();
 
-        assertEquals("Pilates", actual.getSpecialization().getTrainingTypeName());
-        assertTrue(map.containsKey(actual.getUserId()));
+        Trainer saved = dao.update(updated);
+        Trainer actual = dao.findById(saved.getId()).orElseThrow(() -> new AssertionError("Trainer not found"));
+
+        assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Pilates");
     }
 
     @Test
@@ -84,25 +62,25 @@ public class TrainerDAOImplTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.update(buildTrainer()));
 
-        assertEquals(String.format(INVALID_ID_MESSAGE, "null"), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_ID_MESSAGE, "null"));
     }
 
     @Test
     void findById_shouldReturnTrainer_whenExists() {
-        Trainer trainer = buildTrainer();
-        Trainer saved = dao.save(trainer);
+        Trainer expected = buildExpectedTrainer();
 
-        Optional<Trainer> actual = dao.findById(saved.getUserId());
+        Optional<Trainer> actual = dao.findById(1L);
 
-        assertTrue(actual.isPresent());
-        assertEquals(saved.getUserId(), actual.get().getUserId());
+        assertThat(actual).isPresent();
+        assertThat(actual.get().getUser().getUsername()).isEqualTo("Callum.Whitfield");
+        assertThat(actual.get()).isEqualTo(expected);
     }
 
     @Test
     void findById_shouldReturnEmptyOptional_whenNotFound() {
         Optional<Trainer> actual = dao.findById(999L);
 
-        assertTrue(actual.isEmpty());
+        assertThat(actual).isEmpty();
     }
 
     @Test
@@ -110,34 +88,136 @@ public class TrainerDAOImplTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findById(0L));
 
-        assertEquals(String.format(INVALID_ID_MESSAGE, "0"), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_ID_MESSAGE, "0"));
+    }
+
+    @Test
+    void findByUsername_shouldReturnTrainer_whenExists() {
+        Trainer expected = buildExpectedTrainer();
+
+        Optional<Trainer> actual = dao.findByUsername("Callum.Whitfield");
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get()).isEqualTo(expected);
+    }
+
+    @Test
+    void findByUsername_shouldReturnEmptyOptional_whenNotFound() {
+        Optional<Trainer> actual = dao.findByUsername("Owen.Castleberry");
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void findByUsername_shouldThrowException_whenUsernameIsBlank() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> dao.findByUsername(" "));
+
+        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
     }
 
     @Test
     void findAll_shouldReturnAllTrainers_whenExist() {
-        dao.save(buildTrainer());
-        dao.save(buildTrainer());
+        List<Trainer> expected = buildExpectedTrainers();
 
         List<Trainer> actual = dao.findAll();
 
-        assertEquals(2, actual.size());
+        assertThat(actual)
+                .hasSize(2)
+                .extracting(t -> t.getUser().getUsername())
+                .contains("Callum.Whitfield");
+        assertThat(actual).containsAll(expected);
     }
 
     @Test
-    void findAll_shouldReturnEmptyList_whenNoTrainers() {
-        List<Trainer> actual = dao.findAll();
+    void findNotAssignedToTrainee_shouldReturnAllTrainers_whenNoAssigned() {
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Petra.Dunmore");
 
-        assertTrue(actual.isEmpty());
+        assertThat(actual)
+                .isNotEmpty()
+                .extracting(t -> t.getUser().getUsername())
+                .containsExactlyInAnyOrder("Callum.Whitfield", "Nora.Pemberton");
+        assertThat(actual).containsAll(buildExpectedTrainers());
+    }
+
+    @Test
+    void findNotAssignedToTrainee_shouldReturnNoTrainers_whenAllAssigned() {
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Owen.Castleberry");
+
+        assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void findNotAssignedToTrainee_shouldReturnAUnassignedTrainers_whenAssigned() {
+        List<Trainer> expected = List.of(buildExpectedTrainer());
+
+        List<Trainer> actual = dao.findNotAssignedToTrainee("Ellis.Hargrove");
+
+        assertThat(actual)
+                .isNotEmpty()
+                .extracting(t -> t.getUser().getUsername())
+                .containsExactlyInAnyOrder("Callum.Whitfield");
+        assertThat(actual).containsAll(expected);
     }
 
     private Trainer buildTrainer() {
         return Trainer.builder()
+                .user(buildUser())
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .firstName("Simone")
+                .lastName("Radcliffe")
+                .username("Simone.Radcliffe")
+                .password("pass444")
+                .isActive(true)
+                .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder()
+                .id(1L)
+                .trainingTypeName("Yoga")
+                .build();
+    }
+
+    private Trainer buildExpectedTrainer() {
+        return Trainer.builder()
+                .id(1L)
+                .user(buildExpectedUser())
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    private User buildExpectedUser() {
+        return User.builder()
+                .id(1L)
                 .firstName("Callum")
                 .lastName("Whitfield")
                 .username("Callum.Whitfield")
-                .password("password")
-                .specialization(new TrainingType("Yoga"))
+                .password("pass111")
                 .isActive(true)
                 .build();
+    }
+
+    private List<Trainer> buildExpectedTrainers() {
+        User user = User.builder()
+                .id(2L)
+                .firstName("Nora")
+                .lastName("Pemberton")
+                .username("Nora.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
+        Trainer trainer = Trainer.builder()
+                .id(2L)
+                .user(user)
+                .specialization(buildTrainingType())
+                .build();
+
+        return List.of(buildExpectedTrainer(), trainer);
     }
 }

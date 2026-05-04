@@ -4,6 +4,7 @@ import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.model.User;
 import com.gym.crm.service.impl.TrainerServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,10 +57,8 @@ public class TrainerServiceImplTest {
         trainer = buildTrainer();
 
         savedTrainer = trainer.toBuilder()
-                .userId(VALID_ID)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
+                .id(VALID_ID)
+                .user(buildSavedUser())
                 .build();
     }
 
@@ -72,9 +71,9 @@ public class TrainerServiceImplTest {
 
         Trainer result = service.createTrainer(trainer);
 
-        assertEquals(USERNAME, result.getUsername());
-        assertEquals(ENCODED_PASSWORD, result.getPassword());
-        assertTrue(result.getIsActive());
+        assertEquals(USERNAME, result.getUser().getUsername());
+        assertEquals(ENCODED_PASSWORD, result.getUser().getPassword());
+        assertTrue(result.getUser().getIsActive());
         verify(dao).save(any(Trainer.class));
     }
 
@@ -89,7 +88,7 @@ public class TrainerServiceImplTest {
     @Test
     void updateTrainer_shouldUpdateTrainer_whenTrainerExists() {
         Trainer expected = savedTrainer.toBuilder()
-                .specialization(new TrainingType("new type"))
+                .specialization(buildTrainingType())
                 .build();
 
         when(dao.findById(VALID_ID)).thenReturn(Optional.of(savedTrainer));
@@ -112,7 +111,7 @@ public class TrainerServiceImplTest {
     @Test
     void updateTrainer_shouldThrowException_whenTrainerNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
-        Trainer nonExistent = savedTrainer.toBuilder().userId(NOT_FOUND_ID).build();
+        Trainer nonExistent = buildNonExistentTrainer();
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> service.updateTrainer(nonExistent));
@@ -159,9 +158,43 @@ public class TrainerServiceImplTest {
 
     private Trainer buildTrainer() {
         return Trainer.builder()
+                .user(buildUser())
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .id(VALID_ID)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
-                .specialization(new TrainingType("Yoga"))
+                .username(USERNAME)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
+
+    private User buildSavedUser() {
+        return User.builder()
+                .id(VALID_ID)
+                .username(USERNAME)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder().trainingTypeName("new type").build();
+    }
+
+    private Trainer buildNonExistentTrainer() {
+        User user = User.builder()
+                .id(NOT_FOUND_ID)
+                .build();
+
+        return savedTrainer.toBuilder()
+                .id(NOT_FOUND_ID)
+                .user(user)
                 .build();
     }
 }

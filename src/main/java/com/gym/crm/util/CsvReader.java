@@ -1,4 +1,4 @@
-package com.gym.crm.csv;
+package com.gym.crm.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

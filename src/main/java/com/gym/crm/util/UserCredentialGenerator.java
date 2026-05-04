@@ -2,7 +2,6 @@ package com.gym.crm.util;
 
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
-import com.gym.crm.model.User;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +71,8 @@ public class UserCredentialGenerator {
 
     private Stream<String> getAllUsernames() {
         return Stream.concat(
-                        traineeDAO.findAll().stream().map(User::getUsername),
-                        trainerDAO.findAll().stream().map(User::getUsername)
+                        traineeDAO.findAll().stream().map(trainee -> trainee.getUser().getUsername()),
+                        trainerDAO.findAll().stream().map(trainer ->  trainer.getUser().getUsername())
                 )
                 .filter(Objects::nonNull);
     }

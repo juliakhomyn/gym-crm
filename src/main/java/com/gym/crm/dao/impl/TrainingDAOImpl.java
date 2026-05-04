@@ -1,53 +1,72 @@
 package com.gym.crm.dao.impl;
 
+import com.gym.crm.config.TransactionManager;
+import com.gym.crm.search.criteria.TraineeTrainingCriteriaBuilder;
+import com.gym.crm.search.criteria.TrainerTrainingCriteriaBuilder;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.dao.TrainingDAO;
 import com.gym.crm.model.Training;
-import com.gym.crm.model.enums.StorageNamespace;
-import com.gym.crm.storage.InMemoryStorage;
 import com.gym.crm.util.Validator;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class TrainingDAOImpl implements TrainingDAO {
 
-    @Setter(onMethod_={@Autowired})
-    private InMemoryStorage inMemoryStorage;
+    private final TransactionManager transactionManager;
+    private final TraineeTrainingCriteriaBuilder traineeCriteriaBuilder;
+    private final TrainerTrainingCriteriaBuilder trainerCriteriaBuilder;
 
-    @Override
     public Training save(Training training) {
         Validator.validateNotNull(training, "Training");
 
-        Training toSave = training.getId() == null
-                ? training.toBuilder().id(generateId()).build()
-                : training;
-        trainingStorage().put(toSave.getId(), toSave);
+        transactionManager.performWithinTx(manager -> manager.persist(training));
 
-        return toSave;
+        return training;
     }
 
-    @Override
     public Optional<Training> findById(Long id) {
         Validator.validateId(id);
 
-        return Optional.ofNullable(trainingStorage().get(id));
+        return transactionManager.performReturningWithinTx(manager ->
+                Optional.ofNullable(manager.find(Training.class, id)));
+    }
+
+    public List<Training> findAll() {
+        return transactionManager.performReturningWithinTx(manager -> manager
+                .createQuery("from Training", Training.class)
+                .getResultList()
+        );
     }
 
     @Override
-    public List<Training> findAll() {
-        return trainingStorage().values().stream().toList();
+    public List<Training> findByTraineeCriteria(TraineeTrainingFilter filter) {
+        Validator.validateNotNull(filter, "Filter");
+
+        return transactionManager.performReturningWithinTx(manager -> {
+            CriteriaBuilder cb = manager.getCriteriaBuilder();
+            CriteriaQuery<Training> cq = traineeCriteriaBuilder.build(cb, filter);
+
+            return manager.createQuery(cq).getResultList();
+        });
     }
 
-    private Map<Long, Training> trainingStorage() {
-        return inMemoryStorage.getStorage(StorageNamespace.TRAINING);
-    }
+    @Override
+    public List<Training> findByTrainerCriteria(TrainerTrainingFilter filter) {
+        Validator.validateNotNull(filter, "Filter");
 
-    private long generateId() {
-        return trainingStorage().keySet().stream().max(Long::compareTo).orElse(0L) + 1;
+        return transactionManager.performReturningWithinTx(manager -> {
+            CriteriaBuilder cb = manager.getCriteriaBuilder();
+            CriteriaQuery<Training> cq = trainerCriteriaBuilder.build(cb, filter);
+
+            return manager.createQuery(cq).getResultList();
+        });
     }
 }

@@ -4,6 +4,7 @@ import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
+import com.gym.crm.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +47,7 @@ public class UserCredentialGeneratorTest {
     @Test
     public void generateUsername_shouldReturnUsernameWithSuffix_whenDuplicateExists() {
         Trainee existingTrainee = Trainee.builder()
-                .username(USERNAME)
+                .user(buildUser(USERNAME))
                 .build();
 
         when(traineeDAO.findAll()).thenReturn(List.of(existingTrainee));
@@ -60,10 +61,10 @@ public class UserCredentialGeneratorTest {
     @Test
     public void generateUsername_shouldReturnUsernameWithSuffix2_whenTwoDuplicatesExist() {
         Trainee existingTrainee = Trainee.builder()
-                .username(USERNAME)
+                .user(buildUser(USERNAME))
                 .build();
         Trainer existingTrainer = Trainer.builder()
-                .username(USERNAME_WITH_SUFFIX_1)
+                .user(buildUser(USERNAME_WITH_SUFFIX_1))
                 .build();
 
         when(traineeDAO.findAll()).thenReturn(List.of(existingTrainee));
@@ -92,10 +93,10 @@ public class UserCredentialGeneratorTest {
     @Test
     public void generateUsername_shouldReturnUniqueUsername_whenGapExists() {
         Trainee trainee1 = Trainee.builder()
-                .username(USERNAME)
+                .user(buildUser(USERNAME))
                 .build();
         Trainee trainee3 = Trainee.builder()
-                .username(USERNAME_WITH_SUFFIX_2)
+                .user(buildUser(USERNAME_WITH_SUFFIX_2))
                 .build();
 
         when(traineeDAO.findAll()).thenReturn(List.of(trainee1, trainee3));
@@ -107,4 +108,9 @@ public class UserCredentialGeneratorTest {
         assertNotEquals(USERNAME_WITH_SUFFIX_2, generatedUsername);
     }
 
+    private User buildUser(String username) {
+        return User.builder()
+                .username(username)
+                .build();
+    }
 }

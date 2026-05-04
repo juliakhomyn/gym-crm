@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class TraineeResponseDTO {
-    private final Long userId;
+    private final Long id;
     private final String firstName;
     private final String lastName;
     private final String username;

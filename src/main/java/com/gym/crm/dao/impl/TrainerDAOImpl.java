@@ -1,41 +1,35 @@
 package com.gym.crm.dao.impl;
 
+import com.gym.crm.config.TransactionManager;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.model.Trainer;
-import com.gym.crm.model.enums.StorageNamespace;
-import com.gym.crm.storage.InMemoryStorage;
 import com.gym.crm.util.Validator;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class TrainerDAOImpl implements TrainerDAO {
 
-    @Setter(onMethod_={@Autowired})
-    private InMemoryStorage inMemoryStorage;
+    private final TransactionManager transactionManager;
 
     @Override
     public Trainer save(Trainer trainer) {
         Validator.validateNotNull(trainer, "Trainer");
 
-        Trainer toSave = trainer.getUserId() == null
-                ? trainer.toBuilder().userId(generateId()).build()
-                : trainer;
-        trainerStorage().put(toSave.getUserId(), toSave);
+        transactionManager.performWithinTx(manager -> manager.persist(trainer));
 
-        return toSave;
+        return trainer;
     }
 
     @Override
     public Trainer update(Trainer trainer) {
-        Validator.validateId(trainer.getUserId());
+        Validator.validateId(trainer.getId());
 
-        trainerStorage().put(trainer.getUserId(), trainer);
+        transactionManager.performWithinTx(manager -> manager.merge(trainer));
 
         return trainer;
     }
@@ -44,19 +38,41 @@ public class TrainerDAOImpl implements TrainerDAO {
     public Optional<Trainer> findById(Long id) {
         Validator.validateId(id);
 
-        return Optional.ofNullable(trainerStorage().get(id));
+        return transactionManager.performReturningWithinTx(manager ->
+                Optional.ofNullable(manager.find(Trainer.class, id)));
+    }
+
+    @Override
+    public Optional<Trainer> findByUsername(String username) {
+        Validator.validateNotBlank(username, "Username");
+
+        return transactionManager.performReturningWithinTx(manager ->
+            manager.createQuery("FROM Trainer t JOIN FETCH t.user WHERE t.user.username = :username", Trainer.class)
+                    .setParameter("username", username)
+                    .getResultStream()
+                    .findFirst()
+        );
     }
 
     @Override
     public List<Trainer> findAll() {
-        return trainerStorage().values().stream().toList();
+        return transactionManager.performReturningWithinTx(manager -> manager
+                .createQuery("from Trainer", Trainer.class)
+                .getResultList()
+        );
     }
 
-    private Map<Long, Trainer> trainerStorage() {
-        return inMemoryStorage.getStorage(StorageNamespace.TRAINER);
-    }
+    @Override
+    public List<Trainer> findNotAssignedToTrainee(String traineeUsername) {
+        Validator.validateNotBlank(traineeUsername, "Trainee Username");
 
-    private long generateId() {
-        return trainerStorage().keySet().stream().max(Long::compareTo).orElse(0L) + 1;
+        return transactionManager.performReturningWithinTx(manager ->
+                manager.createQuery("SELECT t FROM Trainer t " +
+                                        "LEFT JOIN t.trainees trn WITH trn.user.username = :username " +
+                                        "WHERE trn IS NULL",
+                            Trainer.class)
+                    .setParameter("username", traineeUsername)
+                    .getResultList()
+        );
     }
 }

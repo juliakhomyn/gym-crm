@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @ToString
 public class TrainerAssignmentUpdateDTO {
-    @NotBlank
+    @NotBlank(message = "Trainee username is required")
     private final String traineeUsername;
 
     @NotEmpty

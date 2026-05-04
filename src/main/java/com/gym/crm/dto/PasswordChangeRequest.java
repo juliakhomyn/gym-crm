@@ -13,7 +13,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class PasswordChangeRequest {
     @NotBlank(message = "Username is required")
-    @Size(min = 5, max = 110, message = "Username must be between 5 and 110 characters long")
+    @Size(min = 3, max = 110, message = "Username must be between 3 and 110 characters long")
     private String username;
 
     @NotBlank(message = "Old password is required")

@@ -159,6 +159,7 @@ public class UserServiceImplTest {
         doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(request);
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
+
         verify(validationService).validate(request);
     }
 
@@ -169,6 +170,7 @@ public class UserServiceImplTest {
         doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(validationService).validate(request);
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
+
         verify(validationService).validate(request);
     }
 
@@ -200,6 +202,7 @@ public class UserServiceImplTest {
     void toggleActive_shouldCallValidationService() {
         User user = buildUser();
         ToggleActiveRequestDTO request = buildToggleActiveRequest();
+
         when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
 
         service.toggleActive(request);
@@ -214,6 +217,7 @@ public class UserServiceImplTest {
         doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(invalidRequest);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidRequest));
+
         assertThat(exception.getMessage()).contains("Username is required");
         verify(validationService).validate(invalidRequest);
     }

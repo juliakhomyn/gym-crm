@@ -2,8 +2,11 @@ package com.gym.crm.service;
 
 import com.gym.crm.dao.TrainingDAO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.model.Trainee;
+import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.model.User;
 import com.gym.crm.service.impl.TrainingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,12 +106,51 @@ public class TrainingServiceImplTest {
 
     private Training buildTraining() {
         return Training.builder()
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
                 .trainingName("Morning Yoga")
-                .trainingType(new TrainingType("Yoga"))
+                .trainingType(buildTrainingType())
                 .trainingDate(LocalDate.of(2026, 4, 4))
                 .trainingDuration(60)
+                .trainee(buildTrainee())
+                .trainer(buildTrainer())
                 .build();
+    }
+
+    private Trainer buildTrainer() {
+        User user = User.builder()
+                .id(1L)
+                .firstName("Callum")
+                .lastName("Whitfield")
+                .username("Callum.Whitfield")
+                .password("pass111")
+                .isActive(true)
+                .build();
+
+        return Trainer.builder()
+                .id(1L)
+                .user(user)
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    private Trainee buildTrainee() {
+        User user = User.builder()
+                .id(2L)
+                .firstName("Nora")
+                .lastName("Pemberton")
+                .username("Nora.Pemberton")
+                .password("pass222")
+                .isActive(true)
+                .build();
+
+        return Trainee.builder()
+                .id(1L)
+                .user(user)
+                .dateOfBirth(LocalDate.of(2000, 3, 10))
+                .address("123 Main St")
+                .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder().trainingTypeName("Yoga").build();
     }
 }

@@ -1,6 +1,5 @@
 package com.gym.crm.config;
 
-import com.gym.crm.storage.StorageInitializer;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +15,6 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan(basePackages = "com.gym.crm",
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = StorageInitializer.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AppConfig.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class),
         }

@@ -15,6 +15,7 @@ import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.model.User;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
@@ -92,12 +93,7 @@ public class GymFacadeTest {
 
     @Test
     void createTrainee_shouldSaveAndReturnResponseDTO() {
-        Trainee saved = trainee.toBuilder()
-                .userId(VALID_ID)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .isActive(true)
-                .build();
+        Trainee saved = buildSavedTrainee();
 
         when(traineeMapper.toEntity(traineeRequestDTO)).thenReturn(trainee);
         when(traineeService.createTrainee(trainee)).thenReturn(saved);
@@ -113,12 +109,7 @@ public class GymFacadeTest {
 
     @Test
     void updateTrainee_shouldSaveAndReturnResponseDTO() {
-        Trainee saved = trainee.toBuilder()
-                .userId(VALID_ID)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .isActive(true)
-                .build();
+        Trainee saved = buildSavedTrainee();
 
         when(traineeMapper.toEntity(traineeUpdateDTO)).thenReturn(saved);
         when(traineeService.updateTrainee(saved)).thenReturn(saved);
@@ -176,12 +167,7 @@ public class GymFacadeTest {
 
     @Test
     void createTrainer_shouldSaveAndReturnResponseDTO() {
-        Trainer saved = trainer.toBuilder()
-                .userId(2L)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .isActive(true)
-                .build();
+        Trainer saved = buildSavedTrainer();
 
         when(trainerMapper.toEntity(trainerRequestDTO)).thenReturn(trainer);
         when(trainerService.createTrainer(trainer)).thenReturn(saved);
@@ -197,12 +183,7 @@ public class GymFacadeTest {
 
     @Test
     void updateTrainer_shouldSaveAndReturnResponseDTO() {
-        Trainer saved = trainer.toBuilder()
-                .userId(2L)
-                .username(USERNAME)
-                .password(PASSWORD)
-                .isActive(true)
-                .build();
+        Trainer saved = buildSavedTrainer();
 
         when(trainerMapper.toEntity(trainerUpdateDTO)).thenReturn(saved);
         when(trainerService.updateTrainer(any(Trainer.class))).thenReturn(saved);
@@ -303,8 +284,7 @@ public class GymFacadeTest {
 
     private Trainee buildTrainee() {
         return Trainee.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .user(buildUser())
                 .dateOfBirth(LocalDate.of(1980, 1, 1))
                 .address("123 Oak St")
                 .build();
@@ -326,7 +306,7 @@ public class GymFacadeTest {
 
     private TraineeResponseDTO buildTraineeResponseDTO() {
         return TraineeResponseDTO.builder()
-                .userId(VALID_ID)
+                .id(VALID_ID)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
                 .username(USERNAME)
@@ -336,9 +316,8 @@ public class GymFacadeTest {
 
     private Trainer buildTrainer() {
         return Trainer.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .specialization(new TrainingType(TRAINING_TYPE_NAME))
+                .user(buildUser())
+                .specialization(buildTrainingType())
                 .build();
     }
 
@@ -358,7 +337,7 @@ public class GymFacadeTest {
 
     private TrainerResponseDTO buildTrainerResponseDTO() {
         return TrainerResponseDTO.builder()
-                .userId(2L)
+                .id(2L)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
                 .username(USERNAME)
@@ -369,12 +348,12 @@ public class GymFacadeTest {
     private Training buildTraining() {
         return Training.builder()
                 .id(VALID_ID)
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
                 .trainingName(TRAINING_NAME)
-                .trainingType(new TrainingType(TRAINING_TYPE_NAME))
+                .trainingType(buildTrainingType())
                 .trainingDate(LocalDate.of(2024, 1, 15))
                 .trainingDuration(60)
+                .trainee(buildTrainee())
+                .trainer(buildTrainer())
                 .build();
     }
 
@@ -399,5 +378,42 @@ public class GymFacadeTest {
                 .trainingDate(LocalDate.of(2024, 1, 15))
                 .trainingDuration(60)
                 .build();
+    }
+
+    private Trainee buildSavedTrainee() {
+        User user =  User.builder()
+                .id(VALID_ID)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .isActive(true)
+                .build();
+
+        return trainee.toBuilder()
+                .user(user)
+                .build();
+    }
+
+    private Trainer buildSavedTrainer() {
+        User user =  User.builder()
+                .id(2L)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .isActive(true)
+                .build();
+
+        return trainer.toBuilder()
+                .user(user)
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder().trainingTypeName(TRAINING_TYPE_NAME).build();
     }
 }

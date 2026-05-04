@@ -2,7 +2,7 @@ package com.gym.crm.dao.impl;
 
 import com.gym.crm.config.TransactionManager;
 import com.gym.crm.dao.TrainingTypeDAO;
-import com.gym.crm.entity.TrainingType;
+import com.gym.crm.model.TrainingType;
 import com.gym.crm.util.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class TrainingTypeHibernateDAOImpl implements TrainingTypeDAO {
+public class TrainingTypeDAOImpl implements TrainingTypeDAO {
 
     private final TransactionManager transactionManager;
 

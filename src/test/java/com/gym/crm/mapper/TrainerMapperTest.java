@@ -5,6 +5,7 @@ import com.gym.crm.dto.TrainerResponseDTO;
 import com.gym.crm.dto.TrainerUpdateDTO;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.model.User;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -26,8 +27,8 @@ public class TrainerMapperTest {
 
         Trainer entity = mapper.toEntity(trainerRequestDTO);
 
-        assertEquals(FIRST_NAME, entity.getFirstName());
-        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(FIRST_NAME, entity.getUser().getFirstName());
+        assertEquals(LAST_NAME, entity.getUser().getLastName());
         assertEquals(TRAINING_TYPE_NAME, entity.getSpecialization().getTrainingTypeName());
     }
 
@@ -37,12 +38,12 @@ public class TrainerMapperTest {
 
         Trainer entity = mapper.toEntity(trainerUpdateDTO);
 
-        assertEquals(USERNAME, entity.getUsername());
-        assertEquals(PASSWORD, entity.getPassword());
-        assertEquals(FIRST_NAME, entity.getFirstName());
-        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(USERNAME, entity.getUser().getUsername());
+        assertEquals(PASSWORD, entity.getUser().getPassword());
+        assertEquals(FIRST_NAME, entity.getUser().getFirstName());
+        assertEquals(LAST_NAME, entity.getUser().getLastName());
         assertEquals(TRAINING_TYPE_NAME, entity.getSpecialization().getTrainingTypeName());
-        assertEquals(true, entity.getIsActive());
+        assertEquals(true, entity.getUser().getIsActive());
     }
 
     @Test
@@ -90,13 +91,23 @@ public class TrainerMapperTest {
 
     private Trainer buildTrainer() {
         return Trainer.builder()
-                .userId(1L)
+                .user(buildUser())
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .id(1L)
                 .username(USERNAME)
                 .password(PASSWORD)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
-                .specialization(new TrainingType(TRAINING_TYPE_NAME))
                 .isActive(true)
                 .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder().trainingTypeName(TRAINING_TYPE_NAME).build();
     }
 }

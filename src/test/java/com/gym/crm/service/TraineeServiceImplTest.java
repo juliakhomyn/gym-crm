@@ -7,6 +7,7 @@ import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.Trainee;
+import com.gym.crm.model.User;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.AfterEach;
@@ -64,10 +65,8 @@ public class TraineeServiceImplTest {
         trainee = buildTrainee();
 
         savedTrainee = trainee.toBuilder()
-                .userId(VALID_ID)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
+                .id(VALID_ID)
+                .user(buildSavedUser())
                 .build();
 
         Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
@@ -91,9 +90,9 @@ public class TraineeServiceImplTest {
 
         Trainee actual = service.createTrainee(trainee);
 
-        assertEquals(USERNAME, actual.getUsername());
-        assertEquals(ENCODED_PASSWORD, actual.getPassword());
-        assertTrue(actual.getIsActive());
+        assertEquals(USERNAME, actual.getUser().getUsername());
+        assertEquals(ENCODED_PASSWORD, actual.getUser().getPassword());
+        assertTrue(actual.getUser().getIsActive());
         verify(dao).save(any(Trainee.class));
     }
 
@@ -128,7 +127,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeNotFound() {
-        Trainee nonExistent = savedTrainee.toBuilder().userId(NOT_FOUND_ID).build();
+        Trainee nonExistent = buildNonExistentTrainee();
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainee(nonExistent));
@@ -207,10 +206,38 @@ public class TraineeServiceImplTest {
 
     private Trainee buildTrainee() {
         return Trainee.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .user(buildUser())
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("123 Main St")
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .id(VALID_ID)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
+
+    private User buildSavedUser() {
+        return User.builder()
+                .id(VALID_ID)
+                .username(USERNAME)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
+
+    private Trainee buildNonExistentTrainee() {
+        User user = User.builder().id(NOT_FOUND_ID).build();
+
+        return savedTrainee.toBuilder()
+                .id(NOT_FOUND_ID)
+                .user(user)
                 .build();
     }
 }

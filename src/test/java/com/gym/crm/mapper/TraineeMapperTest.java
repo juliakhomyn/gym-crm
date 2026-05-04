@@ -4,6 +4,7 @@ import com.gym.crm.dto.TraineeRequestDTO;
 import com.gym.crm.dto.TraineeResponseDTO;
 import com.gym.crm.dto.TraineeUpdateDTO;
 import com.gym.crm.model.Trainee;
+import com.gym.crm.model.User;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -27,8 +28,8 @@ public class TraineeMapperTest {
 
         Trainee entity = mapper.toEntity(traineeRequestDTO);
 
-        assertEquals(FIRST_NAME, entity.getFirstName());
-        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(FIRST_NAME, entity.getUser().getFirstName());
+        assertEquals(LAST_NAME, entity.getUser().getLastName());
         assertEquals(DATE_OF_BIRTH, entity.getDateOfBirth());
         assertEquals(ADDRESS, entity.getAddress());
     }
@@ -39,13 +40,13 @@ public class TraineeMapperTest {
 
         Trainee entity = mapper.toEntity(traineeUpdateDTO);
 
-        assertEquals(USERNAME, entity.getUsername());
-        assertEquals(PASSWORD, entity.getPassword());
-        assertEquals(FIRST_NAME, entity.getFirstName());
-        assertEquals(LAST_NAME, entity.getLastName());
+        assertEquals(USERNAME, entity.getUser().getUsername());
+        assertEquals(PASSWORD, entity.getUser().getPassword());
+        assertEquals(FIRST_NAME, entity.getUser().getFirstName());
+        assertEquals(LAST_NAME, entity.getUser().getLastName());
         assertEquals(DATE_OF_BIRTH, entity.getDateOfBirth());
         assertEquals(ADDRESS, entity.getAddress());
-        assertEquals(true, entity.getIsActive());
+        assertEquals(true, entity.getUser().getIsActive());
     }
 
     @Test
@@ -86,13 +87,19 @@ public class TraineeMapperTest {
 
     private Trainee buildTrainee() {
         return Trainee.builder()
-                .userId(1L)
+                .user(buildUser())
+                .dateOfBirth(DATE_OF_BIRTH)
+                .address(ADDRESS)
+                .build();
+    }
+
+    private User buildUser() {
+        return User.builder()
+                .id(1L)
                 .username(USERNAME)
                 .password(PASSWORD)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
-                .dateOfBirth(DATE_OF_BIRTH)
-                .address(ADDRESS)
                 .isActive(true)
                 .build();
     }

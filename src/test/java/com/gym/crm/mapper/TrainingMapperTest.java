@@ -2,6 +2,8 @@ package com.gym.crm.mapper;
 
 import com.gym.crm.dto.TrainingRequestDTO;
 import com.gym.crm.dto.TrainingResponseDTO;
+import com.gym.crm.model.Trainee;
+import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import org.junit.jupiter.api.Test;
@@ -26,8 +28,8 @@ public class TrainingMapperTest {
 
         Training training = mapper.toEntity(trainingRequestDTO);
 
-        assertEquals(VALID_ID, training.getTraineeId());
-        assertEquals(VALID_ID, training.getTrainerId());
+        assertEquals(VALID_ID, training.getTrainee().getId());
+        assertEquals(VALID_ID, training.getTrainer().getId());
         assertEquals(TRAINING_NAME, training.getTrainingName());
         assertEquals(TRAINING_TYPE_NAME, training.getTrainingType().getTrainingTypeName());
         assertEquals(TRAINING_DATE, training.getTrainingDate());
@@ -60,14 +62,24 @@ public class TrainingMapperTest {
     }
     
     private Training buildTraining() {
+        Trainee trainee = Trainee.builder().id(VALID_ID).build();
+        Trainer trainer = Trainer.builder().id(VALID_ID).build();
+
         return Training.builder()
                 .id(VALID_ID)
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
                 .trainingName(TRAINING_NAME)
-                .trainingType(new TrainingType(TRAINING_TYPE_NAME))
+                .trainingType(buildTrainingType())
                 .trainingDate(TRAINING_DATE)
                 .trainingDuration(TRAINING_DURATION)
+                .trainee(trainee)
+                .trainer(trainer)
+                .build();
+    }
+
+    private TrainingType buildTrainingType() {
+        return TrainingType.builder()
+                .id(1L)
+                .trainingTypeName(TRAINING_TYPE_NAME)
                 .build();
     }
 }

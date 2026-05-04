@@ -1,4 +1,4 @@
-package com.gym.crm.csv;
+package com.gym.crm.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

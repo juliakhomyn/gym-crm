@@ -24,7 +24,7 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public Training createTraining(Training training) {
         Validator.validateNotNull(training, TRAINING);
-        log.info("Creating training: trainingName={}, traineeId={}, trainerId={}", training.getTrainingName(), training.getTraineeId(), training.getTrainerId());
+        log.info("Creating training: trainingName={}, traineeId={}, trainerId={}", training.getTrainingName(), training.getTrainee().getId(), training.getTrainer().getId());
 
         Training saved = dao.save(training);
         log.info("Training created successfully: id={}", saved.getId());

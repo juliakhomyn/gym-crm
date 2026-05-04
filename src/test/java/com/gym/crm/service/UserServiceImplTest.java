@@ -41,7 +41,6 @@ public class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl service;
 
-    private User user;
     private User savedUser;
 
     @BeforeEach

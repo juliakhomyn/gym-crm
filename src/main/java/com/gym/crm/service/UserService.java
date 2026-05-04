@@ -1,5 +1,7 @@
 package com.gym.crm.service;
 
+import com.gym.crm.dto.PasswordChangeRequest;
+import com.gym.crm.dto.ToggleActiveRequestDTO;
 import com.gym.crm.model.User;
 
 import java.util.List;
@@ -11,7 +13,7 @@ public interface UserService {
 
     List<User> getAll();
 
-    void changePassword(String username, String oldPassword, String newPassword);
+    void changePassword(PasswordChangeRequest request);
 
-    void toggleActive(String username);
+    void toggleActive(ToggleActiveRequestDTO request);
 }

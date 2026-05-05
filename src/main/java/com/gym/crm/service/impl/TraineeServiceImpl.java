@@ -13,7 +13,7 @@ import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
 import com.gym.crm.service.TraineeService;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.util.UserCredentialGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,12 +38,12 @@ public class TraineeServiceImpl implements TraineeService {
     private TrainerDAO trainerDAO;
     private UserCredentialGenerator userCredentialGenerator;
     private PasswordEncoder passwordEncoder;
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
     private TraineeMapper mapper;
 
     @Override
     public TraineeResponseDTO createTrainee(@Valid TraineeRequestDTO request) {
-        validationService.validate(request, TRAINEE);
+        userInputValidator.validate(request, TRAINEE);
 
         log.info("Creating trainee: firstName={} lastName{}", request.getFirstName(), request.getLastName());
 
@@ -68,7 +68,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public TraineeResponseDTO updateTrainee(@Valid TraineeUpdateDTO request) {
-        validationService.validate(request, TRAINEE);
+        userInputValidator.validate(request, TRAINEE);
 
         Trainee trainee = mapper.toEntity(request);
 
@@ -83,7 +83,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public void deleteTraineeById(Long id) {
-        validationService.validateId(id);
+        userInputValidator.validateId(id);
 
         log.info("Deleting trainee by id: id={}", id);
         getTraineeById(id);
@@ -94,7 +94,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public void deleteByUsername(String username) {
-        validationService.validateUsername(username);
+        userInputValidator.validateUsername(username);
 
         log.info("Deleting trainee by username: username={}", username);
         getTraineeByUsername(username);
@@ -106,7 +106,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public TraineeInfoDTO getTraineeById(Long id) {
         log.info("Getting trainee by id: id={}", id);
-        validationService.validateId(id);
+        userInputValidator.validateId(id);
 
         Trainee trainee = dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_ID, id)));
@@ -117,7 +117,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public TraineeInfoDTO getTraineeByUsername(String username) {
         log.info("Getting trainee by username: username={}", username);
-        validationService.validateUsername(username);
+        userInputValidator.validateUsername(username);
 
         Trainee trainee = dao.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, username)));
@@ -131,13 +131,13 @@ public class TraineeServiceImpl implements TraineeService {
 
         return dao.findAll()
                 .stream()
-                .map(t -> mapper.toInfoDto(t))
+                .map(mapper::toInfoDto)
                 .toList();
     }
 
     @Override
     public void updateTrainersList(@Valid TrainerAssignmentUpdateDTO dto) {
-        validationService.validate(dto, "Trainer assignment");
+        userInputValidator.validate(dto, "Trainer assignment");
 
         log.info("Updating trainers list for trainee: username={}, trainers' usernames={}", dto.getTraineeUsername(), dto.getTrainerUsernames());
         List<Trainer> trainers = dto.getTrainerUsernames().stream()

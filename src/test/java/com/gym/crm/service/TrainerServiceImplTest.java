@@ -11,7 +11,7 @@ import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.TrainerServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ public class TrainerServiceImplTest {
     @Mock
     private TrainerMapper mapper;
     @Mock
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
 
     @InjectMocks
     private TrainerServiceImpl service;
@@ -100,7 +100,7 @@ public class TrainerServiceImplTest {
         TrainerResponseDTO actual = service.createTrainer(request);
 
         assertThat(actual).isEqualTo(response);
-        verify(validationService).validate(request, "Trainer");
+        verify(userInputValidator).validate(request, "Trainer");
         verify(mapper).toEntity(request);
         verify(userCredentialGenerator).generateUsername(FIRST_NAME, LAST_NAME);
         verify(userCredentialGenerator).generatePassword();
@@ -111,7 +111,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void createTrainer_shouldThrowException_whenTrainerIsNull() {
-        doThrow(new ValidationFailedException(TRAINER_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainer");
+        doThrow(new ValidationFailedException(TRAINER_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Trainer");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainer(null));
 
@@ -135,7 +135,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void updateTrainer_shouldThrowException_whenTrainerIsNull() {
-        doThrow(new ValidationFailedException(TRAINER_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainer");
+        doThrow(new ValidationFailedException(TRAINER_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Trainer");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainer(null));
 
@@ -175,7 +175,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void getTrainerById_shouldThrow_whenIdIsNull() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(userInputValidator).validateId(null);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainerById(null));
 
@@ -184,7 +184,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void getTrainerById_shouldThrow_whenIdIsNegative() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(userInputValidator).validateId(INVALID_ID);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainerById(INVALID_ID));
 
@@ -214,7 +214,7 @@ public class TrainerServiceImplTest {
 
     @Test
     void getTrainerByUsername_shouldThrowException_whenUsernameIsBlank() {
-        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(userInputValidator).validateUsername(BLANK_USERNAME);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainerByUsername(BLANK_USERNAME));
 
@@ -257,7 +257,7 @@ public class TrainerServiceImplTest {
         assertThat(actual)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(trainerInfoDTO1, trainerInfoDTO2);
-        verify(validationService).validateUsername(USERNAME);
+        verify(userInputValidator).validateUsername(USERNAME);
         verify(dao).findNotAssignedToTrainee(USERNAME);
         verify(mapper).toInfoDto(trainer1);
         verify(mapper).toInfoDto(trainer2);
@@ -270,19 +270,19 @@ public class TrainerServiceImplTest {
         List<TrainerInfoDTO> actual = service.getNotAssignedToTrainee(USERNAME);
 
         assertThat(actual).isEmpty();
-        verify(validationService).validateUsername(USERNAME);
+        verify(userInputValidator).validateUsername(USERNAME);
         verify(dao).findNotAssignedToTrainee(USERNAME);
         verify(mapper, never()).toInfoDto(any());
     }
 
     @Test
     void getNotAssignedToTrainee_shouldThrow_whenUsernameIsInvalid() {
-        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(userInputValidator).validateUsername(BLANK_USERNAME);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getNotAssignedToTrainee(BLANK_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
-        verify(validationService).validateUsername(BLANK_USERNAME);
+        verify(userInputValidator).validateUsername(BLANK_USERNAME);
         verify(dao, never()).findNotAssignedToTrainee(any());
         verify(mapper, never()).toInfoDto(any());
     }

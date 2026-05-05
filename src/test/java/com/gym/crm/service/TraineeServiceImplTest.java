@@ -17,7 +17,7 @@ import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.AfterEach;
@@ -75,7 +75,7 @@ public class TraineeServiceImplTest {
     @Mock
     private TraineeMapper mapper;
     @Mock
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
     @Mock
     private TrainerDAO trainerDAO;
 
@@ -126,7 +126,7 @@ public class TraineeServiceImplTest {
         TraineeResponseDTO actual = service.createTrainee(request);
 
         assertThat(actual).isEqualTo(response);
-        verify(validationService).validate(request, "Trainee");
+        verify(userInputValidator).validate(request, "Trainee");
         verify(mapper).toEntity(request);
         verify(userCredentialGenerator).generateUsername(FIRST_NAME, LAST_NAME);
         verify(userCredentialGenerator).generatePassword();
@@ -138,7 +138,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void createTrainee_shouldThrowException_whenTraineeIsNull() {
-        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainee");
+        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Trainee");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainee(null));
 
@@ -162,7 +162,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeIsNull() {
-        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainee");
+        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Trainee");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.updateTrainee(null));
 
@@ -202,7 +202,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void deleteTraineeById_shouldThrow_whenIdIsNull() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(userInputValidator).validateId(null);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteTraineeById(null));
 
@@ -212,7 +212,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void deleteTraineeById_shouldThrow_whenIdIsInvalid() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(userInputValidator).validateId(INVALID_ID);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteTraineeById(INVALID_ID));
 
@@ -231,7 +231,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void deleteByUsername_shouldThrow_whenUsernameIsNull() {
-        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(null);
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(userInputValidator).validateUsername(null);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteByUsername(null));
 
@@ -241,7 +241,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void deleteByUsername_shouldThrow_whenUsernameIsBlank() {
-        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(userInputValidator).validateUsername(BLANK_USERNAME);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteByUsername(BLANK_USERNAME));
 
@@ -280,7 +280,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void getTraineeById_shouldThrow_whenIdIsNull() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(userInputValidator).validateId(null);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeById(null));
 
@@ -289,7 +289,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void getTraineeById_shouldThrow_whenIdIsNegative() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(userInputValidator).validateId(INVALID_ID);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeById(INVALID_ID));
 
@@ -319,7 +319,7 @@ public class TraineeServiceImplTest {
 
     @Test
     void getTraineeByUsername_shouldThrowException_whenUsernameIsBlank() {
-        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(userInputValidator).validateUsername(BLANK_USERNAME);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeByUsername(BLANK_USERNAME));
 
@@ -375,7 +375,7 @@ public class TraineeServiceImplTest {
 
         service.updateTrainersList(dto);
 
-        verify(validationService).validate(dto, "Trainer assignment");
+        verify(userInputValidator).validate(dto, "Trainer assignment");
         verify(trainerDAO).findByUsername("trainer1");
         verify(trainerDAO).findByUsername("trainer2");
 
@@ -394,7 +394,7 @@ public class TraineeServiceImplTest {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainersList(dto));
 
         assertThat(exception.getMessage()).contains("Trainer not found by username: trainer1");
-        verify(validationService).validate(dto, "Trainer assignment");
+        verify(userInputValidator).validate(dto, "Trainer assignment");
         verify(trainerDAO).findByUsername("trainer1");
         verify(dao, never()).updateTrainersList(anyString(), anyList());
     }
@@ -410,7 +410,7 @@ public class TraineeServiceImplTest {
 
         service.updateTrainersList(dto);
 
-        verify(validationService).validate(dto, "Trainer assignment");
+        verify(userInputValidator).validate(dto, "Trainer assignment");
     }
 
     private Trainee buildTrainee() {

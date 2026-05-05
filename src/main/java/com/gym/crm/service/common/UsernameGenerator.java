@@ -1,7 +1,6 @@
 package com.gym.crm.service.common;
 
 import com.gym.crm.dao.UserDAO;
-import com.gym.crm.util.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

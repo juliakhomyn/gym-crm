@@ -62,17 +62,12 @@ public class TrainingServiceImplTest {
     private TrainingMapper mapper;
     @Mock
     private ValidationService validationService;
-    @Mock
-    private TraineeTrainingCriteriaBuilder traineeCriteriaBuilder;
-    @Mock
-    private TrainerTrainingCriteriaBuilder trainerCriteriaBuilder;
 
     @InjectMocks
     private TrainingServiceImpl service;
 
     private Trainee trainee;
     private Trainer trainer;
-    private Training training;
     private Training savedTraining;
     private TrainingRequestDTO request;
     private TrainingResponseDTO response;
@@ -81,8 +76,7 @@ public class TrainingServiceImplTest {
     void setUp() {
         trainee = buildTrainee();
         trainer = buildTrainer();
-        training = buildTraining();
-        savedTraining = training.toBuilder()
+        savedTraining = buildTraining().toBuilder()
                 .id(VALID_ID)
                 .build();
         request = buildTrainingRequestDTO();

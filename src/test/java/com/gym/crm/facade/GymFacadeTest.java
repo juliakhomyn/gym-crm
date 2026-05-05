@@ -38,7 +38,6 @@ public class GymFacadeTest {
     private static final String FIRST_NAME = "Simone";
     private static final String LAST_NAME = "Radcliffe";
     private static final String USERNAME = "Simone.Radcliffe";
-    private static final String PASSWORD = "encodedPassword";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final long VALID_ID = 1L;

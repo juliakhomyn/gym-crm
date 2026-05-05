@@ -1,4 +1,4 @@
-package com.gym.crm.service.helper;
+package com.gym.crm.service.common;
 
 import com.gym.crm.dao.UserDAO;
 import com.gym.crm.util.Validator;
@@ -15,10 +15,11 @@ public class UsernameGenerator {
     private static final String SEPARATOR = ".";
 
     private final UserDAO dao;
+    private final UserInputValidator validator;
 
     public String generateUsername(String firstName, String lastName) {
-        Validator.validateNotBlank(firstName, FIRST_NAME);
-        Validator.validateNotBlank(lastName, LAST_NAME);
+        validator.validateNotBlank(firstName, FIRST_NAME);
+        validator.validateNotBlank(lastName, LAST_NAME);
 
         String baseUsername = (firstName + SEPARATOR + lastName);
 

@@ -1,7 +1,5 @@
 package com.gym.crm.service.common;
 
-import com.gym.crm.service.helper.PasswordGenerator;
-import com.gym.crm.service.helper.UsernameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

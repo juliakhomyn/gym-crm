@@ -1,8 +1,8 @@
 package com.gym.crm.service;
 
 import com.gym.crm.dao.UserDAO;
-import com.gym.crm.dto.PasswordChangeRequest;
-import com.gym.crm.dto.ToggleActiveRequestDTO;
+import com.gym.crm.dto.common.PasswordChangeRequest;
+import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
@@ -89,8 +89,7 @@ public class UserServiceImplTest {
     void getByUsername_shouldThrowException_whenUserNotFound() {
         when(dao.findByUsername(NON_EXISTENT_USERNAME)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.getByUsername(NON_EXISTENT_USERNAME));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getByUsername(NON_EXISTENT_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
     }
@@ -149,29 +148,29 @@ public class UserServiceImplTest {
 
         service.changePassword(request);
 
-        verify(validationService).validate(request);
+        verify(validationService).validate(request, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenUsernameIsBlank() {
         PasswordChangeRequest request = buildPasswordChangeRequestBlankUsername();
 
-        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(request);
+        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(request, "Password change request");
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
 
-        verify(validationService).validate(request);
+        verify(validationService).validate(request, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenNewPasswordTooShort() {
         PasswordChangeRequest request = buildPasswordChangeRequestShortNewPassword();
 
-        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(validationService).validate(request);
+        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(validationService).validate(request, "Password change request");
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
 
-        verify(validationService).validate(request);
+        verify(validationService).validate(request, "Password change request");
     }
 
     @Test
@@ -207,19 +206,19 @@ public class UserServiceImplTest {
 
         service.toggleActive(request);
 
-        verify(validationService).validate(request);
+        verify(validationService).validate(request,  "Toggle active request");
     }
 
     @Test
     void toggleActive_shouldThrowValidationException_whenUsernameIsBlank() {
         ToggleActiveRequestDTO invalidRequest = buildInvalidToggleActiveRequest();
 
-        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(invalidRequest);
+        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(invalidRequest, "Toggle active request");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidRequest));
 
         assertThat(exception.getMessage()).contains("Username is required");
-        verify(validationService).validate(invalidRequest);
+        verify(validationService).validate(invalidRequest, "Toggle active request");
     }
 
     private User buildUser() {

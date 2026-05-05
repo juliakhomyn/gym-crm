@@ -1,15 +1,20 @@
 package com.gym.crm.service.impl;
 
 import com.gym.crm.dao.TrainerDAO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
 import com.gym.crm.service.TrainerService;
+import com.gym.crm.service.common.ValidationService;
 import com.gym.crm.util.UserCredentialGenerator;
-import com.gym.crm.util.Validator;
-import lombok.Setter;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,26 +22,26 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
     private static final String TRAINER_NOT_FOUND_BY_ID = "Trainer not found by id: %s";
+    private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINER = "Trainer";
 
-    @Setter(onMethod_={@Autowired})
     private TrainerDAO dao;
-
-    @Setter(onMethod_={@Autowired})
     private UserCredentialGenerator userCredentialGenerator;
-
-    @Setter(onMethod_={@Autowired})
     private PasswordEncoder passwordEncoder;
+    private ValidationService validationService;
+    private TrainerMapper mapper;
 
     @Override
-    public Trainer createTrainer(Trainer trainer) {
-        Validator.validateNotNull(trainer, TRAINER);
+    public TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO request) {
+        validationService.validate(request, TRAINER);
 
-        log.info("Creating trainer: firstName={} lastName{}", trainer.getUser().getFirstName(), trainer.getUser().getLastName());
+        log.info("Creating trainer: firstName={} lastName{}", request.getFirstName(), request.getLastName());
 
-        String username = userCredentialGenerator.generateUsername(trainer.getUser().getFirstName(), trainer.getUser().getLastName());
+        Trainer trainer = mapper.toEntity(request);
+        String username = userCredentialGenerator.generateUsername(request.getFirstName(), request.getLastName());
         String rawPassword = userCredentialGenerator.generatePassword();
 
         User user = trainer.getUser().toBuilder()
@@ -51,12 +56,14 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer saved = dao.save(withCredentials);
         log.info("Trainer created successfully: username={}", saved.getUser().getUsername());
 
-        return saved;
+        return mapper.toDto(saved);
     }
 
     @Override
-    public Trainer updateTrainer(Trainer trainer) {
-        Validator.validateNotNull(trainer, TRAINER);
+    public TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO request) {
+        validationService.validate(request, "Trainer");
+
+        Trainer trainer = mapper.toEntity(request);
 
         log.info("Updating trainer: id={}", trainer.getId());
         getTrainerById(trainer.getId());
@@ -64,17 +71,49 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer updated = dao.update(trainer);
         log.info("Trainer updated successfully: id={}", updated.getId());
 
-        return updated;
+        return mapper.toDto(updated);
     }
 
     @Override
-    public Trainer getTrainerById(Long id) {
-        return dao.findById(id)
+    public TrainerInfoDTO getTrainerById(Long id) {
+        log.info("Getting trainer by id: id={}", id);
+        validationService.validateId(id);
+
+        Trainer trainer = dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_ID, id)));
+
+        return mapper.toInfoDto(trainer);
     }
 
     @Override
-    public List<Trainer> getAllTrainers() {
-        return dao.findAll();
+    public TrainerInfoDTO getTrainerByUsername(String username) {
+        log.info("Getting trainer by username: username={}", username);
+        validationService.validateUsername(username);
+
+        Trainer trainer = dao.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, username)));
+
+        return mapper.toInfoDto(trainer);
+    }
+
+    @Override
+    public List<TrainerInfoDTO> getAllTrainers() {
+        log.info("Getting all trainers");
+
+        return dao.findAll()
+                .stream()
+                .map(t -> mapper.toInfoDto(t))
+                .toList();
+    }
+
+    @Override
+    public List<TrainerInfoDTO> getNotAssignedToTrainee(String traineeUsername) {
+        validationService.validateUsername(traineeUsername);
+
+        log.info("Getting all trainers not assigned to trainee: username={}", traineeUsername);
+
+        return dao.findNotAssignedToTrainee(traineeUsername).stream()
+                .map(t -> mapper.toInfoDto(t))
+                .toList();
     }
 }

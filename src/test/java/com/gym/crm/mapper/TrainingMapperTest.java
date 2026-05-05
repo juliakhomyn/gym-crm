@@ -1,11 +1,12 @@
 package com.gym.crm.mapper;
 
-import com.gym.crm.dto.TrainingRequestDTO;
-import com.gym.crm.dto.TrainingResponseDTO;
+import com.gym.crm.dto.training.TrainingRequestDTO;
+import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.model.User;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -14,6 +15,8 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TrainingMapperTest {
+    private static final String TRAINEE_USERNAME = "Trainee.Username";
+    private static final String TRAINER_USERNAME = "Trainer.Username";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final LocalDate TRAINING_DATE = LocalDate.of(2026, 4, 4);
@@ -28,8 +31,6 @@ public class TrainingMapperTest {
 
         Training training = mapper.toEntity(trainingRequestDTO);
 
-        assertEquals(VALID_ID, training.getTrainee().getId());
-        assertEquals(VALID_ID, training.getTrainer().getId());
         assertEquals(TRAINING_NAME, training.getTrainingName());
         assertEquals(TRAINING_TYPE_NAME, training.getTrainingType().getTrainingTypeName());
         assertEquals(TRAINING_DATE, training.getTrainingDate());
@@ -42,8 +43,8 @@ public class TrainingMapperTest {
 
         TrainingResponseDTO trainingResponseDTO = mapper.toDto(training);
 
-        assertEquals(VALID_ID, trainingResponseDTO.getTraineeId());
-        assertEquals(VALID_ID, trainingResponseDTO.getTrainerId());
+        assertEquals(TRAINEE_USERNAME, trainingResponseDTO.getTraineeUsername());
+        assertEquals(TRAINER_USERNAME, trainingResponseDTO.getTrainerUsername());
         assertEquals(TRAINING_NAME, trainingResponseDTO.getTrainingName());
         assertEquals(TRAINING_TYPE_NAME, trainingResponseDTO.getTrainingTypeName());
         assertEquals(TRAINING_DATE, trainingResponseDTO.getTrainingDate());
@@ -52,8 +53,8 @@ public class TrainingMapperTest {
     
     private TrainingRequestDTO buildTrainingRequestDTO() {
         return TrainingRequestDTO.builder()
-                .traineeId(VALID_ID)
-                .trainerId(VALID_ID)
+                .traineeUsername(TRAINEE_USERNAME)
+                .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
                 .trainingTypeName(TRAINING_TYPE_NAME)
                 .trainingDate(TRAINING_DATE)
@@ -62,8 +63,11 @@ public class TrainingMapperTest {
     }
     
     private Training buildTraining() {
-        Trainee trainee = Trainee.builder().id(VALID_ID).build();
-        Trainer trainer = Trainer.builder().id(VALID_ID).build();
+        User traineeUser = User.builder().username(TRAINEE_USERNAME).build();
+        User trainerUser = User.builder().username(TRAINER_USERNAME).build();
+
+        Trainee trainee = Trainee.builder().id(VALID_ID).user(traineeUser).build();
+        Trainer trainer = Trainer.builder().id(VALID_ID).user(trainerUser).build();
 
         return Training.builder()
                 .id(VALID_ID)

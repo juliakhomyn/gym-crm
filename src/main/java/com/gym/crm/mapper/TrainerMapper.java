@@ -1,8 +1,9 @@
 package com.gym.crm.mapper;
 
-import com.gym.crm.dto.TrainerRequestDTO;
-import com.gym.crm.dto.TrainerResponseDTO;
-import com.gym.crm.dto.TrainerUpdateDTO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import org.mapstruct.Mapper;
@@ -30,6 +31,13 @@ public interface TrainerMapper {
     @Mapping(target = "isActive", source = "user.isActive")
     @Mapping(target = "specialization", source = "specialization")
     TrainerResponseDTO toDto(Trainer trainer);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "isActive", source = "user.isActive")
+    @Mapping(target = "specialization", source = "specialization")
+    TrainerInfoDTO toInfoDto(Trainer trainer);
 
     default TrainingType map(String type) {
         return type == null ? null : TrainingType.builder().trainingTypeName(type).build();

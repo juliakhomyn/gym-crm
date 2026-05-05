@@ -1,45 +1,109 @@
 package com.gym.crm.service.impl;
 
+import com.gym.crm.dao.TraineeDAO;
+import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dao.TrainingDAO;
+import com.gym.crm.dto.training.TrainingRequestDTO;
+import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.mapper.TrainingMapper;
+import com.gym.crm.model.Trainee;
+import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TrainingService;
-import com.gym.crm.util.Validator;
-import lombok.Setter;
+import com.gym.crm.service.common.ValidationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 @Slf4j
+@Validated
 @Service
+@RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
     private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by id: %s";
+    private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
+    private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING = "Training";
 
-    @Setter(onMethod_={@Autowired})
     private TrainingDAO dao;
+    private TraineeDAO traineeDAO;
+    private TrainerDAO trainerDAO;
+    private ValidationService validationService;
+    private TrainingMapper mapper;
 
     @Override
-    public Training createTraining(Training training) {
-        Validator.validateNotNull(training, TRAINING);
-        log.info("Creating training: trainingName={}, traineeId={}, trainerId={}", training.getTrainingName(), training.getTrainee().getId(), training.getTrainer().getId());
+    public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
+        validationService.validate(request, TRAINING);
+
+        log.info("Creating training: trainingName={}", request.getTrainingName());
+
+        Training mapped = mapper.toEntity(request);
+        Training training = mapped.toBuilder()
+                .trainee(getTrainee(request.getTraineeUsername()))
+                .trainer(getTrainer(request.getTrainerUsername()))
+                .build();
 
         Training saved = dao.save(training);
         log.info("Training created successfully: id={}", saved.getId());
 
-        return saved;
+        return mapper.toDto(saved);
     }
 
     @Override
-    public Training getTrainingById(Long id) {
-        return dao.findById(id)
+    public TrainingResponseDTO getTrainingById(Long id) {
+        log.info("Getting training by id: id={}", id);
+        validationService.validateId(id);
+
+        Training training = dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINING_NOT_FOUND_BY_ID, id)));
+
+        return mapper.toDto(training);
     }
 
     @Override
-    public List<Training> getAllTrainings() {
-        return dao.findAll();
+    public List<TrainingResponseDTO> getAllTrainings() {
+        log.info("Getting all trainings");
+
+        return dao.findAll()
+                .stream()
+                .map(t -> mapper.toDto(t))
+                .toList();
+    }
+
+    @Override
+    public List<TrainingResponseDTO> getTraineeTrainings(@Valid TraineeTrainingFilter filter) {
+        validationService.validate(filter, "Filter");
+        log.info("Getting trainee trainings by filter: {}", filter);
+
+        return dao.findByTraineeCriteria(filter)
+                .stream()
+                .map(t -> mapper.toDto(t))
+                .toList();
+    }
+
+    @Override
+    public List<TrainingResponseDTO> getTrainerTrainings(@Valid TrainerTrainingFilter filter) {
+        validationService.validate(filter, "Filter");
+        log.info("Getting trainer trainings by filter: {}", filter);
+
+        return dao.findByTrainerCriteria(filter)
+                .stream()
+                .map(t -> mapper.toDto(t))
+                .toList();
+    }
+
+    private Trainee getTrainee(String username) {
+        return traineeDAO.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, username)));
+    }
+
+    private Trainer getTrainer(String username) {
+        return trainerDAO.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, username)));
     }
 }

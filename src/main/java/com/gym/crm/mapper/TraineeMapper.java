@@ -1,8 +1,9 @@
 package com.gym.crm.mapper;
 
-import com.gym.crm.dto.TraineeRequestDTO;
-import com.gym.crm.dto.TraineeResponseDTO;
-import com.gym.crm.dto.TraineeUpdateDTO;
+import com.gym.crm.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.model.Trainee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -32,4 +33,12 @@ public interface TraineeMapper {
     @Mapping(target = "dateOfBirth", source = "dateOfBirth")
     @Mapping(target = "address", source = "address")
     TraineeResponseDTO toDto(Trainee trainee);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "isActive", source = "user.isActive")
+    @Mapping(target = "dateOfBirth", source = "dateOfBirth")
+    @Mapping(target = "address", source = "address")
+    TraineeInfoDTO toInfoDto(Trainee trainee);
 }

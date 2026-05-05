@@ -18,8 +18,8 @@ import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
 import com.gym.crm.service.common.UserInputValidator;
+import com.gym.crm.service.common.UserProfileService;
 import com.gym.crm.service.impl.TraineeServiceImpl;
-import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -69,9 +68,7 @@ public class TraineeServiceImplTest {
     @Mock
     private TraineeDAO dao;
     @Mock
-    private UserCredentialGenerator userCredentialGenerator;
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    private UserProfileService userProfileService;
     @Mock
     private TraineeMapper mapper;
     @Mock
@@ -117,9 +114,9 @@ public class TraineeServiceImplTest {
     @Test
     void createTrainee_shouldSaveTraineeWithCredentials() {
         when(mapper.toEntity(request)).thenReturn(trainee);
-        when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
-        when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
-        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(userProfileService.encodePassword(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
         when(mapper.toDto(savedTrainee)).thenReturn(response);
 
@@ -128,13 +125,12 @@ public class TraineeServiceImplTest {
         assertThat(actual).isEqualTo(response);
         verify(userInputValidator).validate(request, "Trainee");
         verify(mapper).toEntity(request);
-        verify(userCredentialGenerator).generateUsername(FIRST_NAME, LAST_NAME);
-        verify(userCredentialGenerator).generatePassword();
-        verify(passwordEncoder).encode(RAW_PASSWORD);
+        verify(userProfileService).generateUsername(FIRST_NAME, LAST_NAME);
+        verify(userProfileService).generatePassword();
+        verify(userProfileService).encodePassword(RAW_PASSWORD);
         verify(dao).save(any(Trainee.class));
         verify(mapper).toDto(savedTrainee);
     }
-
 
     @Test
     void createTrainee_shouldThrowException_whenTraineeIsNull() {
@@ -349,9 +345,9 @@ public class TraineeServiceImplTest {
     @Test
     void createTrainee_shouldLogInfo_whenCreatingTrainee() {
         when(mapper.toEntity(request)).thenReturn(trainee);
-        when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
-        when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
-        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(userProfileService.encodePassword(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
         when(mapper.toDto(savedTrainee)).thenReturn(response);
 

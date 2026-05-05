@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUsername(String username) {
-        userInputValidator.validate(username, "Username");
+        userInputValidator.validateUsername(username);
 
         return dao.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, username)));
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Long id) {
-        userInputValidator.validate(id, "Id");
+        userInputValidator.validateId(id);
 
         return dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_ID, id)));

@@ -46,4 +46,13 @@ public class UserInputValidator {
             throw new ValidationFailedException("ID must be a positive number");
         }
     }
+
+    public void validateNotBlank(String value, String fieldName) {
+        if (value == null) {
+            throw new ValidationFailedException(fieldName + " cannot be null");
+        }
+        if (value.trim().isEmpty() || value.isBlank()) {
+            throw new ValidationFailedException(fieldName + " cannot be empty");
+        }
+    }
 }

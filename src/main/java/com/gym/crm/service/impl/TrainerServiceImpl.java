@@ -11,11 +11,10 @@ import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.common.UserInputValidator;
-import com.gym.crm.util.UserCredentialGenerator;
+import com.gym.crm.service.common.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,8 +28,7 @@ public class TrainerServiceImpl implements TrainerService {
     private static final String TRAINER = "Trainer";
 
     private TrainerDAO dao;
-    private UserCredentialGenerator userCredentialGenerator;
-    private PasswordEncoder passwordEncoder;
+    private UserProfileService userProfileService;
     private UserInputValidator userInputValidator;
     private TrainerMapper mapper;
 
@@ -41,12 +39,12 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Creating trainer: firstName={} lastName{}", request.getFirstName(), request.getLastName());
 
         Trainer trainer = mapper.toEntity(request);
-        String username = userCredentialGenerator.generateUsername(request.getFirstName(), request.getLastName());
-        String rawPassword = userCredentialGenerator.generatePassword();
+        String username = userProfileService.generateUsername(request.getFirstName(), request.getLastName());
+        String rawPassword = userProfileService.generatePassword();
 
         User user = trainer.getUser().toBuilder()
                 .username(username)
-                .password(passwordEncoder.encode(rawPassword))
+                .password(userProfileService.encodePassword(rawPassword))
                 .isActive(true)
                 .build();
         Trainer withCredentials = trainer.toBuilder()

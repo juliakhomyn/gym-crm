@@ -1,0 +1,37 @@
+package com.gym.crm.service.common;
+
+import com.gym.crm.dao.UserDAO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class UsernameGenerator {
+    private static final String FIRST_NAME = "First name";
+    private static final String LAST_NAME = "Last name";
+    private static final String SEPARATOR = ".";
+
+    private final UserDAO dao;
+    private final UserInputValidator validator;
+
+    public String generateUsername(String firstName, String lastName) {
+        validator.validateNotBlank(firstName, FIRST_NAME);
+        validator.validateNotBlank(lastName, LAST_NAME);
+
+        String baseUsername = (firstName + SEPARATOR + lastName);
+
+        if (!dao.existsByUsername(baseUsername)) {
+            return baseUsername;
+        }
+
+        long serialNumber = 1;
+        while (dao.existsByUsername(baseUsername + serialNumber)) {
+            serialNumber++;
+        }
+
+        log.warn("Username {} already exists, serial number {} will be appended", baseUsername, serialNumber);
+        return baseUsername + serialNumber;
+    }
+}

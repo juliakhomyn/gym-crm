@@ -2,9 +2,9 @@ package com.gym.crm.service;
 
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
-import com.gym.crm.dto.trainer.TrainerUpdateDTO;
-import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainerMapper;
@@ -12,15 +12,14 @@ import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
 import com.gym.crm.service.common.UserInputValidator;
+import com.gym.crm.service.common.UserProfileService;
 import com.gym.crm.service.impl.TrainerServiceImpl;
-import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,9 +56,7 @@ public class TrainerServiceImplTest {
     @Mock
     private TrainerDAO dao;
     @Mock
-    private UserCredentialGenerator userCredentialGenerator;
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    private UserProfileService userProfileService;
     @Mock
     private TrainerMapper mapper;
     @Mock
@@ -91,9 +88,9 @@ public class TrainerServiceImplTest {
     @Test
     void createTrainer_shouldSaveTrainerWithCredentials() {
         when(mapper.toEntity(request)).thenReturn(trainer);
-        when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
-        when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
-        when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(userProfileService.encodePassword(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(dao.save(any(Trainer.class))).thenReturn(savedTrainer);
         when(mapper.toDto(savedTrainer)).thenReturn(response);
 
@@ -102,9 +99,9 @@ public class TrainerServiceImplTest {
         assertThat(actual).isEqualTo(response);
         verify(userInputValidator).validate(request, "Trainer");
         verify(mapper).toEntity(request);
-        verify(userCredentialGenerator).generateUsername(FIRST_NAME, LAST_NAME);
-        verify(userCredentialGenerator).generatePassword();
-        verify(passwordEncoder).encode(RAW_PASSWORD);
+        verify(userProfileService).generateUsername(FIRST_NAME, LAST_NAME);
+        verify(userProfileService).generatePassword();
+        verify(userProfileService).encodePassword(RAW_PASSWORD);
         verify(dao).save(any(Trainer.class));
         verify(mapper).toDto(savedTrainer);
     }

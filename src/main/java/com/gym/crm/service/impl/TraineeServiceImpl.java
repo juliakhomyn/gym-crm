@@ -14,11 +14,10 @@ import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.common.UserInputValidator;
-import com.gym.crm.util.UserCredentialGenerator;
+import com.gym.crm.service.common.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -36,8 +35,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     private TraineeDAO dao;
     private TrainerDAO trainerDAO;
-    private UserCredentialGenerator userCredentialGenerator;
-    private PasswordEncoder passwordEncoder;
+    private UserProfileService userProfileService;
     private UserInputValidator userInputValidator;
     private TraineeMapper mapper;
 
@@ -48,12 +46,12 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Creating trainee: firstName={} lastName{}", request.getFirstName(), request.getLastName());
 
         Trainee trainee = mapper.toEntity(request);
-        String username = userCredentialGenerator.generateUsername(request.getFirstName(), request.getLastName());
-        String rawPassword = userCredentialGenerator.generatePassword();
+        String username = userProfileService.generateUsername(request.getFirstName(), request.getLastName());
+        String rawPassword = userProfileService.generatePassword();
 
         User user = trainee.getUser().toBuilder()
                 .username(username)
-                .password(passwordEncoder.encode(rawPassword))
+                .password(userProfileService.encodePassword(rawPassword))
                 .isActive(true)
                 .build();
         Trainee withCredentials = trainee.toBuilder()

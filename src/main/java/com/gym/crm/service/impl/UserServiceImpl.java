@@ -1,8 +1,8 @@
 package com.gym.crm.service.impl;
 
 import com.gym.crm.dao.UserDAO;
-import com.gym.crm.dto.PasswordChangeRequest;
-import com.gym.crm.dto.ToggleActiveRequestDTO;
+import com.gym.crm.dto.common.PasswordChangeRequest;
+import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.service.UserService;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUsername(String username) {
-        validationService.validate(username);
+        validationService.validate(username, "Username");
 
         return dao.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, username)));
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Long id) {
-        validationService.validate(id);
+        validationService.validate(id, "Id");
 
         return dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_ID, id)));
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(@Valid PasswordChangeRequest request) {
-        validationService.validate(request);
+        validationService.validate(request, "Password change request");
         log.info("Changing password for user: username={}", request.getUsername());
 
         User user = dao.findByUsername(request.getUsername())
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void toggleActive(@Valid ToggleActiveRequestDTO request) {
-        validationService.validate(request);
+        validationService.validate(request, "Toggle active request");
         log.info("Changing active status for user: username={}", request.getUsername());
 
         User user = dao.findByUsername(request.getUsername())

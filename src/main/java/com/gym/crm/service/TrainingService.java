@@ -1,13 +1,20 @@
 package com.gym.crm.service;
 
-import com.gym.crm.model.Training;
+import com.gym.crm.dto.training.TrainingRequestDTO;
+import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 
 import java.util.List;
 
 public interface TrainingService {
-    Training createTraining(Training training);
+    TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO);
 
-    Training getTrainingById(Long id);
+    TrainingResponseDTO getTrainingById(Long id);
 
-    List<Training> getAllTrainings();
+    List<TrainingResponseDTO> getAllTrainings();
+
+    List<TrainingResponseDTO> getTraineeTrainings(TraineeTrainingFilter filter);
+
+    List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingFilter filter);
 }

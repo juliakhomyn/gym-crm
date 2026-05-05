@@ -1,21 +1,23 @@
-package com.gym.crm.dto;
+package com.gym.crm.dto.trainer;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.time.LocalDate;
-
 @Getter
 @Builder
 @ToString
 @EqualsAndHashCode
-public class TraineeUpdateDTO {
+public class TrainerUpdateDTO {
+    @NotNull(message = "Id is required")
+    @Positive(message = "Id must be a positive number")
+    private Long id;
+
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name cannot exceed 50 characters")
     private final String firstName;
@@ -25,7 +27,7 @@ public class TraineeUpdateDTO {
     private final String lastName;
 
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 110, message = "Username must be between 3 and 110 characters long")
+    @Size(min = 3, max = 110, message = "Username must be between 5 and 110 characters long")
     private final String username;
 
     @NotBlank(message = "Password is required")
@@ -33,11 +35,9 @@ public class TraineeUpdateDTO {
     @ToString.Exclude
     private final String password;
 
-    @Past(message = "Date of birth must be in the past")
-    private final LocalDate dateOfBirth;
-
-    @Size(max = 255, message = "Address cannot exceed 255 characters")
-    private final String address;
+    @NotBlank(message = "Specialization is required")
+    @Size(max = 100, message = "Specialization cannot exceed 100 characters")
+    private final String specialization;
 
     @NotNull(message = "Is active is required")
     private final Boolean isActive;

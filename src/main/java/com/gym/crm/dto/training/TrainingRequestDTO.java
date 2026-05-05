@@ -1,4 +1,4 @@
-package com.gym.crm.dto;
+package com.gym.crm.dto.training;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,13 +16,13 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class TrainingRequestDTO {
-    @NotNull(message = "Trainee id is required")
-    @Positive(message = "Trainee id must be a positive number")
-    private final Long traineeId;
+    @NotBlank(message = "Trainee username is required")
+    @Size(max = 110, message = "Trainee username cannot exceed 110 characters")
+    private final String traineeUsername;
 
-    @NotNull(message = "Trainer id is required")
-    @Positive(message = "Trainer id must be a positive number")
-    private final Long trainerId;
+    @NotBlank(message = "Trainer username is required")
+    @Size(max = 110, message = "Trainer username cannot exceed 110 characters")
+    private final String trainerUsername;
 
     @NotBlank(message = "Training name is required")
     @Size(max = 100, message = "Training name cannot exceed 100 characters")

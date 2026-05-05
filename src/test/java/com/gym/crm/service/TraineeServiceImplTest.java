@@ -5,15 +5,26 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.dao.TraineeDAO;
+import com.gym.crm.dao.TrainerDAO;
+import com.gym.crm.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.dto.trainee.TraineeUpdateDTO;
+import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.exception.ValidationFailedException;
+import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.model.Trainee;
+import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
+import com.gym.crm.service.common.ValidationService;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UserCredentialGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,10 +36,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,13 +51,20 @@ public class TraineeServiceImplTest {
     private static final String FIRST_NAME = "Owen";
     private static final String LAST_NAME = "Castleberry";
     private static final String USERNAME = "Owen.Castleberry";
+    private static final String NOT_FOUND_USERNAME = "Not.Found";
+    private static final String BLANK_USERNAME = " ";
     private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final String RAW_PASSWORD = "rawPassword";
     private static final long VALID_ID = 1L;
+    private static final long INVALID_ID = -1L;
     private static final long NOT_FOUND_ID = 999L;
 
     private static final String TRAINEE_CANNOT_BE_NULL = "Trainee cannot be null";
     private static final String TRAINEE_NOT_FOUND_BY_ID = "Trainee not found by id: %s";
+    private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
+    private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
+    private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
+    private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
 
     @Mock
     private TraineeDAO dao;
@@ -52,18 +72,31 @@ public class TraineeServiceImplTest {
     private UserCredentialGenerator userCredentialGenerator;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private TraineeMapper mapper;
+    @Mock
+    private ValidationService validationService;
+    @Mock
+    private TrainerDAO trainerDAO;
 
     @InjectMocks
     private TraineeServiceImpl service;
 
     private Trainee trainee;
     private Trainee savedTrainee;
+    private TraineeRequestDTO request;
+    private TraineeUpdateDTO updateDTO;
+    private TraineeResponseDTO response;
+    private TraineeInfoDTO info;
     private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
         trainee = buildTrainee();
-
+        request = buildTraineeRequestDTO();
+        updateDTO = buildTraineeUpdateDTO();
+        response = buildTraineeResponseDTO();
+        info = buildTraineeInfoDTO();
         savedTrainee = trainee.toBuilder()
                 .id(VALID_ID)
                 .user(buildSavedUser())
@@ -83,119 +116,246 @@ public class TraineeServiceImplTest {
 
     @Test
     void createTrainee_shouldSaveTraineeWithCredentials() {
+        when(mapper.toEntity(request)).thenReturn(trainee);
         when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
         when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
+        when(mapper.toDto(savedTrainee)).thenReturn(response);
 
-        Trainee actual = service.createTrainee(trainee);
+        TraineeResponseDTO actual = service.createTrainee(request);
 
-        assertEquals(USERNAME, actual.getUser().getUsername());
-        assertEquals(ENCODED_PASSWORD, actual.getUser().getPassword());
-        assertTrue(actual.getUser().getIsActive());
+        assertThat(actual).isEqualTo(response);
+        verify(validationService).validate(request, "Trainee");
+        verify(mapper).toEntity(request);
+        verify(userCredentialGenerator).generateUsername(FIRST_NAME, LAST_NAME);
+        verify(userCredentialGenerator).generatePassword();
+        verify(passwordEncoder).encode(RAW_PASSWORD);
         verify(dao).save(any(Trainee.class));
+        verify(mapper).toDto(savedTrainee);
     }
+
 
     @Test
     void createTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createTrainee(null));
+        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainee");
 
-        assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainee(null));
+
+        assertThat(exception.getMessage()).isEqualTo(TRAINEE_CANNOT_BE_NULL);
     }
 
     @Test
     void updateTrainee_shouldUpdateTrainee_whenTraineeExists() {
-        Trainee expected = savedTrainee.toBuilder()
-                .address("new address")
-                .build();
+        when(mapper.toEntity(updateDTO)).thenReturn(savedTrainee);
+        when(dao.findById(VALID_ID)).thenReturn(Optional.ofNullable(savedTrainee));
+        when(dao.update(any(Trainee.class))).thenReturn(savedTrainee);
+        when(mapper.toDto(savedTrainee)).thenReturn(response);
 
-        when(dao.findById(VALID_ID)).thenReturn(Optional.of(savedTrainee));
-        when(dao.update(savedTrainee)).thenReturn(expected);
+        TraineeResponseDTO actual = service.updateTrainee(updateDTO);
 
-        Trainee actual = service.updateTrainee(savedTrainee);
-
-        assertEquals(expected, actual);
-        verify(dao).update(savedTrainee);
+        assertThat(actual).isEqualTo(response);
+        verify(mapper).toEntity(updateDTO);
+        verify(dao).update(any(Trainee.class));
+        verify(mapper).toDto(savedTrainee);
     }
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeIsNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateTrainee(null));
+        doThrow(new ValidationFailedException(TRAINEE_CANNOT_BE_NULL)).when(validationService).validate(null, "Trainee");
 
-        assertEquals(TRAINEE_CANNOT_BE_NULL, exception.getMessage());
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.updateTrainee(null));
+
+        assertThat(exception.getMessage()).isEqualTo(TRAINEE_CANNOT_BE_NULL);
     }
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeNotFound() {
-        Trainee nonExistent = buildNonExistentTrainee();
+        TraineeUpdateDTO nonExistent = buildNonExistentTraineeUpdateDTO();
+        when(mapper.toEntity(nonExistent)).thenReturn(buildNonExistentTrainee());
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainee(nonExistent));
 
-        assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID));
         verify(dao, never()).update(any(Trainee.class));
     }
 
     @Test
-    void deleteTrainee_shouldDeleteTrainee_whenTraineeExists() {
+    void deleteTraineeById_shouldDeleteTrainee_whenTraineeExists() {
         when(dao.findById(VALID_ID)).thenReturn(Optional.of(savedTrainee));
 
-        service.deleteTrainee(VALID_ID);
+        service.deleteTraineeById(VALID_ID);
 
         verify(dao).delete(VALID_ID);
     }
 
     @Test
-    void deleteTrainee_shouldThrowException_whenTraineeNotFound() {
+    void deleteTraineeById_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> service.deleteTrainee(NOT_FOUND_ID));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.deleteTraineeById(NOT_FOUND_ID));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID));
         verify(dao, never()).delete(any());
+    }
+
+    @Test
+    void deleteTraineeById_shouldThrow_whenIdIsNull() {
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteTraineeById(null));
+
+        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NULL);
+        verify(dao, never()).delete(any());
+    }
+
+    @Test
+    void deleteTraineeById_shouldThrow_whenIdIsInvalid() {
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteTraineeById(INVALID_ID));
+
+        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NEGATIVE);
+        verify(dao, never()).delete(any());
+    }
+
+    @Test
+    void deleteByUsername_shouldDelete_whenTraineeExists() {
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(trainee));
+
+        service.deleteByUsername(USERNAME);
+
+        verify(dao).deleteByUsername(USERNAME);
+    }
+
+    @Test
+    void deleteByUsername_shouldThrow_whenUsernameIsNull() {
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(null);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteByUsername(null));
+
+        assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
+        verify(dao, never()).deleteByUsername(any());
+    }
+
+    @Test
+    void deleteByUsername_shouldThrow_whenUsernameIsBlank() {
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.deleteByUsername(BLANK_USERNAME));
+
+        assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
+        verify(dao, never()).deleteByUsername(any());
+    }
+
+    @Test
+    void deleteByUsername_shouldThrow_whenTraineeNotFound() {
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.deleteByUsername(USERNAME));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, USERNAME));
+        verify(dao, never()).deleteByUsername(any());
     }
 
     @Test
     void getTraineeById_shouldReturnTrainee_whenTraineeExists() {
         when(dao.findById(VALID_ID)).thenReturn(Optional.of(savedTrainee));
+        when(mapper.toInfoDto(savedTrainee)).thenReturn(info);
 
-        Trainee actual = service.getTraineeById(VALID_ID);
+        TraineeInfoDTO actual = service.getTraineeById(VALID_ID);
 
-        assertEquals(savedTrainee, actual);
+        assertThat(actual).isEqualTo(info);
     }
 
     @Test
-    void findById_shouldThrowException_whenTraineeNotFound() {
+    void gerTraineeById_shouldThrowException_whenTraineeNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTraineeById(NOT_FOUND_ID));
-        assertEquals(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID), exception.getMessage());
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID));
+    }
+
+    @Test
+    void getTraineeById_shouldThrow_whenIdIsNull() {
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeById(null));
+
+        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NULL);
+    }
+
+    @Test
+    void getTraineeById_shouldThrow_whenIdIsNegative() {
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeById(INVALID_ID));
+
+        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NEGATIVE);
+    }
+
+    @Test
+    void getTraineeByUsername_shouldReturnTrainee_whenExists() {
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(trainee));
+        when(mapper.toInfoDto(trainee)).thenReturn(info);
+
+        TraineeInfoDTO actual = service.getTraineeByUsername(USERNAME);
+
+        assertThat(actual).isEqualTo(info);
+        verify(dao).findByUsername(USERNAME);
+    }
+
+    @Test
+    void getTraineeByUsername_shouldThrowException_whenNotFound() {
+        when(dao.findByUsername(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTraineeByUsername(NOT_FOUND_USERNAME));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, NOT_FOUND_USERNAME));
+        verify(dao).findByUsername(NOT_FOUND_USERNAME);
+    }
+
+    @Test
+    void getTraineeByUsername_shouldThrowException_whenUsernameIsBlank() {
+        doThrow(new ValidationFailedException(USERNAME_CANNOT_BE_NULL)).when(validationService).validateUsername(BLANK_USERNAME);
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeByUsername(BLANK_USERNAME));
+
+        assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
+        verify(dao, never()).findByUsername(any());
     }
 
     @Test
     void getAllTrainees_shouldReturnAllTrainees_whenExist() {
         when(dao.findAll()).thenReturn(List.of(savedTrainee));
+        when(mapper.toInfoDto(savedTrainee)).thenReturn(info);
 
-        List<Trainee> actual = service.getAllTrainees();
+        List<TraineeInfoDTO> actual = service.getAllTrainees();
 
-        assertEquals(1, actual.size());
+        assertThat(actual).hasSize(1);
     }
 
     @Test
     void getAllTrainees_shouldReturnEmptyList_whenNoTrainees() {
         when(dao.findAll()).thenReturn(List.of());
 
-        List<Trainee> actual = service.getAllTrainees();
+        List<TraineeInfoDTO> actual = service.getAllTrainees();
 
-        assertTrue(actual.isEmpty());
+        assertThat(actual).isEmpty();
     }
 
     @Test
     void createTrainee_shouldLogInfo_whenCreatingTrainee() {
+        when(mapper.toEntity(request)).thenReturn(trainee);
         when(userCredentialGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(userCredentialGenerator.generatePassword()).thenReturn(RAW_PASSWORD);
         when(passwordEncoder.encode(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
         when(dao.save(any(Trainee.class))).thenReturn(savedTrainee);
+        when(mapper.toDto(savedTrainee)).thenReturn(response);
 
-        service.createTrainee(trainee);
+        service.createTrainee(request);
 
         assertThat(logAppender.list)
                 .filteredOn(log -> log.getLevel() == Level.INFO)
@@ -204,9 +364,101 @@ public class TraineeServiceImplTest {
                 .anyMatch(message -> message.contains(USERNAME));
     }
 
+    @Test
+    void updateTrainersList_shouldUpdateTrainers_whenAllExist() {
+        Trainer trainer1 = buildTrainer("trainer1");
+        Trainer trainer2 = buildTrainer("trainer2");
+        TrainerAssignmentUpdateDTO dto = buildValidDto();
+
+        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.of(trainer1));
+        when(trainerDAO.findByUsername("trainer2")).thenReturn(Optional.of(trainer2));
+
+        service.updateTrainersList(dto);
+
+        verify(validationService).validate(dto, "Trainer assignment");
+        verify(trainerDAO).findByUsername("trainer1");
+        verify(trainerDAO).findByUsername("trainer2");
+
+        ArgumentCaptor<List<Trainer>> captor = ArgumentCaptor.forClass(List.class);
+        verify(dao).updateTrainersList(eq(USERNAME), captor.capture());
+        List<Trainer> trainersPassed = captor.getValue();
+        assertThat(trainersPassed).containsExactly(trainer1, trainer2);
+    }
+
+    @Test
+    void updateTrainersList_shouldThrow_whenTrainerNotFound() {
+        TrainerAssignmentUpdateDTO dto = buildValidDto();
+
+        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainersList(dto));
+
+        assertThat(exception.getMessage()).contains("Trainer not found by username: trainer1");
+        verify(validationService).validate(dto, "Trainer assignment");
+        verify(trainerDAO).findByUsername("trainer1");
+        verify(dao, never()).updateTrainersList(anyString(), anyList());
+    }
+
+    @Test
+    void updateTrainersList_shouldCallValidationService() {
+        TrainerAssignmentUpdateDTO dto = buildValidDto();
+        Trainer trainer1 = buildTrainer("trainer1");
+        Trainer trainer2 = buildTrainer("trainer2");
+
+        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.of(trainer1));
+        when(trainerDAO.findByUsername("trainer2")).thenReturn(Optional.of(trainer2));
+
+        service.updateTrainersList(dto);
+
+        verify(validationService).validate(dto, "Trainer assignment");
+    }
+
     private Trainee buildTrainee() {
         return Trainee.builder()
                 .user(buildUser())
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .address("123 Main St")
+                .build();
+    }
+
+    private TraineeRequestDTO buildTraineeRequestDTO() {
+        return TraineeRequestDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TraineeUpdateDTO buildTraineeUpdateDTO() {
+        return TraineeUpdateDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
+    }
+
+    private TraineeUpdateDTO buildNonExistentTraineeUpdateDTO() {
+        return TraineeUpdateDTO.builder()
+                .id(NOT_FOUND_ID)
+                .build();
+    }
+
+    private TraineeResponseDTO buildTraineeResponseDTO() {
+        return TraineeResponseDTO.builder()
+                .id(VALID_ID)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .address("123 Main St")
+                .build();
+    }
+
+    private TraineeInfoDTO buildTraineeInfoDTO() {
+        return TraineeInfoDTO.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("123 Main St")
                 .build();
@@ -238,6 +490,20 @@ public class TraineeServiceImplTest {
         return savedTrainee.toBuilder()
                 .id(NOT_FOUND_ID)
                 .user(user)
+                .build();
+    }
+
+    private TrainerAssignmentUpdateDTO buildValidDto() {
+        return TrainerAssignmentUpdateDTO.builder()
+                .traineeUsername(USERNAME)
+                .trainerUsernames(List.of("trainer1", "trainer2"))
+                .build();
+    }
+
+    private Trainer buildTrainer(String username) {
+        return Trainer.builder()
+                .id(VALID_ID)
+                .user(User.builder().username(username).build())
                 .build();
     }
 }

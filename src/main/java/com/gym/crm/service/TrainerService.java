@@ -1,15 +1,22 @@
 package com.gym.crm.service;
 
-import com.gym.crm.model.Trainer;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 
 import java.util.List;
 
 public interface TrainerService {
-    Trainer createTrainer(Trainer trainer);
+    TrainerResponseDTO createTrainer(TrainerRequestDTO trainer);
 
-    Trainer updateTrainer(Trainer trainer);
+    TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainer);
 
-    Trainer getTrainerById(Long id);
+    TrainerInfoDTO getTrainerById(Long id);
 
-    List<Trainer> getAllTrainers();
+    TrainerInfoDTO getTrainerByUsername(String username);
+
+    List<TrainerInfoDTO> getAllTrainers();
+
+    List<TrainerInfoDTO> getNotAssignedToTrainee(String traineeUsername);
 }

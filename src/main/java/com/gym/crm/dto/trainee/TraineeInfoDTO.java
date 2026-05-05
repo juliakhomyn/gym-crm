@@ -1,4 +1,4 @@
-package com.gym.crm.dto;
+package com.gym.crm.dto.trainee;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -11,14 +11,11 @@ import java.time.LocalDate;
 @Builder
 @ToString
 @EqualsAndHashCode
-public class TraineeResponseDTO {
-    private final Long id;
+public class TraineeInfoDTO {
     private final String firstName;
     private final String lastName;
     private final String username;
-    @ToString.Exclude
-    private final String password;
+    private final Boolean isActive;
     private final LocalDate dateOfBirth;
     private final String address;
-    private final Boolean isActive;
 }

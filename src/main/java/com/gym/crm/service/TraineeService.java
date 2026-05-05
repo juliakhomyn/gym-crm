@@ -1,17 +1,27 @@
 package com.gym.crm.service;
 
-import com.gym.crm.model.Trainee;
+import com.gym.crm.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.dto.trainee.TraineeUpdateDTO;
+import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
 
 import java.util.List;
 
 public interface TraineeService {
-    Trainee createTrainee(Trainee trainee);
+    TraineeResponseDTO createTrainee(TraineeRequestDTO trainee);
 
-    Trainee updateTrainee(Trainee trainee);
+    TraineeResponseDTO updateTrainee(TraineeUpdateDTO trainee);
 
-    void deleteTrainee(Long id);
+    void deleteTraineeById(Long id);
 
-    Trainee getTraineeById(Long id);
+    void deleteByUsername(String username);
 
-    List<Trainee> getAllTrainees();
+    TraineeInfoDTO getTraineeById(Long id);
+
+    TraineeInfoDTO getTraineeByUsername(String username);
+
+    List<TraineeInfoDTO> getAllTrainees();
+
+    void updateTrainersList(TrainerAssignmentUpdateDTO dto);
 }

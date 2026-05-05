@@ -1,25 +1,25 @@
 package com.gym.crm.facade;
 
-import com.gym.crm.dto.TraineeRequestDTO;
-import com.gym.crm.dto.TraineeResponseDTO;
-import com.gym.crm.dto.TraineeUpdateDTO;
-import com.gym.crm.dto.TrainerRequestDTO;
-import com.gym.crm.dto.TrainerResponseDTO;
-import com.gym.crm.dto.TrainerUpdateDTO;
-import com.gym.crm.dto.TrainingRequestDTO;
-import com.gym.crm.dto.TrainingResponseDTO;
-import com.gym.crm.mapper.TraineeMapper;
-import com.gym.crm.mapper.TrainerMapper;
-import com.gym.crm.mapper.TrainingMapper;
-import com.gym.crm.model.Trainee;
-import com.gym.crm.model.Trainer;
-import com.gym.crm.model.Training;
+import com.gym.crm.dto.common.PasswordChangeRequest;
+import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.dto.trainee.TraineeUpdateDTO;
+import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.dto.trainer.TrainerUpdateDTO;
+import com.gym.crm.dto.training.TrainingRequestDTO;
+import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.search.filter.TraineeTrainingFilter;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
+import com.gym.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,89 +31,77 @@ public class GymFacade {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final TrainingService trainingService;
-
-    @Setter(onMethod_={@Autowired})
-    private TraineeMapper traineeMapper;
-    @Setter(onMethod_={@Autowired})
-    private TrainerMapper trainerMapper;
-    @Setter(onMethod_={@Autowired})
-    private TrainingMapper trainingMapper;
+    private final UserService userService;
 
     public TraineeResponseDTO createTrainee(TraineeRequestDTO traineeRequestDTO) {
-        Trainee trainee = traineeMapper.toEntity(traineeRequestDTO);
-        Trainee saved = traineeService.createTrainee(trainee);
-
-        return traineeMapper.toDto(saved);
+        return traineeService.createTrainee(traineeRequestDTO);
     }
 
     public TraineeResponseDTO updateTrainee(TraineeUpdateDTO traineeUpdateDTO) {
-        Trainee trainee = traineeMapper.toEntity(traineeUpdateDTO);
-        Trainee saved = traineeService.updateTrainee(trainee);
-
-        return traineeMapper.toDto(saved);
+        return traineeService.updateTrainee(traineeUpdateDTO);
     }
 
-    public void deleteTrainee(Long id) {
-        traineeService.deleteTrainee(id);
+    public void deleteTraineeByUsername(String username) {
+        traineeService.deleteByUsername(username);
     }
 
-    public TraineeResponseDTO getTraineeById(Long id) {
-        Trainee trainee = traineeService.getTraineeById(id);
-
-        return traineeMapper.toDto(trainee);
+    public TraineeInfoDTO getTraineeByUsername(String username) {
+        return traineeService.getTraineeByUsername(username);
     }
 
-    public List<TraineeResponseDTO> getAllTrainees() {
-        return traineeService.getAllTrainees()
-                .stream()
-                .map(traineeMapper::toDto)
-                .toList();
+    public List<TraineeInfoDTO> getAllTrainees() {
+        return traineeService.getAllTrainees();
+    }
+
+    public void updateTraineeTrainersList(TrainerAssignmentUpdateDTO dto) {
+        traineeService.updateTrainersList(dto);
     }
 
     public TrainerResponseDTO createTrainer(TrainerRequestDTO trainerRequestDTO) {
-        Trainer trainer = trainerMapper.toEntity(trainerRequestDTO);
-        Trainer saved = trainerService.createTrainer(trainer);
-
-        return trainerMapper.toDto(saved);
+        return trainerService.createTrainer(trainerRequestDTO);
     }
 
     public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO) {
-        Trainer trainer = trainerMapper.toEntity(trainerUpdateDTO);
-        Trainer saved = trainerService.updateTrainer(trainer);
-
-        return trainerMapper.toDto(saved);
+        return trainerService.updateTrainer(trainerUpdateDTO);
     }
 
-    public TrainerResponseDTO getTrainerById(Long id) {
-        Trainer trainer = trainerService.getTrainerById(id);
-
-        return trainerMapper.toDto(trainer);
+    public TrainerInfoDTO getTrainerByUsername(String username) {
+        return trainerService.getTrainerByUsername(username);
     }
 
-    public List<TrainerResponseDTO> getAllTrainers() {
-        return trainerService.getAllTrainers()
-                .stream()
-                .map(trainerMapper::toDto)
-                .toList();
+    public List<TrainerInfoDTO> getAllTrainers() {
+        return trainerService.getAllTrainers();
+    }
+
+    public List<TrainerInfoDTO> getTrainersNotAssignedToTrainee(String username) {
+        return trainerService.getNotAssignedToTrainee(username);
+    }
+
+    public void changePassword(PasswordChangeRequest request) {
+        userService.changePassword(request);
+    }
+
+    public void toggleActiveStatus(ToggleActiveRequestDTO request) {
+        userService.toggleActive(request);
     }
 
     public TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO) {
-        Training training = trainingMapper.toEntity(trainingRequestDTO);
-        Training saved = trainingService.createTraining(training);
-
-        return trainingMapper.toDto(saved);
+        return trainingService.createTraining(trainingRequestDTO);
     }
 
     public TrainingResponseDTO getTrainingById(Long id) {
-        Training training = trainingService.getTrainingById(id);
-
-        return trainingMapper.toDto(training);
+        return trainingService.getTrainingById(id);
     }
 
     public List<TrainingResponseDTO> getAllTrainings() {
-        return trainingService.getAllTrainings()
-                .stream()
-                .map(trainingMapper::toDto)
-                .toList();
+        return trainingService.getAllTrainings();
+    }
+
+    public List<TrainingResponseDTO> getTraineeTrainingsByFilter(TraineeTrainingFilter filter) {
+        return trainingService.getTraineeTrainings(filter);
+    }
+
+    public List<TrainingResponseDTO> getTrainerTrainingsByFilter(TrainerTrainingFilter filter) {
+        return trainingService.getTrainerTrainings(filter);
     }
 }

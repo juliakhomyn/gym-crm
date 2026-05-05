@@ -13,11 +13,9 @@ import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
-import com.gym.crm.search.criteria.TraineeTrainingCriteriaBuilder;
-import com.gym.crm.search.criteria.TrainerTrainingCriteriaBuilder;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.TrainingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +59,7 @@ public class TrainingServiceImplTest {
     @Mock
     private TrainingMapper mapper;
     @Mock
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
 
     @InjectMocks
     private TrainingServiceImpl service;
@@ -96,13 +94,13 @@ public class TrainingServiceImplTest {
         assertThat(actual).isEqualTo(response);
         verify(mapper).toEntity(request);
         verify(mapper).toDto(savedTraining);
-        verify(validationService).validate(request, "Training");
+        verify(userInputValidator).validate(request, "Training");
         verify(dao).save(any(Training.class));
     }
 
     @Test
     void createTraining_shouldThrowException_whenTrainingIsNull() {
-        doThrow(new ValidationFailedException(TRAINING_CANNOT_BE_NULL)).when(validationService).validate(null, "Training");
+        doThrow(new ValidationFailedException(TRAINING_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Training");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTraining(null));
 
@@ -130,7 +128,7 @@ public class TrainingServiceImplTest {
 
     @Test
     void getTrainingById_shouldThrow_whenIdIsNull() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(validationService).validateId(null);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(userInputValidator).validateId(null);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainingById(null));
 
@@ -139,7 +137,7 @@ public class TrainingServiceImplTest {
 
     @Test
     void getTrainingById_shouldThrow_whenIdIsNegative() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(validationService).validateId(INVALID_ID);
+        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(userInputValidator).validateId(INVALID_ID);
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainingById(INVALID_ID));
 

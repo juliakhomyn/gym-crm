@@ -6,7 +6,7 @@ import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
 
     @InjectMocks
     private UserServiceImpl service;
@@ -148,29 +148,29 @@ public class UserServiceImplTest {
 
         service.changePassword(request);
 
-        verify(validationService).validate(request, "Password change request");
+        verify(userInputValidator).validate(request, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenUsernameIsBlank() {
         PasswordChangeRequest request = buildPasswordChangeRequestBlankUsername();
 
-        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(request, "Password change request");
+        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(request, "Password change request");
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
 
-        verify(validationService).validate(request, "Password change request");
+        verify(userInputValidator).validate(request, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenNewPasswordTooShort() {
         PasswordChangeRequest request = buildPasswordChangeRequestShortNewPassword();
 
-        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(validationService).validate(request, "Password change request");
+        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(userInputValidator).validate(request, "Password change request");
 
         assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
 
-        verify(validationService).validate(request, "Password change request");
+        verify(userInputValidator).validate(request, "Password change request");
     }
 
     @Test
@@ -206,19 +206,19 @@ public class UserServiceImplTest {
 
         service.toggleActive(request);
 
-        verify(validationService).validate(request,  "Toggle active request");
+        verify(userInputValidator).validate(request,  "Toggle active request");
     }
 
     @Test
     void toggleActive_shouldThrowValidationException_whenUsernameIsBlank() {
         ToggleActiveRequestDTO invalidRequest = buildInvalidToggleActiveRequest();
 
-        doThrow(new ValidationFailedException("Username is required")).when(validationService).validate(invalidRequest, "Toggle active request");
+        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(invalidRequest, "Toggle active request");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidRequest));
 
         assertThat(exception.getMessage()).contains("Username is required");
-        verify(validationService).validate(invalidRequest, "Toggle active request");
+        verify(userInputValidator).validate(invalidRequest, "Toggle active request");
     }
 
     private User buildUser() {

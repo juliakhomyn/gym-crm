@@ -13,7 +13,7 @@ import com.gym.crm.model.Training;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TrainingService;
-import com.gym.crm.service.common.ValidationService;
+import com.gym.crm.service.common.UserInputValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,12 +35,12 @@ public class TrainingServiceImpl implements TrainingService {
     private TrainingDAO dao;
     private TraineeDAO traineeDAO;
     private TrainerDAO trainerDAO;
-    private ValidationService validationService;
+    private UserInputValidator userInputValidator;
     private TrainingMapper mapper;
 
     @Override
     public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
-        validationService.validate(request, TRAINING);
+        userInputValidator.validate(request, TRAINING);
 
         log.info("Creating training: trainingName={}", request.getTrainingName());
 
@@ -59,7 +59,7 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public TrainingResponseDTO getTrainingById(Long id) {
         log.info("Getting training by id: id={}", id);
-        validationService.validateId(id);
+        userInputValidator.validateId(id);
 
         Training training = dao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINING_NOT_FOUND_BY_ID, id)));
@@ -73,29 +73,29 @@ public class TrainingServiceImpl implements TrainingService {
 
         return dao.findAll()
                 .stream()
-                .map(t -> mapper.toDto(t))
+                .map(mapper::toDto)
                 .toList();
     }
 
     @Override
     public List<TrainingResponseDTO> getTraineeTrainings(@Valid TraineeTrainingFilter filter) {
-        validationService.validate(filter, "Filter");
+        userInputValidator.validate(filter, "Filter");
         log.info("Getting trainee trainings by filter: {}", filter);
 
         return dao.findByTraineeCriteria(filter)
                 .stream()
-                .map(t -> mapper.toDto(t))
+                .map(mapper::toDto)
                 .toList();
     }
 
     @Override
     public List<TrainingResponseDTO> getTrainerTrainings(@Valid TrainerTrainingFilter filter) {
-        validationService.validate(filter, "Filter");
+        userInputValidator.validate(filter, "Filter");
         log.info("Getting trainer trainings by filter: {}", filter);
 
         return dao.findByTrainerCriteria(filter)
                 .stream()
-                .map(t -> mapper.toDto(t))
+                .map(mapper::toDto)
                 .toList();
     }
 

@@ -14,6 +14,7 @@ import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.common.UserInputValidator;
+import com.gym.crm.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final UserInputValidator userInputValidator;
     private final TrainingMapper mapper;
 
+    @Transactional
     @Override
     public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
         userInputValidator.validate(request, TRAINING);

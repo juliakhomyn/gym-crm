@@ -14,8 +14,8 @@ public class TransactionAspect {
 
     private final TransactionManager transactionManager;
 
-    @Around("@annotation(Transaction)")
-    public Object manageTransaction(ProceedingJoinPoint joinPoint, Transactional transactional) throws Throwable {
+    @Around("@annotation(com.gym.crm.transaction.Transactional)")
+    public Object manageTransaction(ProceedingJoinPoint joinPoint) {
         return transactionManager.performReturningWithinTx(entityManager -> {
             try {
                 return joinPoint.proceed();

@@ -16,18 +16,18 @@ public class AuthenticationAspect {
 
     private final SessionContext sessionContext;
 
-    @Before(value = "@annotation(com.gym.crm.auth.Authenticated) && args(username, ..)", argNames = "username")
-    public void checkAuthentication(String username) {
+    @Before(value = "@annotation(com.gym.crm.auth.Authenticated) && args(callerUsername, ..)", argNames = "callerUsername")
+    public void checkAuthentication(String callerUsername) {
         User user = sessionContext.getAuthenticatedUser();
 
         Optional.ofNullable(user)
                 .orElseThrow(() -> new UserAuthenticationException("No user authenticated"));
 
-        Optional.ofNullable(username)
+        Optional.ofNullable(callerUsername)
                 .orElseThrow(() -> new UserAuthenticationException("User is not authenticated: no request to check authentication"));
 
-        if (!user.getUsername().equals(username)) {
-            throw new UserAuthenticationException(String.format("Authenticated user with username: %s does not match with requested user with username: %s", user.getUsername(), username));
+        if (!user.getUsername().equals(callerUsername)) {
+            throw new UserAuthenticationException(String.format("Authenticated user with username: %s does not match with requested user with username: %s", user.getUsername(), callerUsername));
         }
     }
 }

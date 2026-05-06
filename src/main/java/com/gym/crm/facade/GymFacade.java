@@ -43,7 +43,7 @@ public class GymFacade {
     }
 
     @Authenticated
-    public void logout(String username) {
+    public void logout(String callerUsername) {
         authenticationService.logout();
     }
 

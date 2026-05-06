@@ -1,5 +1,8 @@
 package com.gym.crm.facade;
 
+import com.gym.crm.auth.Authenticated;
+import com.gym.crm.dto.common.AuthRequestDTO;
+import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.dto.trainee.TraineeInfoDTO;
@@ -15,6 +18,7 @@ import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import com.gym.crm.service.AuthenticationService;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
@@ -32,28 +36,43 @@ public class GymFacade {
     private final TrainerService trainerService;
     private final TrainingService trainingService;
     private final UserService userService;
+    private final AuthenticationService authenticationService;
+
+    public AuthResponseDTO login(AuthRequestDTO dto) {
+        return authenticationService.authenticate(dto);
+    }
+
+    @Authenticated
+    public void logout(String callerUsername) {
+        authenticationService.logout();
+    }
 
     public TraineeResponseDTO createTrainee(TraineeRequestDTO traineeRequestDTO) {
         return traineeService.createTrainee(traineeRequestDTO);
     }
 
-    public TraineeResponseDTO updateTrainee(TraineeUpdateDTO traineeUpdateDTO) {
+    @Authenticated
+    public TraineeResponseDTO updateTrainee(TraineeUpdateDTO traineeUpdateDTO, String callerUsername) {
         return traineeService.updateTrainee(traineeUpdateDTO);
     }
 
-    public void deleteTraineeByUsername(String username) {
+    @Authenticated
+    public void deleteTraineeByUsername(String username, String callerUsername) {
         traineeService.deleteByUsername(username);
     }
 
-    public TraineeInfoDTO getTraineeByUsername(String username) {
+    @Authenticated
+    public TraineeInfoDTO getTraineeByUsername(String username, String callerUsername) {
         return traineeService.getTraineeByUsername(username);
     }
 
-    public List<TraineeInfoDTO> getAllTrainees() {
+    @Authenticated
+    public List<TraineeInfoDTO> getAllTrainees(String callerUsername) {
         return traineeService.getAllTrainees();
     }
 
-    public void updateTraineeTrainersList(TrainerAssignmentUpdateDTO dto) {
+    @Authenticated
+    public void updateTraineeTrainersList(TrainerAssignmentUpdateDTO dto, String callerUsername) {
         traineeService.updateTrainersList(dto);
     }
 
@@ -61,47 +80,58 @@ public class GymFacade {
         return trainerService.createTrainer(trainerRequestDTO);
     }
 
-    public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO) {
+    @Authenticated
+    public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO, String callerUsername) {
         return trainerService.updateTrainer(trainerUpdateDTO);
     }
 
-    public TrainerInfoDTO getTrainerByUsername(String username) {
+    @Authenticated
+    public TrainerInfoDTO getTrainerByUsername(String username, String callerUsername) {
         return trainerService.getTrainerByUsername(username);
     }
 
-    public List<TrainerInfoDTO> getAllTrainers() {
+    @Authenticated
+    public List<TrainerInfoDTO> getAllTrainers(String callerUsername) {
         return trainerService.getAllTrainers();
     }
 
-    public List<TrainerInfoDTO> getTrainersNotAssignedToTrainee(String username) {
+    @Authenticated
+    public List<TrainerInfoDTO> getTrainersNotAssignedToTrainee(String username, String callerUsername) {
         return trainerService.getNotAssignedToTrainee(username);
     }
 
-    public void changePassword(PasswordChangeRequest request) {
+    @Authenticated
+    public void changePassword(PasswordChangeRequest request, String callerUsername) {
         userService.changePassword(request);
     }
 
-    public void toggleActiveStatus(ToggleActiveRequestDTO request) {
+    @Authenticated
+    public void toggleActiveStatus(ToggleActiveRequestDTO request, String callerUsername) {
         userService.toggleActive(request);
     }
 
-    public TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO) {
+    @Authenticated
+    public TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO, String callerUsername) {
         return trainingService.createTraining(trainingRequestDTO);
     }
 
-    public TrainingResponseDTO getTrainingById(Long id) {
+    @Authenticated
+    public TrainingResponseDTO getTrainingById(Long id, String callerUsername) {
         return trainingService.getTrainingById(id);
     }
 
-    public List<TrainingResponseDTO> getAllTrainings() {
+    @Authenticated
+    public List<TrainingResponseDTO> getAllTrainings(String callerUsername) {
         return trainingService.getAllTrainings();
     }
 
-    public List<TrainingResponseDTO> getTraineeTrainingsByFilter(TraineeTrainingFilter filter) {
+    @Authenticated
+    public List<TrainingResponseDTO> getTraineeTrainingsByFilter(TraineeTrainingFilter filter, String callerUsername) {
         return trainingService.getTraineeTrainings(filter);
     }
 
-    public List<TrainingResponseDTO> getTrainerTrainingsByFilter(TrainerTrainingFilter filter) {
+    @Authenticated
+    public List<TrainingResponseDTO> getTrainerTrainingsByFilter(TrainerTrainingFilter filter, String callerUsername) {
         return trainingService.getTrainerTrainings(filter);
     }
 }

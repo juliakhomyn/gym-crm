@@ -33,18 +33,18 @@ public class UserProfileServiceTest {
     void generateUsername_shouldReturnConcatenatedUsername() {
         when(usernameGenerator.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
 
-        String username = service.generateUsername(FIRST_NAME, LAST_NAME);
+        String actual = service.generateUsername(FIRST_NAME, LAST_NAME);
 
-        assertThat(username).isEqualTo(USERNAME);
+        assertThat(actual).isEqualTo(USERNAME);
         verify(usernameGenerator).generateUsername(FIRST_NAME, LAST_NAME);
     }
     @Test
     void generatePassword_shouldReturnRawPassword() {
         when(passwordGenerator.generatePassword()).thenReturn(PASSWORD);
 
-        String password = service.generatePassword();
+        String actual = service.generatePassword();
 
-        assertThat(password).isEqualTo(PASSWORD);
+        assertThat(actual).isEqualTo(PASSWORD);
         verify(passwordGenerator).generatePassword();
     }
 
@@ -52,9 +52,9 @@ public class UserProfileServiceTest {
     void encodePassword_shouldReturnEncodedPassword() {
         when(passwordEncoder.encode(PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
-        String encodedPassword = service.encodePassword(PASSWORD);
+        String actual = service.encodePassword(PASSWORD);
 
-        assertThat(encodedPassword).isEqualTo(ENCODED_PASSWORD);
+        assertThat(actual).isEqualTo(ENCODED_PASSWORD);
         verify(passwordEncoder).encode(PASSWORD);
     }
 }

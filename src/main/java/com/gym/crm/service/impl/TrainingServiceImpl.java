@@ -32,11 +32,11 @@ public class TrainingServiceImpl implements TrainingService {
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING = "Training";
 
-    private TrainingDAO dao;
-    private TraineeDAO traineeDAO;
-    private TrainerDAO trainerDAO;
-    private UserInputValidator userInputValidator;
-    private TrainingMapper mapper;
+    private final TrainingDAO dao;
+    private final TraineeDAO traineeDAO;
+    private final TrainerDAO trainerDAO;
+    private final UserInputValidator userInputValidator;
+    private final TrainingMapper mapper;
 
     @Override
     public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {

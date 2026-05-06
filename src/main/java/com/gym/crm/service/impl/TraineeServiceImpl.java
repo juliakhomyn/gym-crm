@@ -33,17 +33,17 @@ public class TraineeServiceImpl implements TraineeService {
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINEE = "Trainee";
 
-    private TraineeDAO dao;
-    private TrainerDAO trainerDAO;
-    private UserProfileService userProfileService;
-    private UserInputValidator userInputValidator;
-    private TraineeMapper mapper;
+    private final TraineeDAO dao;
+    private final TrainerDAO trainerDAO;
+    private final UserProfileService userProfileService;
+    private final UserInputValidator userInputValidator;
+    private final TraineeMapper mapper;
 
     @Override
     public TraineeResponseDTO createTrainee(@Valid TraineeRequestDTO request) {
         userInputValidator.validate(request, TRAINEE);
 
-        log.info("Creating trainee: firstName={} lastName{}", request.getFirstName(), request.getLastName());
+        log.info("Creating trainee: firstName={}, lastName={}", request.getFirstName(), request.getLastName());
 
         Trainee trainee = mapper.toEntity(request);
         String username = userProfileService.generateUsername(request.getFirstName(), request.getLastName());

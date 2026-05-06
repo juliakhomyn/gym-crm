@@ -1,5 +1,7 @@
 package com.gym.crm.facade;
 
+import com.gym.crm.dto.common.AuthRequestDTO;
+import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.dto.trainee.TraineeInfoDTO;
@@ -15,6 +17,7 @@ import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import com.gym.crm.service.AuthenticationService;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
@@ -38,9 +41,12 @@ public class GymFacadeTest {
     private static final String FIRST_NAME = "Simone";
     private static final String LAST_NAME = "Radcliffe";
     private static final String USERNAME = "Simone.Radcliffe";
+    private static final String PASSWORD = "password";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final long VALID_ID = 1L;
+
+    private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
 
     @Mock
     private TraineeService traineeService;
@@ -50,6 +56,8 @@ public class GymFacadeTest {
     private TrainingService trainingService;
     @Mock
     private UserService userService;
+    @Mock
+    private AuthenticationService authenticationService;
 
     @InjectMocks
     private GymFacade facade;
@@ -69,6 +77,9 @@ public class GymFacadeTest {
     private PasswordChangeRequest passwordChangeRequest;
     private TraineeTrainingFilter traineeTrainingFilter;
     private TrainerTrainingFilter trainerTrainingFilter;
+
+    private AuthRequestDTO authRequestDTO;
+    private AuthResponseDTO authResponseDTO;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +101,19 @@ public class GymFacadeTest {
         passwordChangeRequest = buildPasswordChangeRequest();
         traineeTrainingFilter = buildTraineeTrainingFilter();
         trainerTrainingFilter = buildTrainerTrainingFilter();
+
+        authRequestDTO = buildAuthRequestDTO();
+        authResponseDTO = buildAuthResponseDTO();
+    }
+
+    @Test
+    void login_shouldSaveUserToContextAndReturnResponseDTO() {
+        when(authenticationService.authenticate(authRequestDTO)).thenReturn(authResponseDTO);
+
+        AuthResponseDTO actual = facade.login(authRequestDTO);
+
+        assertThat(actual).isEqualTo(authResponseDTO);
+        verify(authenticationService).authenticate(authRequestDTO);
     }
 
     @Test
@@ -106,7 +130,7 @@ public class GymFacadeTest {
     void updateTrainee_shouldReturnResponseDTO() {
         when(traineeService.updateTrainee(traineeUpdateDTO)).thenReturn(traineeResponseDTO);
 
-        TraineeResponseDTO actual = facade.updateTrainee(traineeUpdateDTO);
+        TraineeResponseDTO actual = facade.updateTrainee(traineeUpdateDTO, USERNAME);
 
         assertThat(actual).isEqualTo(traineeResponseDTO);
         verify(traineeService).updateTrainee(traineeUpdateDTO);
@@ -114,14 +138,14 @@ public class GymFacadeTest {
 
     @Test
     void toggleActiveStatus_shouldCallUserService() {
-        facade.toggleActiveStatus(toggleActiveRequestDTO);
+        facade.toggleActiveStatus(toggleActiveRequestDTO, USERNAME);
 
         verify(userService).toggleActive(toggleActiveRequestDTO);
     }
 
     @Test
     void deleteTraineeByUsername_shouldDeleteTrainee() {
-        facade.deleteTraineeByUsername(USERNAME);
+        facade.deleteTraineeByUsername(USERNAME, USERNAME);
 
         verify(traineeService).deleteByUsername(USERNAME);
     }
@@ -130,7 +154,7 @@ public class GymFacadeTest {
     void getTraineeByUsername_shouldReturnInfoDTO() {
         when(traineeService.getTraineeByUsername(USERNAME)).thenReturn(traineeInfoDTO);
 
-        TraineeInfoDTO actual = facade.getTraineeByUsername(USERNAME);
+        TraineeInfoDTO actual = facade.getTraineeByUsername(USERNAME, USERNAME);
 
         assertThat(actual).isEqualTo(traineeInfoDTO);
         verify(traineeService).getTraineeByUsername(USERNAME);
@@ -140,7 +164,7 @@ public class GymFacadeTest {
     void getAllTrainees_shouldReturnListOfInfoDTOs() {
         when(traineeService.getAllTrainees()).thenReturn(List.of(traineeInfoDTO));
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees();
+        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -152,7 +176,7 @@ public class GymFacadeTest {
     void getAllTrainees_shouldReturnEmptyList_whenNoTrainees() {
         when(traineeService.getAllTrainees()).thenReturn(List.of());
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees();
+        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(traineeService).getAllTrainees();
@@ -160,7 +184,7 @@ public class GymFacadeTest {
 
     @Test
     void updateTraineeTrainersList_shouldCallService() {
-        facade.updateTraineeTrainersList(trainerAssignmentUpdateDTO);
+        facade.updateTraineeTrainersList(trainerAssignmentUpdateDTO, USERNAME);
 
         verify(traineeService).updateTrainersList(trainerAssignmentUpdateDTO);
     }
@@ -179,7 +203,7 @@ public class GymFacadeTest {
     void updateTrainer_shouldReturnResponseDTO() {
         when(trainerService.updateTrainer(trainerUpdateDTO)).thenReturn(trainerResponseDTO);
 
-        TrainerResponseDTO actual = facade.updateTrainer(trainerUpdateDTO);
+        TrainerResponseDTO actual = facade.updateTrainer(trainerUpdateDTO, USERNAME);
 
         assertThat(actual).isEqualTo(trainerResponseDTO);
         verify(trainerService).updateTrainer(trainerUpdateDTO);
@@ -189,7 +213,7 @@ public class GymFacadeTest {
     void getTrainerByUsername_shouldReturnInfoDTO() {
         when(trainerService.getTrainerByUsername(USERNAME)).thenReturn(trainerInfoDTO);
 
-        TrainerInfoDTO actual = facade.getTrainerByUsername(USERNAME);
+        TrainerInfoDTO actual = facade.getTrainerByUsername(USERNAME, USERNAME);
 
         assertThat(actual).isEqualTo(trainerInfoDTO);
         verify(trainerService).getTrainerByUsername(USERNAME);
@@ -199,7 +223,7 @@ public class GymFacadeTest {
     void getAllTrainers_shouldReturnListOfInfoDTOs() {
         when(trainerService.getAllTrainers()).thenReturn(List.of(trainerInfoDTO));
 
-        List<TrainerInfoDTO> actual = facade.getAllTrainers();
+        List<TrainerInfoDTO> actual = facade.getAllTrainers(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -211,7 +235,7 @@ public class GymFacadeTest {
     void getAllTrainers_shouldReturnEmptyList_whenNoTrainers() {
         when(trainerService.getAllTrainers()).thenReturn(List.of());
 
-        List<TrainerInfoDTO> actual = facade.getAllTrainers();
+        List<TrainerInfoDTO> actual = facade.getAllTrainers(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(trainerService).getAllTrainers();
@@ -221,7 +245,7 @@ public class GymFacadeTest {
     void getTrainersNotAssignedToTrainee_shouldReturnListOfInfoDTOs() {
         when(trainerService.getNotAssignedToTrainee(USERNAME)).thenReturn(List.of(trainerInfoDTO));
 
-        List<TrainerInfoDTO> actual = facade.getTrainersNotAssignedToTrainee(USERNAME);
+        List<TrainerInfoDTO> actual = facade.getTrainersNotAssignedToTrainee(USERNAME, USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -231,7 +255,7 @@ public class GymFacadeTest {
 
     @Test
     void changePassword_shouldCallUserService() {
-        facade.changePassword(passwordChangeRequest);
+        facade.changePassword(passwordChangeRequest, USERNAME);
 
         verify(userService).changePassword(passwordChangeRequest);
     }
@@ -240,7 +264,7 @@ public class GymFacadeTest {
     void createTraining_shouldReturnResponseDTO() {
         when(trainingService.createTraining(trainingRequestDTO)).thenReturn(trainingResponseDTO);
 
-        TrainingResponseDTO actual = facade.createTraining(trainingRequestDTO);
+        TrainingResponseDTO actual = facade.createTraining(trainingRequestDTO, USERNAME);
 
         assertThat(actual).isEqualTo(trainingResponseDTO);
         verify(trainingService).createTraining(trainingRequestDTO);
@@ -250,7 +274,7 @@ public class GymFacadeTest {
     void getTrainingById_shouldReturnResponseDTO() {
         when(trainingService.getTrainingById(VALID_ID)).thenReturn(trainingResponseDTO);
 
-        TrainingResponseDTO actual = facade.getTrainingById(VALID_ID);
+        TrainingResponseDTO actual = facade.getTrainingById(VALID_ID, USERNAME);
 
         assertThat(actual).isEqualTo(trainingResponseDTO);
         verify(trainingService).getTrainingById(VALID_ID);
@@ -260,7 +284,7 @@ public class GymFacadeTest {
     void getAllTrainings_shouldReturnListOfResponseDTOs() {
         when(trainingService.getAllTrainings()).thenReturn(List.of(trainingResponseDTO));
 
-        List<TrainingResponseDTO> actual = facade.getAllTrainings();
+        List<TrainingResponseDTO> actual = facade.getAllTrainings(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -272,7 +296,7 @@ public class GymFacadeTest {
     void getAllTrainings_shouldReturnEmptyList_whenNoTrainings() {
         when(trainingService.getAllTrainings()).thenReturn(List.of());
 
-        List<TrainingResponseDTO> actual = facade.getAllTrainings();
+        List<TrainingResponseDTO> actual = facade.getAllTrainings(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(trainingService).getAllTrainings();
@@ -282,7 +306,7 @@ public class GymFacadeTest {
     void getTraineeTrainingsByFilter_shouldReturnListOfResponseDTOs() {
         when(trainingService.getTraineeTrainings(traineeTrainingFilter)).thenReturn(List.of(trainingResponseDTO));
 
-        List<TrainingResponseDTO> actual = facade.getTraineeTrainingsByFilter(traineeTrainingFilter);
+        List<TrainingResponseDTO> actual = facade.getTraineeTrainingsByFilter(traineeTrainingFilter, USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -294,7 +318,7 @@ public class GymFacadeTest {
     void getTrainerTrainingsByFilter_shouldReturnListOfResponseDTOs() {
         when(trainingService.getTrainerTrainings(trainerTrainingFilter)).thenReturn(List.of(trainingResponseDTO));
 
-        List<TrainingResponseDTO> actual = facade.getTrainerTrainingsByFilter(trainerTrainingFilter);
+        List<TrainingResponseDTO> actual = facade.getTrainerTrainingsByFilter(trainerTrainingFilter, USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
@@ -425,6 +449,20 @@ public class GymFacadeTest {
     private TrainerTrainingFilter buildTrainerTrainingFilter() {
         return TrainerTrainingFilter.builder()
                 .username(USERNAME)
+                .build();
+    }
+
+    private AuthRequestDTO buildAuthRequestDTO() {
+        return AuthRequestDTO.builder()
+                .username(USERNAME)
+                .password(PASSWORD)
+                .build();
+    }
+
+    private AuthResponseDTO buildAuthResponseDTO() {
+        return AuthResponseDTO.builder()
+                .username(USERNAME)
+                .message(AUTH_SUCCESS_MESSAGE)
                 .build();
     }
 }

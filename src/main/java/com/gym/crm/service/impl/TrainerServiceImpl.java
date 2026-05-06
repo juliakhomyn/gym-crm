@@ -12,6 +12,7 @@ import com.gym.crm.model.User;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.common.UserProfileService;
+import com.gym.crm.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final UserInputValidator userInputValidator;
     private final TrainerMapper mapper;
 
+    @Transactional
     @Override
     public TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO request) {
         userInputValidator.validate(request, TRAINER);
@@ -57,6 +59,7 @@ public class TrainerServiceImpl implements TrainerService {
         return mapper.toDto(saved);
     }
 
+    @Transactional
     @Override
     public TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO request) {
         userInputValidator.validate(request, "Trainer");

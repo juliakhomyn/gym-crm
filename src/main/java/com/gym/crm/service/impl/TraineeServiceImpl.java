@@ -15,6 +15,7 @@ import com.gym.crm.model.User;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.common.UserProfileService;
+import com.gym.crm.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final UserInputValidator userInputValidator;
     private final TraineeMapper mapper;
 
+    @Transactional
     @Override
     public TraineeResponseDTO createTrainee(@Valid TraineeRequestDTO request) {
         userInputValidator.validate(request, TRAINEE);
@@ -64,6 +66,7 @@ public class TraineeServiceImpl implements TraineeService {
         return mapper.toDto(saved);
     }
 
+    @Transactional
     @Override
     public TraineeResponseDTO updateTrainee(@Valid TraineeUpdateDTO request) {
         userInputValidator.validate(request, TRAINEE);
@@ -79,6 +82,7 @@ public class TraineeServiceImpl implements TraineeService {
         return mapper.toDto(updated);
     }
 
+    @Transactional
     @Override
     public void deleteTraineeById(Long id) {
         userInputValidator.validateId(id);
@@ -90,6 +94,7 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Trainee deleted successfully: id={}", id);
     }
 
+    @Transactional
     @Override
     public void deleteByUsername(String username) {
         userInputValidator.validateUsername(username);
@@ -133,6 +138,7 @@ public class TraineeServiceImpl implements TraineeService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void updateTrainersList(@Valid TrainerAssignmentUpdateDTO dto) {
         userInputValidator.validate(dto, "Trainer assignment");

@@ -19,10 +19,8 @@ public class TransactionAspect {
         return transactionManager.performReturningWithinTx(entityManager -> {
             try {
                 return joinPoint.proceed();
-            } catch (RuntimeException e) {
-                throw e;
             } catch (Throwable e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Transaction failed due to error", e);
             }
         });
     }

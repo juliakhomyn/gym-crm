@@ -13,7 +13,7 @@
       <spring.version>6.2.11</spring.version>
       <mapstruct.version>1.6.3</mapstruct.version>
       <lombok.version>1.18.30</lombok.version>
-      <sonar.projectKey>gym-crm</sonar.projectKey>
+      <sonar.projectKey>juliakhomyn_gym-crm</sonar.projectKey>
       <sonar.organization>juliakhomyn</sonar.organization>
       <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>

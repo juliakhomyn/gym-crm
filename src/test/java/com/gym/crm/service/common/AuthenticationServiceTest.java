@@ -1,4 +1,4 @@
-package com.gym.crm.service;
+package com.gym.crm.service.common;
 
 import com.gym.crm.auth.SessionContext;
 import com.gym.crm.dao.UserDAO;
@@ -7,9 +7,6 @@ import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.User;
-import com.gym.crm.service.common.UserInputValidator;
-import com.gym.crm.service.common.UserProfileService;
-import com.gym.crm.service.common.AuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTest {
+class AuthenticationServiceTest {
     private static final String USERNAME = "Cillian.Mercer";
     private static final String PASSWORD = "password";
     private static final String INVALID_PASSWORD = "invalid";

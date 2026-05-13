@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TraineeMapperTest {
+class TraineeMapperTest {
     private static final String FIRST_NAME = "Ellis";
     private static final String LAST_NAME = "Hargrove";
     private static final String USERNAME = "Ellis.Hargrove";

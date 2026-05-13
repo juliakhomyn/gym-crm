@@ -15,6 +15,8 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class TraineeDAOImpl implements TraineeDAO {
+    private static final String USERNAME = "Username";
+    private static final String USERNAME_PARAMETER = "username";
 
     private final TransactionManager transactionManager;
 
@@ -51,12 +53,12 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public void deleteByUsername(String username) {
-        Validator.validateNotBlank(username, "Username");
+        Validator.validateNotBlank(username, USERNAME);
         transactionManager.performWithinTx(manager ->
                 manager.createQuery(
                                 "FROM Trainee t JOIN FETCH t.user WHERE t.user.username = :username",
                                 Trainee.class)
-                        .setParameter("username", username)
+                        .setParameter(USERNAME_PARAMETER, username)
                         .getResultStream()
                         .findFirst()
                         .ifPresent(manager::remove));
@@ -72,11 +74,11 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public Optional<Trainee> findByUsername(String username) {
-        Validator.validateNotBlank(username, "Username");
+        Validator.validateNotBlank(username, USERNAME);
 
         return transactionManager.performReturningWithinTx(manager ->
                 manager.createQuery("FROM Trainee t JOIN FETCH t.user WHERE t.user.username = :username", Trainee.class)
-                    .setParameter("username", username)
+                    .setParameter(USERNAME_PARAMETER, username)
                     .getResultStream()
                     .findFirst()
         );
@@ -92,7 +94,7 @@ public class TraineeDAOImpl implements TraineeDAO {
 
     @Override
     public void updateTrainersList(String username, List<Trainer> trainers) {
-        Validator.validateNotBlank(username, "Username");
+        Validator.validateNotBlank(username, USERNAME);
         Validator.validateNotNull(trainers, "Trainers");
 
         transactionManager.performWithinTx(manager -> {
@@ -102,7 +104,7 @@ public class TraineeDAOImpl implements TraineeDAO {
                                     "LEFT JOIN FETCH t.trainers " +
                                     "WHERE t.user.username = :username",
                             Trainee.class)
-                    .setParameter("username", username)
+                    .setParameter(USERNAME_PARAMETER, username)
                     .getResultStream()
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Trainee not found: " + username));
@@ -129,7 +131,7 @@ public class TraineeDAOImpl implements TraineeDAO {
                                         "LEFT JOIN FETCH tr.user " +
                                         "WHERE t.user.username = :username",
                                 Trainee.class)
-                        .setParameter("username", username)
+                        .setParameter(USERNAME_PARAMETER, username)
                         .getResultStream()
                         .findFirst());
     }

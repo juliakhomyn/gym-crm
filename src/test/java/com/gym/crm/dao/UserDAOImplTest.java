@@ -11,8 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DatabaseSetup(value = "/dataset/user.xml")
-public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
+class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
+    private static final String INVALID_USERNAME_MESSAGE = "Username cannot be null or empty";
 
     @Test
     void save_shouldSaveUser_whenValid() {
@@ -24,7 +25,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
         assertThat(actual.getUsername()).isEqualTo("Simone.Radcliffe");
         assertThat(actual.getFirstName()).isEqualTo("Simone");
         assertThat(actual.getLastName()).isEqualTo("Radcliffe");
-        assertThat(actual.getIsActive()).isEqualTo(true);
+        assertThat(actual.getIsActive()).isTrue();
     }
 
     @Test
@@ -62,7 +63,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
 
         assertThat(actual).isPresent();
         assertThat(actual.get().getUsername()).isEqualTo("Callum.Whitfield");
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -92,7 +93,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findByUsername(" "));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(INVALID_USERNAME_MESSAGE);
     }
 
     @Test
@@ -100,7 +101,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.findByUsername(null));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(INVALID_USERNAME_MESSAGE);
     }
 
     @Test
@@ -135,7 +136,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.existsByUsername(" "));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(INVALID_USERNAME_MESSAGE);
     }
 
     @Test
@@ -143,7 +144,7 @@ public class UserDAOImplTest extends AbstractDaoTest<UserDAO> {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> dao.existsByUsername(null));
 
-        assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
+        assertThat(exception.getMessage()).isEqualTo(INVALID_USERNAME_MESSAGE);
     }
 
     private User buildUser() {

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DatabaseSetup(value = "/dataset/trainee.xml")
-public class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
+class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
     private static final String NULL_OR_EMPTY_USERNAME_MESSAGE = "Username cannot be null or empty";
 
@@ -33,7 +33,7 @@ public class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
         assertThat(actual.getUser().getUsername()).isEqualTo("Simone.Radcliffe");
         assertThat(actual.getUser().getFirstName()).isEqualTo("Simone");
         assertThat(actual.getUser().getLastName()).isEqualTo("Radcliffe");
-        assertThat(actual.getUser().getIsActive()).isEqualTo(true);
+        assertThat(actual.getUser().getIsActive()).isTrue();
         assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 3, 10));
         assertThat(actual.getAddress()).isEqualTo("123 Main St");
     }
@@ -70,7 +70,7 @@ public class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
         dao.delete(1L);
 
         assertThat(dao.findById(1L)).isEmpty();
-        assertThat(dao.findAll().size()).isEqualTo(1);
+        assertThat(dao.findAll()).hasSize(1);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
 
         assertThat(actual).isPresent();
         assertThat(actual.get().getUser().getUsername()).isEqualTo("Nora.Pemberton");
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
         Optional<Trainee> actual = dao.findByUsername("Nora.Pemberton");
 
         assertThat(actual).isPresent();
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test

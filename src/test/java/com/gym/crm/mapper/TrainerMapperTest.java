@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TrainerMapperTest {
+class TrainerMapperTest {
     private static final String FIRST_NAME = "Ellis";
     private static final String LAST_NAME = "Hargrove";
     private static final String USERNAME = "Ellis.Hargrove";

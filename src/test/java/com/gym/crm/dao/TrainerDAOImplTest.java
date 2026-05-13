@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DatabaseSetup(value = "/dataset/trainer.xml")
-public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
+class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
 
     @Test
@@ -27,7 +27,7 @@ public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
         assertThat(actual.getUser().getUsername()).isEqualTo("Simone.Radcliffe");
         assertThat(actual.getUser().getFirstName()).isEqualTo("Simone");
         assertThat(actual.getUser().getLastName()).isEqualTo("Radcliffe");
-        assertThat(actual.getUser().getIsActive()).isEqualTo(true);
+        assertThat(actual.getUser().getIsActive()).isTrue();
         assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Yoga");
     }
 
@@ -46,8 +46,8 @@ public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
                 .trainingTypeName("Pilates")
                 .build();
 
-        Trainer Trainer = dao.findById(1L).orElseThrow(() -> new AssertionError("Trainer not found"));
-        Trainer updated = Trainer.toBuilder()
+        Trainer trainer = dao.findById(1L).orElseThrow(() -> new AssertionError("Trainer not found"));
+        Trainer updated = trainer.toBuilder()
                 .specialization(newTrainingType)
                 .build();
 
@@ -73,7 +73,7 @@ public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
 
         assertThat(actual).isPresent();
         assertThat(actual.get().getUser().getUsername()).isEqualTo("Callum.Whitfield");
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
         Optional<Trainer> actual = dao.findByUsername("Callum.Whitfield");
 
         assertThat(actual).isPresent();
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test

@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DatabaseSetup(value = "/dataset/training.xml")
-public class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
+class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
 
     @Test
     void save_shouldSaveTraining_whenValid() {
@@ -60,7 +60,7 @@ public class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
         assertThat(actual).isPresent();
         assertThat(actual.get().getTrainingName()).isEqualTo("Hot Yoga");
         assertThat(actual.get().getTrainingDate()).isEqualTo(LocalDate.of(2026, 4, 15));
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -84,8 +84,9 @@ public class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
 
         List<Training> actual = dao.findAll();
 
-        assertThat(actual).isNotEmpty();
-        assertThat(actual).containsAll(expected);
+        assertThat(actual)
+                .isNotEmpty()
+                .containsAll(expected);
         assertThat(actual)
                 .hasSize(2)
                 .extracting(Training::getTrainingName)

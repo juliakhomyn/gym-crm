@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GCA API
+  title: GIA API
   description: API for managing trainees, their profiles, trainers, and training schedules
   version: '1.0'
 

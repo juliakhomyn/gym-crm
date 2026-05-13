@@ -228,7 +228,6 @@
                 <configuration>
                     <excludes>
                         <exclude>**/mapper/**</exclude>
-                        <exclude>**/constant/**</exclude>
                         <exclude>**/dto/**</exclude>
                         <exclude>**/model/**</exclude>
                         <exclude>**/config/**</exclude>

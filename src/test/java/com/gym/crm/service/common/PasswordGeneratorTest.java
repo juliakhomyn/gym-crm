@@ -1,5 +1,6 @@
 package com.gym.crm.service.common;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,8 @@ class PasswordGeneratorTest {
     void generatePassword_shouldReturnPasswordWithAllowedCharacters() {
         String actual = passwordGenerator.generatePassword();
 
-        assertThat(actual.chars()).allMatch(c -> CHARS.indexOf(c) >= 0);
+        assertThat(actual).isNotEmpty();
+        assertThat(StringUtils.containsOnly(actual, CHARS)).isTrue();
     }
 
     @Test

@@ -173,8 +173,9 @@ class TraineeDAOImplTest extends AbstractDaoTest<TraineeDAO> {
 
         Optional<Trainee> actual = dao.findByUsername("Nora.Pemberton");
 
-        assertThat(actual).isPresent();
-        assertThat(actual).contains(expected);
+        assertThat(actual)
+                .isPresent()
+                .contains(expected);
     }
 
     @Test

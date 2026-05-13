@@ -29,7 +29,7 @@ class PasswordGeneratorTest {
     }
 
     @Test
-    public void generatePassword_shouldReturnDifferentPasswords_whenCalledTwoTimes() {
+    void generatePassword_shouldReturnDifferentPasswords_whenCalledTwoTimes() {
         String password1 = passwordGenerator.generatePassword();
         String password2 = passwordGenerator.generatePassword();
 

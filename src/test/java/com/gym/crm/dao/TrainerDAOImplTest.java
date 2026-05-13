@@ -97,8 +97,9 @@ class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
 
         Optional<Trainer> actual = dao.findByUsername("Callum.Whitfield");
 
-        assertThat(actual).isPresent();
-        assertThat(actual).contains(expected);
+        assertThat(actual)
+                .isPresent()
+                .contains(expected);
     }
 
     @Test

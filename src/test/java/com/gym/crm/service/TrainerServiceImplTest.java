@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TrainerServiceImplTest {
+class TrainerServiceImplTest {
     private static final String FIRST_NAME = "Owen";
     private static final String LAST_NAME = "Castleberry";
     private static final String USERNAME = "Owen.Castleberry";
@@ -134,7 +134,7 @@ public class TrainerServiceImplTest {
     void updateTrainer_shouldThrowException_whenTrainerIsNull() {
         doThrow(new ValidationFailedException(TRAINER_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Trainer");
 
-        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainer(null));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.updateTrainer(null));
 
         assertThat(exception.getMessage()).isEqualTo(TRAINER_CANNOT_BE_NULL);
     }

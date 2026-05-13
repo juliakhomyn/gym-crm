@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ValidatorTest {
+class ValidatorTest {
     public static final Long ZERO_ID = 0L;
     public static final Long NEGATIVE_ID = -1L;
     public static final String VALID_STRING = "value";
@@ -19,12 +19,12 @@ public class ValidatorTest {
     public static final String BLANK_FIELD_MESSAGE = "%s cannot be null or empty";
 
     @Test
-    public void validateId_shouldNotThrowException_whenIdIsNotNull() {
+    void validateId_shouldNotThrowException_whenIdIsNotNull() {
         assertDoesNotThrow(() -> Validator.validateId(1L));
     }
 
     @Test
-    public void validateId_shouldThrowException_whenIdIsNull() {
+    void validateId_shouldThrowException_whenIdIsNull() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateId(null));
 
@@ -32,7 +32,7 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validateId_shouldThrowException_whenIdIsZero() {
+    void validateId_shouldThrowException_whenIdIsZero() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateId(ZERO_ID));
 
@@ -40,7 +40,7 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validateId_shouldThrowException_whenIdIsNegative() {
+    void validateId_shouldThrowException_whenIdIsNegative() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateId(NEGATIVE_ID));
 
@@ -48,12 +48,12 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validateNotNull_shouldNotThrowException_whenIsNotNull() {
+    void validateNotNull_shouldNotThrowException_whenIsNotNull() {
         assertDoesNotThrow(() -> Validator.validateNotNull(VALID_STRING, OBJECT_NAME));
     }
 
     @Test
-    public void validateNotNull_shouldThrowException_whenIsNull() {
+    void validateNotNull_shouldThrowException_whenIsNull() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateNotNull(null, OBJECT_NAME));
 
@@ -61,12 +61,12 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validateNotBlank_shouldNotThrowException_whenIsNotNull() {
+    void validateNotBlank_shouldNotThrowException_whenIsNotNull() {
         assertDoesNotThrow(() -> Validator.validateNotBlank(VALID_STRING, FIELD_NAME));
     }
 
     @Test
-    public void validateNotBlank_shouldThrowException_whenIsNull() {
+    void validateNotBlank_shouldThrowException_whenIsNull() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateNotBlank(null, FIELD_NAME));
 
@@ -74,7 +74,7 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validateNotBlank_shouldThrowException_whenIsBlank() {
+    void validateNotBlank_shouldThrowException_whenIsBlank() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> Validator.validateNotBlank(BLANK_STRING, FIELD_NAME));
 

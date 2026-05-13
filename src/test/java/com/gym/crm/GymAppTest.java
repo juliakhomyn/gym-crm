@@ -1,5 +1,13 @@
 package com.gym.crm;
 
-public class GymAppTest {
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+class GymAppTest {
+
+    @Test
+    void main_shouldStartSpringContextWithoutException() {
+        assertDoesNotThrow(() -> GymApp.main(new String[]{}));
+    }
 }

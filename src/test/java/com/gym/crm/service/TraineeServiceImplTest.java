@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TraineeServiceImplTest {
+class TraineeServiceImplTest {
     private static final String FIRST_NAME = "Owen";
     private static final String LAST_NAME = "Castleberry";
     private static final String USERNAME = "Owen.Castleberry";

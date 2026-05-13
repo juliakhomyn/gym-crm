@@ -62,7 +62,7 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional
     @Override
     public TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO request) {
-        userInputValidator.validate(request, "Trainer");
+        userInputValidator.validate(request, TRAINER);
 
         Trainer trainer = mapper.toEntity(request);
 

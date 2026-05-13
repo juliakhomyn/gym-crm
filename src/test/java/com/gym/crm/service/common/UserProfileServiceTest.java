@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserProfileServiceTest {
+class UserProfileServiceTest {
     private static final String FIRST_NAME = "Cillian";
     private static final String LAST_NAME = "Mercer";
     private static final String USERNAME = "Cillian.Mercer";

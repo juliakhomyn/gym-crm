@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class GymFacadeTest {
+class GymFacadeTest {
     private static final String FIRST_NAME = "Simone";
     private static final String LAST_NAME = "Radcliffe";
     private static final String USERNAME = "Simone.Radcliffe";
@@ -114,6 +114,13 @@ public class GymFacadeTest {
 
         assertThat(actual).isEqualTo(authResponseDTO);
         verify(authenticationService).authenticate(authRequestDTO);
+    }
+
+    @Test
+    void logout_shouldCallClearContext() {
+        facade.logout(USERNAME);
+
+        verify(authenticationService).logout();
     }
 
     @Test

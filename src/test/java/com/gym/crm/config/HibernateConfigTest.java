@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringJUnitConfig(TestAppConfig.class)
-public class HibernateConfigTest {
+class HibernateConfigTest {
 
     @Autowired
     private EntityManagerFactory factory;

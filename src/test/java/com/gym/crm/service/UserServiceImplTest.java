@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
     private static final String USERNAME = "Owen.Castleberry";
     private static final String NON_EXISTENT_USERNAME = "Non.Existent";
     private static final String BLANK_USERNAME = " ";

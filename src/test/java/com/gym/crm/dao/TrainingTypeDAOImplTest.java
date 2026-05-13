@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DatabaseSetup(value = "/dataset/training-type.xml")
-public class TrainingTypeDAOImplTest extends AbstractDaoTest<TrainingTypeDAO> {
+class TrainingTypeDAOImplTest extends AbstractDaoTest<TrainingTypeDAO> {
     private static final String INVALID_ID_MESSAGE = "ID must be positive and not null, got: %s";
     private static final String EMPTY_STRING_EXCEPTION_MESSAGE = "%s cannot be null or empty";
 

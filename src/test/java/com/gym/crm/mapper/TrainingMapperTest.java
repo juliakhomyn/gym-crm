@@ -14,7 +14,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TrainingMapperTest {
+class TrainingMapperTest {
     private static final String TRAINEE_USERNAME = "Trainee.Username";
     private static final String TRAINER_USERNAME = "Trainer.Username";
     private static final String TRAINING_NAME = "Morning Cardio";

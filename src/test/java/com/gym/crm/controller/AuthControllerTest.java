@@ -26,8 +26,9 @@ class AuthControllerTest {
     private static final String NEW_PASSWORD = "newPassword";
     private static final String BASE_URL = "/api/v1/auth";
 
-    private MockMvc mockMvc;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    private MockMvc mockMvc;
 
     @Mock
     private GymFacade facade;

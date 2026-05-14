@@ -19,16 +19,16 @@ public class AuthController {
     private final GymFacade facade;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
         facade.login(request);
 
-        return ResponseEntity.ok("Successful login");
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestBody LoginChangeRequest request) {
+    public ResponseEntity<Void> changePassword(@RequestBody LoginChangeRequest request) {
         facade.changePassword(request, request.getUsername());
 
-        return ResponseEntity.ok("Password changed successfully");
+        return ResponseEntity.ok().build();
     }
 }

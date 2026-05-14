@@ -1,5 +1,7 @@
 package com.gym.crm.facade;
 
+import com.gia.openapi.model.LoginChangeRequest;
+import com.gia.openapi.model.LoginRequest;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -25,6 +27,7 @@ import com.gym.crm.service.common.AuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,6 +45,7 @@ class GymFacadeTest {
     private static final String LAST_NAME = "Radcliffe";
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String PASSWORD = "password";
+    private static final String NEW_PASSWORD = "newPassword";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final long VALID_ID = 1L;
@@ -78,6 +82,9 @@ class GymFacadeTest {
     private TraineeTrainingFilter traineeTrainingFilter;
     private TrainerTrainingFilter trainerTrainingFilter;
 
+    private LoginRequest loginRequest;
+    private LoginChangeRequest loginChangeRequest;
+
     private AuthRequestDTO authRequestDTO;
     private AuthResponseDTO authResponseDTO;
 
@@ -104,16 +111,20 @@ class GymFacadeTest {
 
         authRequestDTO = buildAuthRequestDTO();
         authResponseDTO = buildAuthResponseDTO();
+
+        loginRequest = buildLoginRequest();
+        loginChangeRequest = buildLoginChangeRequest();
     }
 
     @Test
     void login_shouldSaveUserToContextAndReturnResponseDTO() {
         when(authenticationService.authenticate(authRequestDTO)).thenReturn(authResponseDTO);
 
-        AuthResponseDTO actual = facade.login(authRequestDTO);
+        facade.login(loginRequest);
 
-        assertThat(actual).isEqualTo(authResponseDTO);
-        verify(authenticationService).authenticate(authRequestDTO);
+        ArgumentCaptor<AuthRequestDTO> dtoCaptor = ArgumentCaptor.forClass(AuthRequestDTO.class);
+        verify(authenticationService).authenticate(dtoCaptor.capture());
+        assertThat(dtoCaptor.getValue()).isEqualTo(authRequestDTO);
     }
 
     @Test
@@ -262,9 +273,11 @@ class GymFacadeTest {
 
     @Test
     void changePassword_shouldCallUserService() {
-        facade.changePassword(passwordChangeRequest, USERNAME);
+        facade.changePassword(loginChangeRequest, USERNAME);
 
-        verify(userService).changePassword(passwordChangeRequest);
+        ArgumentCaptor<PasswordChangeRequest> dtoCaptor = ArgumentCaptor.forClass(PasswordChangeRequest.class);
+        verify(userService).changePassword(dtoCaptor.capture());
+        assertThat(dtoCaptor.getValue()).isEqualTo(passwordChangeRequest);
     }
 
     @Test
@@ -442,8 +455,8 @@ class GymFacadeTest {
     private PasswordChangeRequest buildPasswordChangeRequest() {
         return PasswordChangeRequest.builder()
                 .username(USERNAME)
-                .oldPassword("oldPass")
-                .newPassword("newPass")
+                .oldPassword(PASSWORD)
+                .newPassword("newPassword")
                 .build();
     }
 
@@ -471,5 +484,13 @@ class GymFacadeTest {
                 .username(USERNAME)
                 .message(AUTH_SUCCESS_MESSAGE)
                 .build();
+    }
+
+    private LoginRequest buildLoginRequest() {
+        return new LoginRequest(USERNAME, PASSWORD);
+    }
+
+    private LoginChangeRequest buildLoginChangeRequest() {
+        return new LoginChangeRequest(USERNAME, PASSWORD, NEW_PASSWORD);
     }
 }

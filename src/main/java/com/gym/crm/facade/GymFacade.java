@@ -1,8 +1,9 @@
 package com.gym.crm.facade;
 
+import com.gia.openapi.model.LoginChangeRequest;
+import com.gia.openapi.model.LoginRequest;
 import com.gym.crm.auth.Authenticated;
 import com.gym.crm.dto.common.AuthRequestDTO;
-import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.dto.trainee.TraineeInfoDTO;
@@ -38,8 +39,13 @@ public class GymFacade {
     private final UserService userService;
     private final AuthenticationService authenticationService;
 
-    public AuthResponseDTO login(AuthRequestDTO dto) {
-        return authenticationService.authenticate(dto);
+    public void login(LoginRequest request) {
+        AuthRequestDTO dto = AuthRequestDTO.builder()
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .build();
+
+        authenticationService.authenticate(dto);
     }
 
     @Authenticated
@@ -101,8 +107,14 @@ public class GymFacade {
     }
 
     @Authenticated
-    public void changePassword(PasswordChangeRequest request, String callerUsername) {
-        userService.changePassword(request);
+    public void changePassword(LoginChangeRequest request, String callerUsername) {
+        PasswordChangeRequest requestDTO = PasswordChangeRequest.builder()
+                .username(request.getUsername())
+                .oldPassword(request.getOldPassword())
+                .newPassword(request.getNewPassword())
+                .build();
+
+        userService.changePassword(requestDTO);
     }
 
     @Authenticated

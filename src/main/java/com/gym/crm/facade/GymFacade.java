@@ -36,7 +36,6 @@ import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
 import com.gym.crm.service.common.UserInputValidator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -51,8 +50,6 @@ public class GymFacade {
     private final TrainingService trainingService;
     private final UserService userService;
     private final AuthenticationService authenticationService;
-
-    private final UserInputValidator validator;
 
     private final TraineeRestMapper traineeRestMapper;
     private final TrainerRestMapper trainerRestMapper;

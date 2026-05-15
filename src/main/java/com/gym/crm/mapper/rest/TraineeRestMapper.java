@@ -1,0 +1,28 @@
+package com.gym.crm.mapper.rest;
+
+import com.gia.openapi.model.TraineeCreateRequest;
+import com.gia.openapi.model.TraineeCreateResponse;
+import com.gia.openapi.model.TraineeGetResponse;
+import com.gia.openapi.model.TraineeUpdateRequest;
+import com.gia.openapi.model.TraineeUpdateResponse;
+import com.gym.crm.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.dto.trainee.TraineeUpdateDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface TraineeRestMapper {
+
+    TraineeRequestDTO toDto(TraineeCreateRequest request);
+
+    TraineeCreateResponse toRest(TraineeResponseDTO dto);
+
+    TraineeGetResponse toRest(TraineeInfoDTO dto);
+
+    @Mapping(target = "username", source = "username")
+    TraineeUpdateDTO toDto(String username, TraineeUpdateRequest request);
+
+    TraineeUpdateResponse toRestUpdateResponse(TraineeResponseDTO dto);
+}

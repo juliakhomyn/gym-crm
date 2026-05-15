@@ -5,6 +5,7 @@ import com.gym.crm.dto.trainee.TraineeRequestDTO;
 import com.gym.crm.dto.trainee.TraineeResponseDTO;
 import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
 
 import java.util.List;
 
@@ -23,5 +24,5 @@ public interface TraineeService {
 
     List<TraineeInfoDTO> getAllTrainees();
 
-    void updateTrainersList(TrainerAssignmentUpdateDTO dto);
+    List<TrainerInfoDTO> updateTrainersList(TrainerAssignmentUpdateDTO dto);
 }

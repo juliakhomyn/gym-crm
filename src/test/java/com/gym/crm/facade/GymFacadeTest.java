@@ -179,12 +179,13 @@ class GymFacadeTest {
     @Test
     void getAllTrainees_shouldReturnListOfInfoDTOs() {
         when(traineeService.getAllTrainees()).thenReturn(List.of(traineeInfoDTO));
+        when(mapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
-                .contains(traineeInfoDTO);
+                .contains(traineeGetResponse);
         verify(traineeService).getAllTrainees();
     }
 
@@ -192,7 +193,7 @@ class GymFacadeTest {
     void getAllTrainees_shouldReturnEmptyList_whenNoTrainees() {
         when(traineeService.getAllTrainees()).thenReturn(List.of());
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(traineeService).getAllTrainees();

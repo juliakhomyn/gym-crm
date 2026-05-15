@@ -35,7 +35,6 @@ import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
-import com.gym.crm.service.common.UserInputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -96,8 +95,10 @@ public class GymFacade {
     }
 
     @Authenticated
-    public List<TraineeInfoDTO> getAllTrainees(String username) {
-        return traineeService.getAllTrainees();
+    public List<TraineeGetResponse> getAllTrainees(String username) {
+        return traineeService.getAllTrainees().stream()
+                .map(traineeRestMapper::toRest)
+                .toList();
     }
 
     @Authenticated

@@ -42,7 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TraineeControllerTest {
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
-
     private static final String BASE_URL = "/api/v1/trainees";
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -95,7 +94,6 @@ class TraineeControllerTest {
     @Test
     void register_shouldReturnCredentials_whenOptionalFieldsOmitted() throws Exception {
         TraineeCreateRequest request = TestDataProvider.buildTraineeCreateRequestOnlyRequiredFields();
-
         TraineeCreateResponse response = TestDataProvider.buildTraineeCreateResponse();
 
         when(facade.createTrainee(any(TraineeCreateRequest.class))).thenReturn(response);

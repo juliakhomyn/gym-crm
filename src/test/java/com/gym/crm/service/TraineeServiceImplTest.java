@@ -11,28 +11,29 @@ import com.gym.crm.dto.trainee.TraineeRequestDTO;
 import com.gym.crm.dto.trainee.TraineeResponseDTO;
 import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TraineeMapper;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
-import com.gym.crm.model.User;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.common.UserProfileService;
 import com.gym.crm.service.impl.TraineeServiceImpl;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,14 +48,17 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TraineeServiceImplTest {
-    private static final String FIRST_NAME = "Owen";
-    private static final String LAST_NAME = "Castleberry";
-    private static final String USERNAME = "Owen.Castleberry";
+    private static final String FIRST_NAME = "Simone";
+    private static final String LAST_NAME = "Radcliffe";
+    private static final String USERNAME = "Simone.Radcliffe";
+    private static final String TRAINER_USERNAME1 = "trainer1";
+    private static final String TRAINER_USERNAME2 = "trainer2";
     private static final String NOT_FOUND_USERNAME = "Not.Found";
     private static final String BLANK_USERNAME = " ";
     private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final String RAW_PASSWORD = "rawPassword";
     private static final long VALID_ID = 1L;
+    private static final long VALID_ID1 = 2L;
     private static final long INVALID_ID = -1L;
     private static final long NOT_FOUND_ID = 999L;
 
@@ -64,6 +68,13 @@ class TraineeServiceImplTest {
     private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
     private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
+
+    private final Trainee trainee = TestDataProvider.buildTrainee();
+    private final Trainee savedTrainee = TestDataProvider.buildSavedTrainee();
+    private final TraineeRequestDTO request = TestDataProvider.buildTraineeRequestDTO();
+    private final TraineeResponseDTO response = TestDataProvider.buildTraineeResponseDTO();
+    private final TraineeInfoDTO info = TestDataProvider.buildTraineeInfoDTO();
+    private final TrainerAssignmentUpdateDTO trainerAssignmentUpdateDTO = TestDataProvider.buildValidTrainerAssignmentUpdateDto();
 
     @Mock
     private TraineeDAO dao;
@@ -75,30 +86,16 @@ class TraineeServiceImplTest {
     private UserInputValidator userInputValidator;
     @Mock
     private TrainerDAO trainerDAO;
+    @Mock
+    private TrainerMapper trainerMapper;
 
     @InjectMocks
     private TraineeServiceImpl service;
 
-    private Trainee trainee;
-    private Trainee savedTrainee;
-    private TraineeRequestDTO request;
-    private TraineeUpdateDTO updateDTO;
-    private TraineeResponseDTO response;
-    private TraineeInfoDTO info;
     private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
-        trainee = buildTrainee();
-        request = buildTraineeRequestDTO();
-        updateDTO = buildTraineeUpdateDTO();
-        response = buildTraineeResponseDTO();
-        info = buildTraineeInfoDTO();
-        savedTrainee = trainee.toBuilder()
-                .id(VALID_ID)
-                .user(buildSavedUser())
-                .build();
-
         Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
         logAppender = new ListAppender<>();
         logAppender.start();
@@ -143,15 +140,15 @@ class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldUpdateTrainee_whenTraineeExists() {
-        when(mapper.toEntity(updateDTO)).thenReturn(savedTrainee);
-        when(dao.findById(VALID_ID)).thenReturn(Optional.ofNullable(savedTrainee));
+        TraineeUpdateDTO updateDTO = TestDataProvider.buildTraineeUpdateDTO();
+
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.ofNullable(savedTrainee));
         when(dao.update(any(Trainee.class))).thenReturn(savedTrainee);
         when(mapper.toDto(savedTrainee)).thenReturn(response);
 
         TraineeResponseDTO actual = service.updateTrainee(updateDTO);
 
         assertThat(actual).isEqualTo(response);
-        verify(mapper).toEntity(updateDTO);
         verify(dao).update(any(Trainee.class));
         verify(mapper).toDto(savedTrainee);
     }
@@ -167,13 +164,12 @@ class TraineeServiceImplTest {
 
     @Test
     void updateTrainee_shouldThrowException_whenTraineeNotFound() {
-        TraineeUpdateDTO nonExistent = buildNonExistentTraineeUpdateDTO();
-        when(mapper.toEntity(nonExistent)).thenReturn(buildNonExistentTrainee());
-        when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
+        TraineeUpdateDTO nonExistent = TestDataProvider.buildNonExistentTraineeUpdateDTO();
+        when(dao.findByUsername(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainee(nonExistent));
 
-        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_ID, NOT_FOUND_ID));
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, NOT_FOUND_USERNAME));
         verify(dao, never()).update(any(Trainee.class));
     }
 
@@ -362,144 +358,39 @@ class TraineeServiceImplTest {
 
     @Test
     void updateTrainersList_shouldUpdateTrainers_whenAllExist() {
-        Trainer trainer1 = buildTrainer("trainer1");
-        Trainer trainer2 = buildTrainer("trainer2");
-        TrainerAssignmentUpdateDTO dto = buildValidDto();
+        Trainer trainer1 = TestDataProvider.buildTrainer(VALID_ID, TRAINER_USERNAME1);
+        Trainer trainer2 = TestDataProvider.buildTrainer(VALID_ID1, TRAINER_USERNAME2);
+        Trainee updatedTrainee = TestDataProvider.buildTraineeWithTrainers(Set.of(trainer1, trainer2));
+        TrainerInfoDTO trainerInfo1 = TestDataProvider.buildTrainerInfoDTO(TRAINER_USERNAME1);
+        TrainerInfoDTO trainerInfo2 = TestDataProvider.buildTrainerInfoDTO(TRAINER_USERNAME2);
 
-        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.of(trainer1));
-        when(trainerDAO.findByUsername("trainer2")).thenReturn(Optional.of(trainer2));
+        when(trainerDAO.findByUsername(TRAINER_USERNAME1)).thenReturn(Optional.of(trainer1));
+        when(trainerDAO.findByUsername(TRAINER_USERNAME2)).thenReturn(Optional.of(trainer2));
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(updatedTrainee));
+        when(trainerMapper.toInfoDto(trainer1)).thenReturn(trainerInfo1);
+        when(trainerMapper.toInfoDto(trainer2)).thenReturn(trainerInfo2);
 
-        service.updateTrainersList(dto);
+        List<TrainerInfoDTO> actual = service.updateTrainersList(trainerAssignmentUpdateDTO);
 
-        verify(userInputValidator).validate(dto, "Trainer assignment");
-        verify(trainerDAO).findByUsername("trainer1");
-        verify(trainerDAO).findByUsername("trainer2");
-
-        ArgumentCaptor<List<Trainer>> captor = ArgumentCaptor.forClass(List.class);
-        verify(dao).updateTrainersList(eq(USERNAME), captor.capture());
-        List<Trainer> trainersPassed = captor.getValue();
-        assertThat(trainersPassed).containsExactly(trainer1, trainer2);
+        verify(userInputValidator).validate(trainerAssignmentUpdateDTO, "Trainer assignment");
+        verify(trainerDAO).findByUsername(TRAINER_USERNAME1);
+        verify(trainerDAO).findByUsername(TRAINER_USERNAME2);
+        verify(dao).updateTrainersList(eq(USERNAME), anyList());
+        verify(dao).findByUsername(USERNAME);
+        verify(trainerMapper).toInfoDto(trainer1);
+        verify(trainerMapper).toInfoDto(trainer2);
+        assertThat(actual).containsExactlyInAnyOrder(trainerInfo1, trainerInfo2);
     }
 
     @Test
     void updateTrainersList_shouldThrow_whenTrainerNotFound() {
-        TrainerAssignmentUpdateDTO dto = buildValidDto();
+        when(trainerDAO.findByUsername(TRAINER_USERNAME1)).thenReturn(Optional.empty());
 
-        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.empty());
-
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainersList(dto));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainersList(trainerAssignmentUpdateDTO));
 
         assertThat(exception.getMessage()).contains("Trainer not found by username: trainer1");
-        verify(userInputValidator).validate(dto, "Trainer assignment");
-        verify(trainerDAO).findByUsername("trainer1");
+        verify(userInputValidator).validate(trainerAssignmentUpdateDTO, "Trainer assignment");
+        verify(trainerDAO).findByUsername(TRAINER_USERNAME1);
         verify(dao, never()).updateTrainersList(anyString(), anyList());
-    }
-
-    @Test
-    void updateTrainersList_shouldCallValidationService() {
-        TrainerAssignmentUpdateDTO dto = buildValidDto();
-        Trainer trainer1 = buildTrainer("trainer1");
-        Trainer trainer2 = buildTrainer("trainer2");
-
-        when(trainerDAO.findByUsername("trainer1")).thenReturn(Optional.of(trainer1));
-        when(trainerDAO.findByUsername("trainer2")).thenReturn(Optional.of(trainer2));
-
-        service.updateTrainersList(dto);
-
-        verify(userInputValidator).validate(dto, "Trainer assignment");
-    }
-
-    private Trainee buildTrainee() {
-        return Trainee.builder()
-                .user(buildUser())
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("123 Main St")
-                .build();
-    }
-
-    private TraineeRequestDTO buildTraineeRequestDTO() {
-        return TraineeRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TraineeUpdateDTO buildTraineeUpdateDTO() {
-        return TraineeUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TraineeUpdateDTO buildNonExistentTraineeUpdateDTO() {
-        return TraineeUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
-                .build();
-    }
-
-    private TraineeResponseDTO buildTraineeResponseDTO() {
-        return TraineeResponseDTO.builder()
-                .id(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("123 Main St")
-                .build();
-    }
-
-    private TraineeInfoDTO buildTraineeInfoDTO() {
-        return TraineeInfoDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("123 Main St")
-                .build();
-    }
-
-    private User buildUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
-                .build();
-    }
-
-    private User buildSavedUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
-                .build();
-    }
-
-    private Trainee buildNonExistentTrainee() {
-        User user = User.builder().id(NOT_FOUND_ID).build();
-
-        return savedTrainee.toBuilder()
-                .id(NOT_FOUND_ID)
-                .user(user)
-                .build();
-    }
-
-    private TrainerAssignmentUpdateDTO buildValidDto() {
-        return TrainerAssignmentUpdateDTO.builder()
-                .traineeUsername(USERNAME)
-                .trainerUsernames(List.of("trainer1", "trainer2"))
-                .build();
-    }
-
-    private Trainer buildTrainer(String username) {
-        return Trainer.builder()
-                .id(VALID_ID)
-                .user(User.builder().username(username).build())
-                .build();
     }
 }

@@ -7,8 +7,10 @@ import com.gym.crm.dto.trainee.TraineeRequestDTO;
 import com.gym.crm.dto.trainee.TraineeResponseDTO;
 import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
+import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.mapper.TraineeMapper;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;
@@ -39,6 +41,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final UserProfileService userProfileService;
     private final UserInputValidator userInputValidator;
     private final TraineeMapper mapper;
+    private final TrainerMapper trainerMapper;
 
     @Transactional
     @Override
@@ -71,15 +74,26 @@ public class TraineeServiceImpl implements TraineeService {
     public TraineeResponseDTO updateTrainee(@Valid TraineeUpdateDTO request) {
         userInputValidator.validate(request, TRAINEE);
 
-        Trainee trainee = mapper.toEntity(request);
+        log.info("Updating trainee: username={}", request.getUsername());
 
-        log.info("Updating trainee: id={}", trainee.getId());
-        getTraineeById(trainee.getId());
+        Trainee existing = dao.findByUsername(request.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, request.getUsername())));
 
-        Trainee updated = dao.update(trainee);
-        log.info("Trainee updated successfully: id={}", updated.getId());
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .isActive(request.getIsActive())
+                .build();
+        Trainee updated = existing.toBuilder()
+                .user(user)
+                .dateOfBirth(request.getDateOfBirth())
+                .address(request.getAddress())
+                .build();
 
-        return mapper.toDto(updated);
+        Trainee saved = dao.update(updated);
+        log.info("Trainee updated successfully: username={}", saved.getUser().getUsername());
+
+        return mapper.toDto(saved);
     }
 
     @Transactional
@@ -140,7 +154,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public void updateTrainersList(@Valid TrainerAssignmentUpdateDTO dto) {
+    public List<TrainerInfoDTO> updateTrainersList(@Valid TrainerAssignmentUpdateDTO dto) {
         userInputValidator.validate(dto, "Trainer assignment");
 
         log.info("Updating trainers list for trainee: username={}, trainers' usernames={}", dto.getTraineeUsername(), dto.getTrainerUsernames());
@@ -151,5 +165,12 @@ public class TraineeServiceImpl implements TraineeService {
 
         dao.updateTrainersList(dto.getTraineeUsername(), trainers);
         log.info("Trainers list updated successfully: username={}", dto.getTraineeUsername());
+
+        Trainee updatedTrainee = dao.findByUsername(dto.getTraineeUsername())
+                .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, dto.getTraineeUsername())));
+
+        return updatedTrainee.getTrainers().stream()
+                .map(trainerMapper::toInfoDto)
+                .toList();
     }
 }

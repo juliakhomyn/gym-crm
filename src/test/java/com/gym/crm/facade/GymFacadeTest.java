@@ -1,7 +1,16 @@
 package com.gym.crm.facade;
 
+import com.gia.openapi.model.ActivationStatusRequest;
+import com.gia.openapi.model.AssignedTrainerResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
+import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
+import com.gia.openapi.model.TraineeAssignedTrainersUpdateResponse;
+import com.gia.openapi.model.TraineeCreateRequest;
+import com.gia.openapi.model.TraineeCreateResponse;
+import com.gia.openapi.model.TraineeGetResponse;
+import com.gia.openapi.model.TraineeUpdateRequest;
+import com.gia.openapi.model.TraineeUpdateResponse;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -17,6 +26,8 @@ import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.mapper.rest.TraineeRestMapper;
+import com.gym.crm.mapper.rest.TrainerRestMapper;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TraineeService;
@@ -24,7 +35,7 @@ import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,7 +43,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,16 +51,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GymFacadeTest {
-    private static final String FIRST_NAME = "Simone";
-    private static final String LAST_NAME = "Radcliffe";
     private static final String USERNAME = "Simone.Radcliffe";
-    private static final String PASSWORD = "password";
-    private static final String NEW_PASSWORD = "newPassword";
-    private static final String TRAINING_NAME = "Morning Cardio";
-    private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final long VALID_ID = 1L;
-
-    private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
 
     @Mock
     private TraineeService traineeService;
@@ -62,59 +64,48 @@ class GymFacadeTest {
     private UserService userService;
     @Mock
     private AuthenticationService authenticationService;
+    @Mock
+    private TraineeRestMapper mapper;
+    @Mock
+    private TrainerRestMapper trainerMapper;
 
     @InjectMocks
     private GymFacade facade;
 
-    private TraineeRequestDTO traineeRequestDTO;
-    private TraineeUpdateDTO traineeUpdateDTO;
-    private TraineeResponseDTO traineeResponseDTO;
-    private TraineeInfoDTO traineeInfoDTO;
-    private TrainerRequestDTO trainerRequestDTO;
-    private TrainerUpdateDTO trainerUpdateDTO;
-    private TrainerResponseDTO trainerResponseDTO;
-    private TrainerInfoDTO trainerInfoDTO;
-    private TrainingRequestDTO trainingRequestDTO;
-    private TrainingResponseDTO trainingResponseDTO;
-    private ToggleActiveRequestDTO toggleActiveRequestDTO;
-    private TrainerAssignmentUpdateDTO trainerAssignmentUpdateDTO;
-    private PasswordChangeRequest passwordChangeRequest;
-    private TraineeTrainingFilter traineeTrainingFilter;
-    private TrainerTrainingFilter trainerTrainingFilter;
+    private final TraineeRequestDTO traineeRequestDTO = TestDataProvider.buildTraineeRequestDTO();
+    private final TraineeUpdateDTO traineeUpdateDTO = TestDataProvider.buildTraineeUpdateDTO();
+    private final TraineeResponseDTO traineeResponseDTO = TestDataProvider.buildTraineeResponseDTO();
+    private final TraineeInfoDTO traineeInfoDTO = TestDataProvider.buildTraineeInfoDTO();
+    private final TrainerAssignmentUpdateDTO trainerAssignmentUpdateDTO = TestDataProvider.buildTrainerAssignmentUpdateDTO();
 
-    private LoginRequest loginRequest;
-    private LoginChangeRequest loginChangeRequest;
+    private final TrainerRequestDTO trainerRequestDTO = TestDataProvider.buildTrainerRequestDTO();
+    private final TrainerUpdateDTO trainerUpdateDTO = TestDataProvider.buildTrainerUpdateDTO();
+    private final TrainerResponseDTO trainerResponseDTO = TestDataProvider.buildTrainerResponseDTO();
+    private final TrainerInfoDTO trainerInfoDTO = TestDataProvider.buildTrainerInfoDTO();
 
-    private AuthRequestDTO authRequestDTO;
-    private AuthResponseDTO authResponseDTO;
+    private final TrainingRequestDTO trainingRequestDTO = TestDataProvider.buildTrainingRequestDTO();
+    private final TrainingResponseDTO trainingResponseDTO = TestDataProvider.buildTrainingResponseDTO();
+    private final TraineeTrainingFilter traineeTrainingFilter = TestDataProvider.buildTraineeTrainingFilter();
+    private final TrainerTrainingFilter trainerTrainingFilter = TestDataProvider.buildTrainerTrainingFilter();
 
-    @BeforeEach
-    void setUp() {
-        traineeRequestDTO = buildTraineeRequestDTO();
-        traineeUpdateDTO = buildTraineeUpdateDTO();
-        traineeResponseDTO = buildTraineeResponseDTO();
-        traineeInfoDTO = buildTraineeInfoDTO();
+    private final ToggleActiveRequestDTO toggleActiveRequestDTO = TestDataProvider.buildToggleActiveRequestDTO();
+    private final PasswordChangeRequest passwordChangeRequest = TestDataProvider.buildPasswordChangeRequest();
 
-        trainerRequestDTO = buildTrainerRequestDTO();
-        trainerUpdateDTO = buildTrainerUpdateDTO();
-        trainerResponseDTO = buildTrainerResponseDTO();
-        trainerInfoDTO = buildTrainerInfoDTO();
+    private final LoginRequest loginRequest = TestDataProvider.buildLoginRequest();
+    private final LoginChangeRequest loginChangeRequest = TestDataProvider.buildLoginChangeRequest();
 
-        trainingRequestDTO = buildTrainingRequestDTO();
-        trainingResponseDTO = buildTrainingResponseDTO();
+    private final AuthRequestDTO authRequestDTO = TestDataProvider.buildAuthRequestDTO();
+    private final AuthResponseDTO authResponseDTO = TestDataProvider.buildAuthResponseDTO();
+    private final ActivationStatusRequest activationStatusRequest = TestDataProvider.buildActivationStatusRequest();
 
-        toggleActiveRequestDTO = buildToggleActiveRequestDTO();
-        trainerAssignmentUpdateDTO = buildTrainerAssignmentUpdateDTO();
-        passwordChangeRequest = buildPasswordChangeRequest();
-        traineeTrainingFilter = buildTraineeTrainingFilter();
-        trainerTrainingFilter = buildTrainerTrainingFilter();
-
-        authRequestDTO = buildAuthRequestDTO();
-        authResponseDTO = buildAuthResponseDTO();
-
-        loginRequest = buildLoginRequest();
-        loginChangeRequest = buildLoginChangeRequest();
-    }
+    private final TraineeCreateRequest traineeCreateRequest = TestDataProvider.buildTraineeCreateRequest();
+    private final TraineeCreateResponse traineeCreateResponse = TestDataProvider.buildTraineeCreateResponse();
+    private final TraineeUpdateRequest traineeUpdateRequest = TestDataProvider.buildTraineeUpdateRequest();
+    private final TraineeUpdateResponse traineeUpdateResponse = TestDataProvider.buildTraineeUpdateResponse();
+    private final TraineeGetResponse traineeGetResponse = TestDataProvider.buildTraineeGetResponse();
+    private final AssignedTrainerResponse assignedTrainerResponse = TestDataProvider.buildAssignedTrainerResponse();
+    private final TraineeAssignedTrainersUpdateRequest traineeAssignedTrainersUpdateRequest = TestDataProvider.buildTraineeAssignedTrainersUpdateRequest();
+    private final TraineeAssignedTrainersUpdateResponse traineeAssignedTrainersUpdateResponse = TestDataProvider.buildTraineeAssignedTrainersUpdateResponse();
 
     @Test
     void login_shouldSaveUserToContextAndReturnResponseDTO() {
@@ -136,34 +127,40 @@ class GymFacadeTest {
 
     @Test
     void createTrainee_shouldReturnResponseDTO() {
+        when(mapper.toDto(traineeCreateRequest)).thenReturn(traineeRequestDTO);
         when(traineeService.createTrainee(traineeRequestDTO)).thenReturn(traineeResponseDTO);
+        when(mapper.toRest(traineeResponseDTO)).thenReturn(traineeCreateResponse);
 
-        TraineeResponseDTO actual = facade.createTrainee(traineeRequestDTO);
+        TraineeCreateResponse actual = facade.createTrainee(traineeCreateRequest);
 
-        assertThat(actual).isEqualTo(traineeResponseDTO);
+        assertThat(actual).isEqualTo(traineeCreateResponse);
         verify(traineeService).createTrainee(traineeRequestDTO);
     }
 
     @Test
     void updateTrainee_shouldReturnResponseDTO() {
+        when(mapper.toDto(USERNAME, traineeUpdateRequest)).thenReturn(traineeUpdateDTO);
         when(traineeService.updateTrainee(traineeUpdateDTO)).thenReturn(traineeResponseDTO);
+        when(mapper.toRestUpdateResponse(traineeResponseDTO)).thenReturn(traineeUpdateResponse);
 
-        TraineeResponseDTO actual = facade.updateTrainee(traineeUpdateDTO, USERNAME);
+        TraineeUpdateResponse actual = facade.updateTrainee(traineeUpdateRequest, USERNAME);
 
-        assertThat(actual).isEqualTo(traineeResponseDTO);
+        assertThat(actual).isEqualTo(traineeUpdateResponse);
         verify(traineeService).updateTrainee(traineeUpdateDTO);
     }
 
     @Test
     void toggleActiveStatus_shouldCallUserService() {
-        facade.toggleActiveStatus(toggleActiveRequestDTO, USERNAME);
+        facade.toggleActiveStatus(activationStatusRequest, USERNAME);
 
-        verify(userService).toggleActive(toggleActiveRequestDTO);
+        ArgumentCaptor<ToggleActiveRequestDTO> dtoCaptor = ArgumentCaptor.forClass(ToggleActiveRequestDTO.class);
+        verify(userService).toggleActive(dtoCaptor.capture());
+        assertThat(dtoCaptor.getValue()).isEqualTo(toggleActiveRequestDTO);
     }
 
     @Test
     void deleteTraineeByUsername_shouldDeleteTrainee() {
-        facade.deleteTraineeByUsername(USERNAME, USERNAME);
+        facade.deleteTraineeByUsername(USERNAME);
 
         verify(traineeService).deleteByUsername(USERNAME);
     }
@@ -171,22 +168,24 @@ class GymFacadeTest {
     @Test
     void getTraineeByUsername_shouldReturnInfoDTO() {
         when(traineeService.getTraineeByUsername(USERNAME)).thenReturn(traineeInfoDTO);
+        when(mapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
-        TraineeInfoDTO actual = facade.getTraineeByUsername(USERNAME, USERNAME);
+        TraineeGetResponse actual = facade.getTraineeByUsername(USERNAME);
 
-        assertThat(actual).isEqualTo(traineeInfoDTO);
+        assertThat(actual).isEqualTo(traineeGetResponse);
         verify(traineeService).getTraineeByUsername(USERNAME);
     }
 
     @Test
     void getAllTrainees_shouldReturnListOfInfoDTOs() {
         when(traineeService.getAllTrainees()).thenReturn(List.of(traineeInfoDTO));
+        when(mapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
-                .contains(traineeInfoDTO);
+                .contains(traineeGetResponse);
         verify(traineeService).getAllTrainees();
     }
 
@@ -194,7 +193,7 @@ class GymFacadeTest {
     void getAllTrainees_shouldReturnEmptyList_whenNoTrainees() {
         when(traineeService.getAllTrainees()).thenReturn(List.of());
 
-        List<TraineeInfoDTO> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(traineeService).getAllTrainees();
@@ -202,8 +201,12 @@ class GymFacadeTest {
 
     @Test
     void updateTraineeTrainersList_shouldCallService() {
-        facade.updateTraineeTrainersList(trainerAssignmentUpdateDTO, USERNAME);
+        when(traineeService.updateTrainersList(trainerAssignmentUpdateDTO)).thenReturn(List.of(trainerInfoDTO));
+        when(trainerMapper.toRest(trainerInfoDTO)).thenReturn(assignedTrainerResponse);
 
+        TraineeAssignedTrainersUpdateResponse actual = facade.updateTraineeTrainersList(traineeAssignedTrainersUpdateRequest, USERNAME);
+
+        assertThat(actual).isEqualTo(traineeAssignedTrainersUpdateResponse);
         verify(traineeService).updateTrainersList(trainerAssignmentUpdateDTO);
     }
 
@@ -231,7 +234,7 @@ class GymFacadeTest {
     void getTrainerByUsername_shouldReturnInfoDTO() {
         when(trainerService.getTrainerByUsername(USERNAME)).thenReturn(trainerInfoDTO);
 
-        TrainerInfoDTO actual = facade.getTrainerByUsername(USERNAME, USERNAME);
+        TrainerInfoDTO actual = facade.getTrainerByUsername(USERNAME);
 
         assertThat(actual).isEqualTo(trainerInfoDTO);
         verify(trainerService).getTrainerByUsername(USERNAME);
@@ -262,12 +265,13 @@ class GymFacadeTest {
     @Test
     void getTrainersNotAssignedToTrainee_shouldReturnListOfInfoDTOs() {
         when(trainerService.getNotAssignedToTrainee(USERNAME)).thenReturn(List.of(trainerInfoDTO));
+        when(trainerMapper.toRest(trainerInfoDTO)).thenReturn(assignedTrainerResponse);
 
-        List<TrainerInfoDTO> actual = facade.getTrainersNotAssignedToTrainee(USERNAME, USERNAME);
+        List<AssignedTrainerResponse> actual = facade.getTrainersNotAssignedToTrainee(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
-                .contains(trainerInfoDTO);
+                .contains(assignedTrainerResponse);
         verify(trainerService).getNotAssignedToTrainee(USERNAME);
     }
 
@@ -344,153 +348,5 @@ class GymFacadeTest {
                 .hasSize(1)
                 .contains(trainingResponseDTO);
         verify(trainingService).getTrainerTrainings(trainerTrainingFilter);
-    }
-
-    private TraineeRequestDTO buildTraineeRequestDTO() {
-        return TraineeRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TraineeUpdateDTO buildTraineeUpdateDTO() {
-        return TraineeUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TraineeResponseDTO buildTraineeResponseDTO() {
-        return TraineeResponseDTO.builder()
-                .id(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-    }
-
-    private TraineeInfoDTO buildTraineeInfoDTO() {
-        return TraineeInfoDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("123 Main St")
-                .build();
-    }
-
-    private TrainerRequestDTO buildTrainerRequestDTO() {
-        return TrainerRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TrainerUpdateDTO buildTrainerUpdateDTO() {
-        return TrainerUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TrainerResponseDTO buildTrainerResponseDTO() {
-        return TrainerResponseDTO.builder()
-                .id(2L)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-    }
-
-    private TrainerInfoDTO buildTrainerInfoDTO() {
-        return TrainerInfoDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .specialization(TRAINING_TYPE_NAME)
-                .build();
-    }
-
-    private TrainingRequestDTO buildTrainingRequestDTO() {
-        return TrainingRequestDTO.builder()
-                .traineeUsername(USERNAME)
-                .trainerUsername(USERNAME)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-    }
-
-    private TrainingResponseDTO buildTrainingResponseDTO() {
-        return TrainingResponseDTO.builder()
-                .id(VALID_ID)
-                .traineeUsername(USERNAME)
-                .trainerUsername(USERNAME)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-    }
-
-    private ToggleActiveRequestDTO buildToggleActiveRequestDTO() {
-        return ToggleActiveRequestDTO.builder()
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-    }
-
-    private TrainerAssignmentUpdateDTO buildTrainerAssignmentUpdateDTO() {
-        return TrainerAssignmentUpdateDTO.builder()
-                .traineeUsername(USERNAME)
-                .trainerUsernames(List.of(USERNAME))
-                .build();
-    }
-
-    private PasswordChangeRequest buildPasswordChangeRequest() {
-        return PasswordChangeRequest.builder()
-                .username(USERNAME)
-                .oldPassword(PASSWORD)
-                .newPassword("newPassword")
-                .build();
-    }
-
-    private TraineeTrainingFilter buildTraineeTrainingFilter() {
-        return TraineeTrainingFilter.builder()
-                .username(USERNAME)
-                .build();
-    }
-
-    private TrainerTrainingFilter buildTrainerTrainingFilter() {
-        return TrainerTrainingFilter.builder()
-                .username(USERNAME)
-                .build();
-    }
-
-    private AuthRequestDTO buildAuthRequestDTO() {
-        return AuthRequestDTO.builder()
-                .username(USERNAME)
-                .password(PASSWORD)
-                .build();
-    }
-
-    private AuthResponseDTO buildAuthResponseDTO() {
-        return AuthResponseDTO.builder()
-                .username(USERNAME)
-                .message(AUTH_SUCCESS_MESSAGE)
-                .build();
-    }
-
-    private LoginRequest buildLoginRequest() {
-        return new LoginRequest(USERNAME, PASSWORD);
-    }
-
-    private LoginChangeRequest buildLoginChangeRequest() {
-        return new LoginChangeRequest(USERNAME, PASSWORD, NEW_PASSWORD);
     }
 }

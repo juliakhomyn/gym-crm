@@ -96,6 +96,12 @@
           <artifactId>jakarta.servlet-api</artifactId>
           <version>6.0.0</version>
       </dependency>
+      <dependency>
+          <groupId>org.glassfish</groupId>
+          <artifactId>jakarta.el</artifactId>
+          <version>4.0.2</version>
+          <scope>test</scope>
+      </dependency>
 
       <!-- MapStruct -->
       <dependency>
@@ -122,6 +128,11 @@
           <groupId>org.openapitools</groupId>
           <artifactId>jackson-databind-nullable</artifactId>
           <version>0.2.6</version>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.datatype</groupId>
+          <artifactId>jackson-datatype-jsr310</artifactId>
+          <version>2.16.2</version>
       </dependency>
 
       <!-- Logging -->
@@ -189,6 +200,12 @@
           <groupId>org.hamcrest</groupId>
           <artifactId>hamcrest</artifactId>
           <version>2.2</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.jayway.jsonpath</groupId>
+          <artifactId>json-path</artifactId>
+          <version>2.10.0</version>
           <scope>test</scope>
       </dependency>
   </dependencies>

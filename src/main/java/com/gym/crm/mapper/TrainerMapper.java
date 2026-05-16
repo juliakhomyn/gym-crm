@@ -13,6 +13,7 @@ import org.mapstruct.Mapping;
 public interface TrainerMapper {
     @Mapping(target = "user.firstName", source = "firstName")
     @Mapping(target = "user.lastName", source = "lastName")
+    @Mapping(target = "specialization", ignore = true)
     Trainer toEntity(TrainerRequestDTO trainerRequestDTO);
 
     @Mapping(target = "user.username", source = "username")

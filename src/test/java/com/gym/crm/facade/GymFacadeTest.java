@@ -11,6 +11,11 @@ import com.gia.openapi.model.TraineeCreateResponse;
 import com.gia.openapi.model.TraineeGetResponse;
 import com.gia.openapi.model.TraineeUpdateRequest;
 import com.gia.openapi.model.TraineeUpdateResponse;
+import com.gia.openapi.model.TrainerCreateRequest;
+import com.gia.openapi.model.TrainerCreateResponse;
+import com.gia.openapi.model.TrainerUpdateRequest;
+import com.gia.openapi.model.TrainerUpdateResponse;
+import com.gia.openapi.model.TrainerGetResponse;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -52,6 +57,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GymFacadeTest {
     private static final String USERNAME = "Simone.Radcliffe";
+    private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final long VALID_ID = 1L;
 
     @Mock
@@ -65,7 +71,7 @@ class GymFacadeTest {
     @Mock
     private AuthenticationService authenticationService;
     @Mock
-    private TraineeRestMapper mapper;
+    private TraineeRestMapper traineeMapper;
     @Mock
     private TrainerRestMapper trainerMapper;
 
@@ -103,9 +109,15 @@ class GymFacadeTest {
     private final TraineeUpdateRequest traineeUpdateRequest = TestDataProvider.buildTraineeUpdateRequest();
     private final TraineeUpdateResponse traineeUpdateResponse = TestDataProvider.buildTraineeUpdateResponse();
     private final TraineeGetResponse traineeGetResponse = TestDataProvider.buildTraineeGetResponse();
-    private final AssignedTrainerResponse assignedTrainerResponse = TestDataProvider.buildAssignedTrainerResponse();
     private final TraineeAssignedTrainersUpdateRequest traineeAssignedTrainersUpdateRequest = TestDataProvider.buildTraineeAssignedTrainersUpdateRequest();
     private final TraineeAssignedTrainersUpdateResponse traineeAssignedTrainersUpdateResponse = TestDataProvider.buildTraineeAssignedTrainersUpdateResponse();
+
+    private final TrainerCreateRequest trainerCreateRequest = TestDataProvider.buildTrainerCreateRequest();
+    private final TrainerCreateResponse trainerCreateResponse = TestDataProvider.buildTrainerCreateResponse();
+    private final TrainerUpdateRequest trainerUpdateRequest = TestDataProvider.buildTrainerUpdateRequest();
+    private final TrainerUpdateResponse trainerUpdateResponse = TestDataProvider.buildTrainerUpdateResponse();
+    private final AssignedTrainerResponse assignedTrainerResponse = TestDataProvider.buildAssignedTrainerResponse();
+    private final TrainerGetResponse trainerGetResponse = TestDataProvider.buildTrainerGetResponse();
 
     @Test
     void login_shouldSaveUserToContextAndReturnResponseDTO() {
@@ -127,9 +139,9 @@ class GymFacadeTest {
 
     @Test
     void createTrainee_shouldReturnResponseDTO() {
-        when(mapper.toDto(traineeCreateRequest)).thenReturn(traineeRequestDTO);
+        when(traineeMapper.toDto(traineeCreateRequest)).thenReturn(traineeRequestDTO);
         when(traineeService.createTrainee(traineeRequestDTO)).thenReturn(traineeResponseDTO);
-        when(mapper.toRest(traineeResponseDTO)).thenReturn(traineeCreateResponse);
+        when(traineeMapper.toRest(traineeResponseDTO)).thenReturn(traineeCreateResponse);
 
         TraineeCreateResponse actual = facade.createTrainee(traineeCreateRequest);
 
@@ -139,9 +151,9 @@ class GymFacadeTest {
 
     @Test
     void updateTrainee_shouldReturnResponseDTO() {
-        when(mapper.toDto(USERNAME, traineeUpdateRequest)).thenReturn(traineeUpdateDTO);
+        when(traineeMapper.toDto(USERNAME, traineeUpdateRequest)).thenReturn(traineeUpdateDTO);
         when(traineeService.updateTrainee(traineeUpdateDTO)).thenReturn(traineeResponseDTO);
-        when(mapper.toRestUpdateResponse(traineeResponseDTO)).thenReturn(traineeUpdateResponse);
+        when(traineeMapper.toRestUpdateResponse(traineeResponseDTO)).thenReturn(traineeUpdateResponse);
 
         TraineeUpdateResponse actual = facade.updateTrainee(traineeUpdateRequest, USERNAME);
 
@@ -168,7 +180,7 @@ class GymFacadeTest {
     @Test
     void getTraineeByUsername_shouldReturnInfoDTO() {
         when(traineeService.getTraineeByUsername(USERNAME)).thenReturn(traineeInfoDTO);
-        when(mapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
+        when(traineeMapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
         TraineeGetResponse actual = facade.getTraineeByUsername(USERNAME);
 
@@ -179,7 +191,7 @@ class GymFacadeTest {
     @Test
     void getAllTrainees_shouldReturnListOfInfoDTOs() {
         when(traineeService.getAllTrainees()).thenReturn(List.of(traineeInfoDTO));
-        when(mapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
+        when(traineeMapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
         List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
 
@@ -212,43 +224,49 @@ class GymFacadeTest {
 
     @Test
     void createTrainer_shouldReturnResponseDTO() {
+        when(trainerMapper.toDto(trainerCreateRequest)).thenReturn(trainerRequestDTO);
         when(trainerService.createTrainer(trainerRequestDTO)).thenReturn(trainerResponseDTO);
+        when(trainerMapper.toRest(trainerResponseDTO)).thenReturn(trainerCreateResponse);
 
-        TrainerResponseDTO actual = facade.createTrainer(trainerRequestDTO);
+        TrainerCreateResponse actual = facade.createTrainer(trainerCreateRequest);
 
-        assertThat(actual).isEqualTo(trainerResponseDTO);
+        assertThat(actual).isEqualTo(trainerCreateResponse);
         verify(trainerService).createTrainer(trainerRequestDTO);
     }
 
     @Test
     void updateTrainer_shouldReturnResponseDTO() {
+        when(trainerMapper.toDto(TRAINER_USERNAME, trainerUpdateRequest)).thenReturn(trainerUpdateDTO);
         when(trainerService.updateTrainer(trainerUpdateDTO)).thenReturn(trainerResponseDTO);
+        when(trainerMapper.toRestUpdateResponse(trainerResponseDTO)).thenReturn(trainerUpdateResponse);
 
-        TrainerResponseDTO actual = facade.updateTrainer(trainerUpdateDTO, USERNAME);
+        TrainerUpdateResponse actual = facade.updateTrainer(trainerUpdateRequest, TRAINER_USERNAME);
 
-        assertThat(actual).isEqualTo(trainerResponseDTO);
+        assertThat(actual).isEqualTo(trainerUpdateResponse);
         verify(trainerService).updateTrainer(trainerUpdateDTO);
     }
 
     @Test
     void getTrainerByUsername_shouldReturnInfoDTO() {
-        when(trainerService.getTrainerByUsername(USERNAME)).thenReturn(trainerInfoDTO);
+        when(trainerService.getTrainerByUsername(TRAINER_USERNAME)).thenReturn(trainerInfoDTO);
+        when(trainerMapper.toRestGetResponse(trainerInfoDTO)).thenReturn(trainerGetResponse);
 
-        TrainerInfoDTO actual = facade.getTrainerByUsername(USERNAME);
+        TrainerGetResponse actual = facade.getTrainerByUsername(TRAINER_USERNAME);
 
-        assertThat(actual).isEqualTo(trainerInfoDTO);
-        verify(trainerService).getTrainerByUsername(USERNAME);
+        assertThat(actual).isEqualTo(trainerGetResponse);
+        verify(trainerService).getTrainerByUsername(TRAINER_USERNAME);
     }
 
     @Test
     void getAllTrainers_shouldReturnListOfInfoDTOs() {
         when(trainerService.getAllTrainers()).thenReturn(List.of(trainerInfoDTO));
+        when(trainerMapper.toRestGetResponse(trainerInfoDTO)).thenReturn(trainerGetResponse);
 
-        List<TrainerInfoDTO> actual = facade.getAllTrainers(USERNAME);
+        List<TrainerGetResponse> actual = facade.getAllTrainers(USERNAME);
 
         assertThat(actual)
                 .hasSize(1)
-                .contains(trainerInfoDTO);
+                .contains(trainerGetResponse);
         verify(trainerService).getAllTrainers();
     }
 
@@ -256,7 +274,7 @@ class GymFacadeTest {
     void getAllTrainers_shouldReturnEmptyList_whenNoTrainers() {
         when(trainerService.getAllTrainers()).thenReturn(List.of());
 
-        List<TrainerInfoDTO> actual = facade.getAllTrainers(USERNAME);
+        List<TrainerGetResponse> actual = facade.getAllTrainers(USERNAME);
 
         assertThat(actual).isEmpty();
         verify(trainerService).getAllTrainers();

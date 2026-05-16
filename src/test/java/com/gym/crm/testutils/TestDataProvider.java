@@ -11,6 +11,12 @@ import com.gia.openapi.model.TraineeCreateResponse;
 import com.gia.openapi.model.TraineeGetResponse;
 import com.gia.openapi.model.TraineeUpdateRequest;
 import com.gia.openapi.model.TraineeUpdateResponse;
+import com.gia.openapi.model.TrainerCreateRequest;
+import com.gia.openapi.model.TrainerCreateResponse;
+import com.gia.openapi.model.TrainerUpdateRequest;
+import com.gia.openapi.model.TrainerUpdateResponse;
+import com.gia.openapi.model.AssignedTraineeResponse;
+import com.gia.openapi.model.TrainerGetResponse;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -28,6 +34,7 @@ import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
+import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
@@ -96,33 +103,37 @@ public class TestDataProvider {
 
     public static TrainerRequestDTO buildTrainerRequestDTO() {
         return TrainerRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .firstName(TRAINER_FIRST_NAME)
+                .lastName(TRAINER_LAST_NAME)
+                .specialization(SPECIALIZATION)
                 .build();
     }
 
     public static TrainerUpdateDTO buildTrainerUpdateDTO() {
         return TrainerUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .username(TRAINER_USERNAME)
+                .firstName(TRAINER_FIRST_NAME)
+                .lastName(TRAINER_LAST_NAME)
+                .specialization(SPECIALIZATION)
+                .isActive(true)
                 .build();
     }
 
     public static TrainerResponseDTO buildTrainerResponseDTO() {
         return TrainerResponseDTO.builder()
                 .id(2L)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
+                .firstName(TRAINER_FIRST_NAME)
+                .lastName(TRAINER_LAST_NAME)
+                .username(TRAINER_USERNAME)
                 .isActive(true)
                 .build();
     }
 
     public static TrainerInfoDTO buildTrainerInfoDTO() {
         return TrainerInfoDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
+                .firstName(TRAINER_FIRST_NAME)
+                .lastName(TRAINER_LAST_NAME)
+                .username(TRAINER_USERNAME)
                 .isActive(true)
                 .specialization(TRAINING_TYPE_NAME)
                 .build();
@@ -131,7 +142,7 @@ public class TestDataProvider {
     public static TrainingRequestDTO buildTrainingRequestDTO() {
         return TrainingRequestDTO.builder()
                 .traineeUsername(USERNAME)
-                .trainerUsername(USERNAME)
+                .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
                 .trainingTypeName(TRAINING_TYPE_NAME)
                 .trainingDate(LocalDate.of(2024, 1, 15))
@@ -143,7 +154,7 @@ public class TestDataProvider {
         return TrainingResponseDTO.builder()
                 .id(VALID_ID)
                 .traineeUsername(USERNAME)
-                .trainerUsername(USERNAME)
+                .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
                 .trainingTypeName(TRAINING_TYPE_NAME)
                 .trainingDate(LocalDate.of(2024, 1, 15))
@@ -294,13 +305,13 @@ public class TestDataProvider {
 
     public static Trainee buildTrainee() {
         return Trainee.builder()
-                .user(buildUser())
+                .user(buildTraineeUser())
                 .dateOfBirth(DATE_OF_BIRTH)
                 .address(ADDRESS)
                 .build();
     }
 
-    public static User buildUser() {
+    public static User buildTraineeUser() {
         return User.builder()
                 .id(VALID_ID)
                 .firstName(FIRST_NAME)
@@ -311,19 +322,10 @@ public class TestDataProvider {
                 .build();
     }
 
-    public static User buildSavedUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
-                .build();
-    }
-
     public static Trainee buildSavedTrainee() {
         return buildTrainee().toBuilder()
                 .id(VALID_ID)
-                .user(buildSavedUser())
+                .user(buildTraineeUser())
                 .build();
     }
 
@@ -362,5 +364,104 @@ public class TestDataProvider {
                 .specialization(SPECIALIZATION)
                 .isActive(true)
                 .build();
+    }
+
+    public static TrainerCreateRequest buildTrainerCreateRequest() {
+        TrainerCreateRequest request = new TrainerCreateRequest();
+        request.setFirstName(FIRST_NAME);
+        request.setLastName(LAST_NAME);
+        request.setSpecialization(SPECIALIZATION);
+
+        return request;
+    }
+
+    public static TrainerCreateResponse buildTrainerCreateResponse() {
+        TrainerCreateResponse response = new TrainerCreateResponse();
+        response.setUsername(TRAINER_USERNAME);
+        response.password(ENCODED_PASSWORD);
+
+        return response;
+    }
+
+    public static Trainer buildTrainer() {
+        return Trainer.builder()
+                .user(buildTrainerUser())
+                .specialization(buildTrainingType())
+                .build();
+    }
+
+    public static TrainingType buildTrainingType() {
+        return TrainingType.builder().trainingTypeName(SPECIALIZATION).build();
+    }
+
+    public static User buildTrainerUser() {
+        return User.builder()
+                .id(VALID_ID)
+                .firstName(TRAINER_FIRST_NAME)
+                .lastName(TRAINER_LAST_NAME)
+                .username(TRAINER_USERNAME)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
+
+    public static Trainer buildSavedTrainer() {
+        return buildTrainer().toBuilder()
+                .id(VALID_ID)
+                .user(buildTrainerUser())
+                .build();
+    }
+
+    public static TrainerUpdateDTO buildNonExistentTrainerUpdateDTO() {
+        return TrainerUpdateDTO.builder()
+                .id(NOT_FOUND_ID)
+                .username(NOT_FOUND_USERNAME)
+                .build();
+    }
+
+    public static TrainerInfoDTO buildNotAssignedTrainerInfoDTO(String username) {
+        return TrainerInfoDTO.builder().username(username).build();
+    }
+
+    public static TrainerUpdateRequest buildTrainerUpdateRequest() {
+        TrainerUpdateRequest request = new TrainerUpdateRequest();
+        request.setFirstName(FIRST_NAME);
+        request.setLastName(LAST_NAME);
+        request.setSpecialization(SPECIALIZATION);
+        request.isActive(true);
+
+        return request;
+    }
+
+    public static TrainerUpdateResponse buildTrainerUpdateResponse() {
+        TrainerUpdateResponse response = new TrainerUpdateResponse();
+        response.setUsername(TRAINER_USERNAME);
+        response.setFirstName(TRAINER_FIRST_NAME);
+        response.setLastName(TRAINER_LAST_NAME);
+        response.setSpecialization(SPECIALIZATION);
+        response.isActive(true);
+        response.setTrainees(List.of(buildAssignedTraineeResponse()));
+
+        return response;
+    }
+
+    public static AssignedTraineeResponse buildAssignedTraineeResponse() {
+        AssignedTraineeResponse response = new AssignedTraineeResponse();
+        response.setUsername(USERNAME);
+        response.setFirstName(FIRST_NAME);
+        response.setLastName(LAST_NAME);
+
+        return response;
+    }
+
+    public static TrainerGetResponse buildTrainerGetResponse() {
+        TrainerGetResponse response = new TrainerGetResponse();
+        response.setFirstName(TRAINER_FIRST_NAME);
+        response.setLastName(TRAINER_LAST_NAME);
+        response.setSpecialization(SPECIALIZATION);
+        response.isActive(true);
+        response.setTrainees(List.of(buildAssignedTraineeResponse()));
+
+        return response;
     }
 }

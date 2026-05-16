@@ -29,7 +29,6 @@ class TrainerMapperTest {
 
         assertEquals(FIRST_NAME, entity.getUser().getFirstName());
         assertEquals(LAST_NAME, entity.getUser().getLastName());
-        assertEquals(TRAINING_TYPE_NAME, entity.getSpecialization().getTrainingTypeName());
     }
 
     @Test

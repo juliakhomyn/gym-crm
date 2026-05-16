@@ -60,6 +60,7 @@ class TraineeControllerTest {
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
+                .addPlaceholderValue("app.api.base-path", "/api/v1")
                 .build();
     }
 

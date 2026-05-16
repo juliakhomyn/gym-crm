@@ -1,6 +1,7 @@
 package com.gym.crm.service;
 
 import com.gym.crm.dao.TrainerDAO;
+import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.dto.trainer.TrainerRequestDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
@@ -10,11 +11,10 @@ import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
-import com.gym.crm.model.User;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.common.UserProfileService;
 import com.gym.crm.service.impl.TrainerServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,9 +52,12 @@ class TrainerServiceImplTest {
     private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
     private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
+    private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
 
     @Mock
     private TrainerDAO dao;
+    @Mock
+    private TrainingTypeDAO trainingTypeDAO;
     @Mock
     private UserProfileService userProfileService;
     @Mock
@@ -65,25 +68,13 @@ class TrainerServiceImplTest {
     @InjectMocks
     private TrainerServiceImpl service;
 
-    private Trainer trainer;
-    private Trainer savedTrainer;
-    private TrainerRequestDTO request;
-    private TrainerUpdateDTO updateDTO;
-    private TrainerResponseDTO response;
-    private TrainerInfoDTO info;
-
-    @BeforeEach
-    void setUp() {
-        trainer = buildTrainer();
-        request = buildTrainerRequestDTO();
-        updateDTO = buildTrainerUpdateDTO();
-        response = buildTrainerResponseDTO();
-        info = buildTrainerInfoDTO();
-        savedTrainer = trainer.toBuilder()
-                .id(VALID_ID)
-                .user(buildSavedUser())
-                .build();
-    }
+    private final Trainer trainer = TestDataProvider.buildTrainer();
+    private final Trainer savedTrainer = TestDataProvider.buildSavedTrainer();
+    private final TrainerRequestDTO request = TestDataProvider.buildTrainerRequestDTO();
+    private final TrainerUpdateDTO updateDTO = TestDataProvider.buildTrainerUpdateDTO();
+    private final TrainerResponseDTO response = TestDataProvider.buildTrainerResponseDTO();
+    private final TrainerInfoDTO info = TestDataProvider.buildTrainerInfoDTO();
+    private final TrainingType trainingType = TestDataProvider.buildTrainingType();
 
     @Test
     void createTrainer_shouldSaveTrainerWithCredentials() {
@@ -91,6 +82,7 @@ class TrainerServiceImplTest {
         when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
         when(userProfileService.encodePassword(RAW_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        when(trainingTypeDAO.findByTrainingTypeName(SPECIALIZATION)).thenReturn(Optional.of(trainingType));
         when(dao.save(any(Trainer.class))).thenReturn(savedTrainer);
         when(mapper.toDto(savedTrainer)).thenReturn(response);
 
@@ -116,16 +108,26 @@ class TrainerServiceImplTest {
     }
 
     @Test
+    void createTrainer_shouldThrowException_whenTrainingTypeNotFound() {
+        when(trainingTypeDAO.findByTrainingTypeName(SPECIALIZATION)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTrainer(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, SPECIALIZATION));
+        verify(dao, never()).save(any(Trainer.class));
+    }
+
+    @Test
     void updateTrainer_shouldUpdateTrainer_whenTrainerExists() {
-        when(mapper.toEntity(updateDTO)).thenReturn(savedTrainer);
-        when(dao.findById(VALID_ID)).thenReturn(Optional.ofNullable(savedTrainer));
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.ofNullable(savedTrainer));
+        when(trainingTypeDAO.findByTrainingTypeName(SPECIALIZATION)).thenReturn(Optional.of(trainingType));
         when(dao.update(any(Trainer.class))).thenReturn(savedTrainer);
         when(mapper.toDto(savedTrainer)).thenReturn(response);
 
         TrainerResponseDTO actual = service.updateTrainer(updateDTO);
 
         assertThat(actual).isEqualTo(response);
-        verify(mapper).toEntity(updateDTO);
+        verify(mapper).toDto(savedTrainer);
         verify(dao).update(any(Trainer.class));
         verify(mapper).toDto(savedTrainer);
     }
@@ -141,13 +143,23 @@ class TrainerServiceImplTest {
 
     @Test
     void updateTrainer_shouldThrowException_whenTrainerNotFound() {
-        TrainerUpdateDTO nonExistent = buildNonExistentTrainerUpdateDTO();
-        when(mapper.toEntity(nonExistent)).thenReturn(buildNonExistentTrainer());
-        when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
+        TrainerUpdateDTO nonExistent = TestDataProvider.buildNonExistentTrainerUpdateDTO();
+        when(dao.findByUsername(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainer(nonExistent));
 
-        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINER_NOT_FOUND_BY_ID, NOT_FOUND_ID));
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINER_NOT_FOUND_BY_USERNAME, NOT_FOUND_USERNAME));
+        verify(dao, never()).update(any(Trainer.class));
+    }
+
+    @Test
+    void updateTrainer_shouldThrowException_whenTrainingTypeNotFound() {
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.ofNullable(savedTrainer));
+        when(trainingTypeDAO.findByTrainingTypeName(SPECIALIZATION)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.updateTrainer(updateDTO));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, SPECIALIZATION));
         verify(dao, never()).update(any(Trainer.class));
     }
 
@@ -240,10 +252,10 @@ class TrainerServiceImplTest {
 
     @Test
     void getNotAssignedToTrainee_shouldReturnListOfTrainerInfoDTOs() {
-        Trainer trainer1 = buildTrainer(1L, "trainer1");
-        Trainer trainer2 = buildTrainer(2L, "trainer2");
-        TrainerInfoDTO trainerInfoDTO1 = buildNotAssignedTrainerInfoDTO("trainer1");
-        TrainerInfoDTO trainerInfoDTO2 = buildNotAssignedTrainerInfoDTO("trainer2");
+        Trainer trainer1 = TestDataProvider.buildTrainer(1L, "trainer1");
+        Trainer trainer2 = TestDataProvider.buildTrainer(2L, "trainer2");
+        TrainerInfoDTO trainerInfoDTO1 = TestDataProvider.buildNotAssignedTrainerInfoDTO("trainer1");
+        TrainerInfoDTO trainerInfoDTO2 = TestDataProvider.buildNotAssignedTrainerInfoDTO("trainer2");
 
         when(dao.findNotAssignedToTrainee(USERNAME)).thenReturn(List.of(trainer1, trainer2));
         when(mapper.toInfoDto(trainer1)).thenReturn(trainerInfoDTO1);
@@ -282,99 +294,5 @@ class TrainerServiceImplTest {
         verify(userInputValidator).validateUsername(BLANK_USERNAME);
         verify(dao, never()).findNotAssignedToTrainee(any());
         verify(mapper, never()).toInfoDto(any());
-    }
-
-    private Trainer buildTrainer() {
-        return Trainer.builder()
-                .user(buildUser())
-                .specialization(buildTrainingType())
-                .build();
-    }
-
-    private User buildUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
-                .build();
-    }
-
-    private User buildSavedUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .username(USERNAME)
-                .password(ENCODED_PASSWORD)
-                .isActive(true)
-                .build();
-    }
-
-    private TrainingType buildTrainingType() {
-        return TrainingType.builder().trainingTypeName(SPECIALIZATION).build();
-    }
-
-    private Trainer buildNonExistentTrainer() {
-        User user = User.builder()
-                .id(NOT_FOUND_ID)
-                .build();
-
-        return savedTrainer.toBuilder()
-                .id(NOT_FOUND_ID)
-                .user(user)
-                .build();
-    }
-
-    private TrainerRequestDTO buildTrainerRequestDTO() {
-        return TrainerRequestDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TrainerUpdateDTO buildTrainerUpdateDTO() {
-        return TrainerUpdateDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .build();
-    }
-
-    private TrainerUpdateDTO buildNonExistentTrainerUpdateDTO() {
-        return TrainerUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
-                .build();
-    }
-
-    private TrainerResponseDTO buildTrainerResponseDTO() {
-        return TrainerResponseDTO.builder()
-                .id(VALID_ID)
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .specialization(SPECIALIZATION)
-                .build();
-    }
-
-    private TrainerInfoDTO buildTrainerInfoDTO() {
-        return TrainerInfoDTO.builder()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .username(USERNAME)
-                .isActive(true)
-                .specialization(SPECIALIZATION)
-                .build();
-    }
-
-    private Trainer buildTrainer(Long id, String username) {
-        return Trainer.builder()
-                .id(id)
-                .user(User.builder().username(username).build())
-                .build();
-    }
-
-    private TrainerInfoDTO buildNotAssignedTrainerInfoDTO(String username) {
-        return TrainerInfoDTO.builder().username(username).build();
     }
 }

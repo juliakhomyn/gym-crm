@@ -11,6 +11,11 @@ import com.gia.openapi.model.TraineeCreateResponse;
 import com.gia.openapi.model.TraineeGetResponse;
 import com.gia.openapi.model.TraineeUpdateRequest;
 import com.gia.openapi.model.TraineeUpdateResponse;
+import com.gia.openapi.model.TrainerCreateRequest;
+import com.gia.openapi.model.TrainerCreateResponse;
+import com.gia.openapi.model.TrainerUpdateRequest;
+import com.gia.openapi.model.TrainerUpdateResponse;
+import com.gia.openapi.model.TrainerGetResponse;
 import com.gym.crm.auth.Authenticated;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -118,23 +123,33 @@ public class GymFacade {
         return response;
     }
 
-    public TrainerResponseDTO createTrainer(TrainerRequestDTO trainerRequestDTO) {
-        return trainerService.createTrainer(trainerRequestDTO);
+    public TrainerCreateResponse createTrainer(TrainerCreateRequest request) {
+        TrainerRequestDTO dto = trainerRestMapper.toDto(request);
+        TrainerResponseDTO trainerResponseDTO = trainerService.createTrainer(dto);
+
+        return trainerRestMapper.toRest(trainerResponseDTO);
     }
 
     @Authenticated
-    public TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainerUpdateDTO, String username) {
-        return trainerService.updateTrainer(trainerUpdateDTO);
+    public TrainerUpdateResponse updateTrainer(TrainerUpdateRequest request, String username) {
+        TrainerUpdateDTO dto = trainerRestMapper.toDto(username, request);
+        TrainerResponseDTO trainerResponseDTO = trainerService.updateTrainer(dto);
+
+        return trainerRestMapper.toRestUpdateResponse(trainerResponseDTO);
     }
 
     @Authenticated
-    public TrainerInfoDTO getTrainerByUsername(String username) {
-        return trainerService.getTrainerByUsername(username);
+    public TrainerGetResponse getTrainerByUsername(String username) {
+        TrainerInfoDTO trainerInfoDTO = trainerService.getTrainerByUsername(username);
+
+        return trainerRestMapper.toRestGetResponse(trainerInfoDTO);
     }
 
     @Authenticated
-    public List<TrainerInfoDTO> getAllTrainers(String username) {
-        return trainerService.getAllTrainers();
+    public List<TrainerGetResponse> getAllTrainers(String username) {
+        return trainerService.getAllTrainers().stream()
+                .map(trainerRestMapper::toRestGetResponse)
+                .toList();
     }
 
     @Authenticated

@@ -2,6 +2,8 @@ package com.gym.crm.testutils;
 
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.AssignedTrainerResponse;
+import com.gia.openapi.model.GetTraineeTrainingResponse;
+import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
@@ -17,6 +19,8 @@ import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
 import com.gia.openapi.model.AssignedTraineeResponse;
 import com.gia.openapi.model.TrainerGetResponse;
+import com.gia.openapi.model.TrainingCreateRequest;
+import com.gia.openapi.model.TrainingTypeResponse;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -32,8 +36,10 @@ import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.dto.training.TrainingTypeDTO;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
+import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
@@ -59,10 +65,14 @@ public class TestDataProvider {
     private static final String TRAINER_LAST_NAME = "Castleberry";
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String SPECIALIZATION = "Yoga";
+    private static final LocalDate TRAINING_DATE = LocalDate.of(2024, 1, 15);
+    private static final int TRAINING_DURATION = 60;
     private static final String NOT_FOUND_USERNAME = "Not.Found";
     private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final long VALID_ID = 1L;
     private static final long NOT_FOUND_ID = 999L;
+    private static final LocalDate FROM_DATE = LocalDate.of(2024, 1, 1);
+    private static final LocalDate TO_DATE = LocalDate.of(2024, 1, 30);
 
     private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
 
@@ -144,9 +154,8 @@ public class TestDataProvider {
                 .traineeUsername(USERNAME)
                 .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
+                .trainingDate(TRAINING_DATE)
+                .trainingDuration(TRAINING_DURATION)
                 .build();
     }
 
@@ -157,8 +166,8 @@ public class TestDataProvider {
                 .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
                 .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
+                .trainingDate(TRAINING_DATE)
+                .trainingDuration(TRAINING_DURATION)
                 .build();
     }
 
@@ -187,12 +196,19 @@ public class TestDataProvider {
     public static TraineeTrainingFilter buildTraineeTrainingFilter() {
         return TraineeTrainingFilter.builder()
                 .username(USERNAME)
+                .fromDate(FROM_DATE)
+                .toDate(TO_DATE)
+                .joinFullName(TRAINER_FIRST_NAME + " " + TRAINER_LAST_NAME)
+                .trainingTypeName(TRAINING_TYPE_NAME)
                 .build();
     }
 
     public static TrainerTrainingFilter buildTrainerTrainingFilter() {
         return TrainerTrainingFilter.builder()
-                .username(USERNAME)
+                .username(TRAINER_USERNAME)
+                .fromDate(FROM_DATE)
+                .toDate(TO_DATE)
+                .joinFullName(FIRST_NAME + " " + LAST_NAME)
                 .build();
     }
 
@@ -461,6 +477,69 @@ public class TestDataProvider {
         response.setSpecialization(SPECIALIZATION);
         response.isActive(true);
         response.setTrainees(List.of(buildAssignedTraineeResponse()));
+
+        return response;
+    }
+
+    public static TrainingCreateRequest buildTrainingCreateRequest() {
+        TrainingCreateRequest request = new TrainingCreateRequest();
+        request.setTraineeUsername(USERNAME);
+        request.setTrainerUsername(TRAINER_USERNAME);
+        request.setTrainingDate(TRAINING_DATE);
+        request.setTrainingDuration(TRAINING_DURATION);
+        request.setTrainingName(TRAINING_NAME);
+
+        return request;
+    }
+
+    public static GetTraineeTrainingResponse buildGetTraineeTrainingResponse() {
+        GetTraineeTrainingResponse response = new GetTraineeTrainingResponse();
+        response.setTrainerName(TRAINER_USERNAME + " " + TRAINER_LAST_NAME);
+        response.setTrainingDate(TRAINING_DATE);
+        response.setTrainingDuration(TRAINING_DURATION);
+        response.setTrainingName(TRAINING_NAME);
+
+        return response;
+    }
+
+    public static GetTrainerTrainingResponse buildGetTrainerTrainingResponse() {
+        GetTrainerTrainingResponse response = new GetTrainerTrainingResponse();
+        response.setTraineeName(FIRST_NAME + " " + LAST_NAME);
+        response.setTrainingDate(TRAINING_DATE);
+        response.setTrainingDuration(TRAINING_DURATION);
+        response.setTrainingName(TRAINING_NAME);
+
+        return response;
+    }
+
+    public static Training buildTraining() {
+        return Training.builder()
+                .trainingName(TRAINING_NAME)
+                .trainingType(buildTrainingType())
+                .trainingDate(TRAINING_DATE)
+                .trainingDuration(TRAINING_DURATION)
+                .trainee(buildTrainee())
+                .trainer(buildTrainer())
+                .build();
+    }
+
+    public static Training buildSavedTraining() {
+        return buildTraining().toBuilder()
+                .id(VALID_ID)
+                .build();
+    }
+
+    public static TrainingTypeDTO buildTrainingTypeDTO() {
+        return TrainingTypeDTO.builder()
+                .id(VALID_ID)
+                .trainingTypeName(SPECIALIZATION)
+                .build();
+    }
+
+    public static TrainingTypeResponse buildTrainingTypeResponse() {
+        TrainingTypeResponse response = new TrainingTypeResponse();
+        response.setId(1);
+        response.setName(SPECIALIZATION);
 
         return response;
     }

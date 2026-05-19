@@ -28,10 +28,6 @@ public class TrainingRequestDTO {
     @Size(max = 100, message = "Training name cannot exceed 100 characters")
     private final String trainingName;
 
-    @NotBlank(message = "Training type name is required")
-    @Size(max = 100, message = "Training type name cannot exceed 100 characters")
-    private final String trainingTypeName;
-
     @NotNull(message = "Training date is required")
     private final LocalDate trainingDate;
 

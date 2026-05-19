@@ -2,7 +2,9 @@ package com.gym.crm.mapper;
 
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.dto.training.TrainingTypeDTO;
 import com.gym.crm.model.Training;
+import com.gym.crm.model.TrainingType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -10,11 +12,12 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TrainingMapper {
 
-    @Mapping(target = "trainingType.trainingTypeName", source = "trainingTypeName")
     Training toEntity(TrainingRequestDTO trainingRequestDTO);
 
     @Mapping(target = "traineeUsername", source = "trainee.user.username")
     @Mapping(target = "trainerUsername", source = "trainer.user.username")
-    @Mapping(target = "trainingTypeName", source = "trainingType.trainingTypeName")
+    @Mapping(target = "trainingName", source = "trainingName")
     TrainingResponseDTO toDto(Training training);
+
+    TrainingTypeDTO toDto(TrainingType trainingType);
 }

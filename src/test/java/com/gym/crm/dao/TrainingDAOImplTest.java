@@ -216,20 +216,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                         List.of(1L)),
                 Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
-                                .firstName("Callum")
-                                .lastName("Whitfield")
-                                .build(),
-                        1,
-                        List.of(1L)),
-                Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .firstName("Callum")
-                                .build(),
-                        1,
-                        List.of(1L)),
-                Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .lastName("Whitfield")
+                                .joinFullName("Callum Whitfield")
                                 .build(),
                         1,
                         List.of(1L))
@@ -253,8 +240,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                                 .build()),
                 Arguments.of(TraineeTrainingFilter.builder()
                                 .username("Nora.Pemberton")
-                                .firstName("Callum")
-                                .lastName("Whitfield")
+                                .joinFullName("Callum Whitfield")
                                 .fromDate(LocalDate.of(2026, 4, 16))
                                 .toDate(LocalDate.of(2026, 4, 30))
                                 .trainingTypeName("Yoga")
@@ -271,21 +257,13 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                         List.of(1L, 2L)),
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
-                                .firstName("Nora")
-                                .lastName("Pemberton")
+                                .joinFullName("Nora Pemberton")
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
-                                .lastName("Hargrove")
-                                .build(),
-                        1,
-                        List.of(2L)),
-                Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
-                                .firstName("Ellis")
-                                .lastName("Hargrove")
+                                .joinFullName("Ellis Hargrove")
                                 .build(),
                         1,
                         List.of(2L)),
@@ -310,8 +288,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                         List.of(1L)),
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
-                                .firstName("Ellis")
-                                .lastName("Hargrove")
+                                .joinFullName("Ellis Hargrove")
                                 .fromDate(LocalDate.of(2026, 4, 19))
                                 .build(),
                         1,
@@ -323,7 +300,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
         return Stream.of(
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
-                                .firstName("NonExistent")
+                                .joinFullName("NonExistent")
                                 .build()),
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
@@ -331,8 +308,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                                 .build()),
                 Arguments.of(TrainerTrainingFilter.builder()
                                 .username("Callum.Whitfield")
-                                .firstName("Nora")
-                                .lastName("Pemberton")
+                                .joinFullName("Nora Pemberton")
                                 .fromDate(LocalDate.of(2026, 4, 16))
                                 .build())
         );

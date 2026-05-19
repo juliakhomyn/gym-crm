@@ -2,6 +2,8 @@ package com.gym.crm.facade;
 
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.AssignedTrainerResponse;
+import com.gia.openapi.model.GetTraineeTrainingResponse;
+import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
@@ -16,6 +18,8 @@ import com.gia.openapi.model.TrainerCreateResponse;
 import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
 import com.gia.openapi.model.TrainerGetResponse;
+import com.gia.openapi.model.TrainingCreateRequest;
+import com.gia.openapi.model.TrainingTypeResponse;
 import com.gym.crm.auth.Authenticated;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -30,9 +34,9 @@ import com.gym.crm.dto.trainer.TrainerRequestDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
-import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.mapper.rest.TraineeRestMapper;
 import com.gym.crm.mapper.rest.TrainerRestMapper;
+import com.gym.crm.mapper.rest.TrainingRestMapper;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TraineeService;
@@ -57,6 +61,7 @@ public class GymFacade {
 
     private final TraineeRestMapper traineeRestMapper;
     private final TrainerRestMapper trainerRestMapper;
+    private final TrainingRestMapper trainingRestMapper;
 
     public void login(LoginRequest request) {
         AuthRequestDTO dto = AuthRequestDTO.builder()
@@ -183,27 +188,30 @@ public class GymFacade {
     }
 
     @Authenticated
-    public TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO, String username) {
-        return trainingService.createTraining(trainingRequestDTO);
+    public void createTraining(TrainingCreateRequest request) {
+        TrainingRequestDTO dto = trainingRestMapper.toDto(request);
+
+        trainingService.createTraining(dto);
     }
 
     @Authenticated
-    public TrainingResponseDTO getTrainingById(Long id, String username) {
-        return trainingService.getTrainingById(id);
+    public List<GetTraineeTrainingResponse> getTraineeTrainingsByFilter(TraineeTrainingFilter filter, String username) {
+        return trainingService.getTraineeTrainings(filter).stream()
+                .map(trainingRestMapper::toRestTraineeResponse)
+                .toList();
     }
 
     @Authenticated
-    public List<TrainingResponseDTO> getAllTrainings(String username) {
-        return trainingService.getAllTrainings();
+    public List<GetTrainerTrainingResponse> getTrainerTrainingsByFilter(TrainerTrainingFilter filter, String username) {
+        return trainingService.getTrainerTrainings(filter).stream()
+                .map(trainingRestMapper::toRestTrainerResponse)
+                .toList();
     }
 
     @Authenticated
-    public List<TrainingResponseDTO> getTraineeTrainingsByFilter(TraineeTrainingFilter filter, String username) {
-        return trainingService.getTraineeTrainings(filter);
-    }
-
-    @Authenticated
-    public List<TrainingResponseDTO> getTrainerTrainingsByFilter(TrainerTrainingFilter filter, String username) {
-        return trainingService.getTrainerTrainings(filter);
+    public List<TrainingTypeResponse> getTrainingTypes() {
+        return trainingService.getAllTrainingTypes().stream()
+                .map(trainingRestMapper::toRest)
+                .toList();
     }
 }

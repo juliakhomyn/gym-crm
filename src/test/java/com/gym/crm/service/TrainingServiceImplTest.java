@@ -3,8 +3,10 @@ package com.gym.crm.service;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dao.TrainingDAO;
+import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.dto.training.TrainingTypeDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainingMapper;
@@ -12,19 +14,17 @@ import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
-import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.TrainingServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,23 +32,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceImplTest {
-    private static final String TRAINEE_USERNAME = "Callum.Whitfield";
-    private static final String TRAINER_USERNAME = "Nora.Pemberton";
+    private static final String TRAINEE_USERNAME = "Simone.Radcliffe";
+    private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String TRAINING_NAME = "Morning Cardio";
-    private static final String TRAINING_TYPE_NAME = "Cardio";
     private static final long VALID_ID = 1L;
     private static final long INVALID_ID = -1L;
     private static final long NOT_FOUND_ID = 999L;
 
+    private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
+    private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
+    private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
     private static final String TRAINING_CANNOT_BE_NULL = "Training cannot be null";
     private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by id: %s";
     private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
+
+    private final Trainee trainee = TestDataProvider.buildTrainee();
+    private final Trainer trainer = TestDataProvider.buildTrainer();
+    private final TrainingType trainingType = TestDataProvider.buildTrainingType();
+    private final Training savedTraining = TestDataProvider.buildSavedTraining();
+    private final TrainingRequestDTO request = TestDataProvider.buildTrainingRequestDTO();
+    private final TrainingResponseDTO response = TestDataProvider.buildTrainingResponseDTO();
+    private final TrainingTypeDTO trainingTypeDTO = TestDataProvider.buildTrainingTypeDTO();
 
     @Mock
     private TrainingDAO dao;
@@ -57,6 +68,8 @@ class TrainingServiceImplTest {
     @Mock
     private TrainerDAO trainerDAO;
     @Mock
+    private TrainingTypeDAO trainingTypeDAO;
+    @Mock
     private TrainingMapper mapper;
     @Mock
     private UserInputValidator userInputValidator;
@@ -64,30 +77,14 @@ class TrainingServiceImplTest {
     @InjectMocks
     private TrainingServiceImpl service;
 
-    private Trainee trainee;
-    private Trainer trainer;
-    private Training savedTraining;
-    private TrainingRequestDTO request;
-    private TrainingResponseDTO response;
-
-    @BeforeEach
-    void setUp() {
-        trainee = buildTrainee();
-        trainer = buildTrainer();
-        savedTraining = buildTraining().toBuilder()
-                .id(VALID_ID)
-                .build();
-        request = buildTrainingRequestDTO();
-        response = buildTrainingResponseDTO();
-    }
-
     @Test
     void createTraining_shouldSaveTrainingWithCredentials() {
         when(mapper.toEntity(request)).thenReturn(savedTraining);
-        when(dao.save(any(Training.class))).thenReturn(savedTraining);
-        when(mapper.toDto(savedTraining)).thenReturn(response);
         when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
         when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
+        when(trainingTypeDAO.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.ofNullable(trainingType));
+        when(dao.save(any(Training.class))).thenReturn(savedTraining);
+        when(mapper.toDto(savedTraining)).thenReturn(response);
 
         TrainingResponseDTO actual = service.createTraining(request);
 
@@ -105,6 +102,42 @@ class TrainingServiceImplTest {
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTraining(null));
 
         assertThat(exception.getMessage()).isEqualTo(TRAINING_CANNOT_BE_NULL);
+    }
+
+    @Test
+    void updateTrainer_shouldThrowException_whenTraineeNotFound() {
+        when(mapper.toEntity(request)).thenReturn(savedTraining);
+        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, TRAINEE_USERNAME));
+        verify(dao, never()).save(any(Training.class));
+    }
+
+    @Test
+    void updateTrainer_shouldThrowException_whenTrainerNotFlund() {
+        when(mapper.toEntity(request)).thenReturn(savedTraining);
+        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
+        when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINER_NOT_FOUND_BY_USERNAME, TRAINER_USERNAME));
+        verify(dao, never()).save(any(Training.class));
+    }
+
+    @Test
+    void updateTrainer_shouldThrowException_whenTrainingTypeNotFound() {
+        when(mapper.toEntity(request)).thenReturn(savedTraining);
+        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
+        when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
+        when(trainingTypeDAO.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, TRAINING_NAME));
+        verify(dao, never()).save(any(Training.class));
     }
 
     @Test
@@ -165,13 +198,12 @@ class TrainingServiceImplTest {
 
     @Test
     void getTraineeTrainings_shouldReturnList_whenValidFilter() {
-        TraineeTrainingFilter filter = buildTraineeTrainingFilter();
-        Training training = buildTraining();
-        List<Training> trainings = List.of(training);
-        TrainingResponseDTO expected = buildTrainingResponseDTO();
+        TraineeTrainingFilter filter = TestDataProvider.buildTraineeTrainingFilter();
+        List<Training> trainings = List.of(savedTraining);
+        TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
         when(dao.findByTraineeCriteria(filter)).thenReturn(trainings);
-        when(mapper.toDto(training)).thenReturn(expected);
+        when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTraineeTrainings(filter);
 
@@ -179,18 +211,17 @@ class TrainingServiceImplTest {
                 .hasSize(1)
                 .contains(expected);
         verify(dao).findByTraineeCriteria(filter);
-        verify(mapper).toDto(training);
+        verify(mapper).toDto(savedTraining);
     }
 
     @Test
     void getTrainerTrainings_shouldReturnList_whenValidFilter() {
-        TrainerTrainingFilter filter = buildTrainerTrainingFilter();
-        Training training = buildTraining();
-        List<Training> trainings = List.of(training);
-        TrainingResponseDTO expected = buildTrainingResponseDTO();
+        TrainerTrainingFilter filter = TestDataProvider.buildTrainerTrainingFilter();
+        List<Training> trainings = List.of(savedTraining);
+        TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
         when(dao.findByTrainerCriteria(filter)).thenReturn(trainings);
-        when(mapper.toDto(training)).thenReturn(expected);
+        when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTrainerTrainings(filter);
 
@@ -198,96 +229,16 @@ class TrainingServiceImplTest {
                 .hasSize(1)
                 .contains(expected);
         verify(dao).findByTrainerCriteria(filter);
-        verify(mapper).toDto(training);
+        verify(mapper).toDto(savedTraining);
     }
 
-    private Training buildTraining() {
-        return Training.builder()
-                .trainingName(TRAINING_NAME)
-                .trainingType(buildTrainingType())
-                .trainingDate(LocalDate.of(2026, 4, 4))
-                .trainingDuration(60)
-                .trainee(buildTrainee())
-                .trainer(buildTrainer())
-                .build();
-    }
+    @Test
+    void getAllTrainingTypes_shouldReturnAllTrainingTypes_whenExist() {
+        when(trainingTypeDAO.findAll()).thenReturn(List.of(trainingType));
+        when(mapper.toDto(trainingType)).thenReturn(trainingTypeDTO);
 
-    private Trainer buildTrainer() {
-        User user = User.builder()
-                .id(1L)
-                .firstName("Callum")
-                .lastName("Whitfield")
-                .username("Callum.Whitfield")
-                .password("pass111")
-                .isActive(true)
-                .build();
+        List<TrainingTypeDTO> actual = service.getAllTrainingTypes();
 
-        return Trainer.builder()
-                .id(1L)
-                .user(user)
-                .specialization(buildTrainingType())
-                .build();
-    }
-
-    private Trainee buildTrainee() {
-        User user = User.builder()
-                .id(2L)
-                .firstName("Nora")
-                .lastName("Pemberton")
-                .username("Nora.Pemberton")
-                .password("pass222")
-                .isActive(true)
-                .build();
-
-        return Trainee.builder()
-                .id(1L)
-                .user(user)
-                .dateOfBirth(LocalDate.of(2000, 3, 10))
-                .address("123 Main St")
-                .build();
-    }
-
-    private TrainingType buildTrainingType() {
-        return TrainingType.builder().trainingTypeName(TRAINING_TYPE_NAME).build();
-    }
-
-    private TrainingRequestDTO buildTrainingRequestDTO() {
-        return TrainingRequestDTO.builder()
-                .traineeUsername(TRAINEE_USERNAME)
-                .trainerUsername(TRAINER_USERNAME)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-    }
-
-    private TrainingResponseDTO buildTrainingResponseDTO() {
-        return TrainingResponseDTO.builder()
-                .id(VALID_ID)
-                .traineeUsername(TRAINEE_USERNAME)
-                .trainerUsername(TRAINER_USERNAME)
-                .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .trainingDate(LocalDate.of(2024, 1, 15))
-                .trainingDuration(60)
-                .build();
-    }
-
-    private TraineeTrainingFilter buildTraineeTrainingFilter() {
-        return TraineeTrainingFilter.builder()
-                .username(TRAINEE_USERNAME)
-                .fromDate(LocalDate.of(2024, 1, 1))
-                .toDate(LocalDate.of(2024, 1, 30))
-                .trainingTypeName(TRAINING_TYPE_NAME)
-                .build();
-    }
-
-    private TrainerTrainingFilter buildTrainerTrainingFilter() {
-        return TrainerTrainingFilter.builder()
-                .username(TRAINER_USERNAME)
-                .fromDate(LocalDate.of(2024, 1, 1))
-                .toDate(LocalDate.of(2024, 1, 30))
-                .build();
+        assertThat(actual).hasSize(1);
     }
 }

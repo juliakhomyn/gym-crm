@@ -32,7 +32,6 @@ class TrainingMapperTest {
         Training training = mapper.toEntity(trainingRequestDTO);
 
         assertEquals(TRAINING_NAME, training.getTrainingName());
-        assertEquals(TRAINING_TYPE_NAME, training.getTrainingType().getTrainingTypeName());
         assertEquals(TRAINING_DATE, training.getTrainingDate());
         assertEquals(TRAINING_DURATION, training.getTrainingDuration());
     }
@@ -46,22 +45,20 @@ class TrainingMapperTest {
         assertEquals(TRAINEE_USERNAME, trainingResponseDTO.getTraineeUsername());
         assertEquals(TRAINER_USERNAME, trainingResponseDTO.getTrainerUsername());
         assertEquals(TRAINING_NAME, trainingResponseDTO.getTrainingName());
-        assertEquals(TRAINING_TYPE_NAME, trainingResponseDTO.getTrainingTypeName());
         assertEquals(TRAINING_DATE, trainingResponseDTO.getTrainingDate());
         assertEquals(TRAINING_DURATION, trainingResponseDTO.getTrainingDuration());
     }
-    
+
     private TrainingRequestDTO buildTrainingRequestDTO() {
         return TrainingRequestDTO.builder()
                 .traineeUsername(TRAINEE_USERNAME)
                 .trainerUsername(TRAINER_USERNAME)
                 .trainingName(TRAINING_NAME)
-                .trainingTypeName(TRAINING_TYPE_NAME)
                 .trainingDate(TRAINING_DATE)
                 .trainingDuration(TRAINING_DURATION)
                 .build();
     }
-    
+
     private Training buildTraining() {
         User traineeUser = User.builder().username(TRAINEE_USERNAME).build();
         User trainerUser = User.builder().username(TRAINER_USERNAME).build();

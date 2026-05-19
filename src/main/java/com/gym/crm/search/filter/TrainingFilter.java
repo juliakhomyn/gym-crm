@@ -11,8 +11,7 @@ import java.time.LocalDate;
 @ToString
 public abstract class TrainingFilter {
     private String username;
-    private String firstName;
-    private String lastName;
+    private String joinFullName;
     private LocalDate fromDate;
     private LocalDate toDate;
 }

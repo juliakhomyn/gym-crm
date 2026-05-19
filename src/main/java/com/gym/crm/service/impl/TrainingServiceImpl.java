@@ -3,13 +3,16 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dao.TrainingDAO;
+import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.dto.training.TrainingTypeDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
+import com.gym.crm.model.TrainingType;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TrainingService;
@@ -31,11 +34,13 @@ public class TrainingServiceImpl implements TrainingService {
     private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by id: %s";
     private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
+    private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
     private static final String TRAINING = "Training";
 
     private final TrainingDAO dao;
     private final TraineeDAO traineeDAO;
     private final TrainerDAO trainerDAO;
+    private final TrainingTypeDAO trainingTypeDAO;
     private final UserInputValidator userInputValidator;
     private final TrainingMapper mapper;
 
@@ -47,9 +52,18 @@ public class TrainingServiceImpl implements TrainingService {
         log.info("Creating training: trainingName={}", request.getTrainingName());
 
         Training mapped = mapper.toEntity(request);
+
+        Trainee trainee = traineeDAO.findByUsername(request.getTraineeUsername()).orElseThrow(
+                () -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, request.getTraineeUsername())));
+        Trainer trainer = trainerDAO.findByUsername(request.getTrainerUsername()).orElseThrow(
+                () -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, request.getTrainerUsername())));
+        TrainingType trainingType = trainingTypeDAO.findByTrainingTypeName(request.getTrainingName()).orElseThrow(
+                () -> new EntityNotFoundException(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, request.getTrainingName())));
+
         Training training = mapped.toBuilder()
-                .trainee(getTrainee(request.getTraineeUsername()))
-                .trainer(getTrainer(request.getTrainerUsername()))
+                .trainee(trainee)
+                .trainer(trainer)
+                .trainingType(trainingType)
                 .build();
 
         Training saved = dao.save(training);
@@ -101,11 +115,10 @@ public class TrainingServiceImpl implements TrainingService {
                 .toList();
     }
 
-    private Trainee getTrainee(String username) {
-        return traineeDAO.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, username)));
-    }
-
-    private Trainer getTrainer(String username) {
-        return trainerDAO.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, username)));
+    @Override
+    public List<TrainingTypeDTO> getAllTrainingTypes() {
+        return trainingTypeDAO.findAll().stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }

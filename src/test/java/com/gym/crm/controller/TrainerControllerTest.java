@@ -10,10 +10,12 @@ import com.gia.openapi.model.TrainerGetResponse;
 import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
 import com.gym.crm.facade.GymFacade;
+import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -21,7 +23,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -35,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class TrainerControllerTest {
     private static final String USERNAME = "Owen.Castleberry";
+    private static final String TRAINEE_NAME = "Simone Radcliffe";
     private static final String BASE_URL = "/api/v1/trainers";
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -134,5 +141,33 @@ class TrainerControllerTest {
                         .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
         verify(facade).toggleActiveStatus(request, USERNAME);
+    }
+
+    @Test
+    void getTrainerTrainings_shouldReturnResponse_whenExist() throws Exception {
+        TrainerTrainingFilter filter = TestDataProvider.buildTrainerTrainingFilter();
+        List<com.gia.openapi.model.GetTrainerTrainingResponse> response = List.of(TestDataProvider.buildGetTrainerTrainingResponse());
+
+        when(facade.getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class), any(String.class))).thenReturn(response);
+
+        mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")
+                        .param("fromDate", "2024-01-01")
+                        .param("toDate", "2024-01-30")
+                        .param("traineeName", TRAINEE_NAME))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(response.size()))
+                .andExpect(jsonPath("$[0].trainingName").value(response.get(0).getTrainingName()))
+                .andExpect(jsonPath("$[0].trainingDate").value(response.get(0).getTrainingDate().toString()))
+                .andExpect(jsonPath("$[0].trainingType").value(response.get(0).getTrainingType()))
+                .andExpect(jsonPath("$[0].trainingDuration").value(response.get(0).getTrainingDuration()))
+                .andExpect(jsonPath("$[0].traineeName").value(response.get(0).getTraineeName()));
+
+        ArgumentCaptor<TrainerTrainingFilter> filterCaptor = ArgumentCaptor.forClass(TrainerTrainingFilter.class);
+        verify(facade).getTrainerTrainingsByFilter(filterCaptor.capture(), eq(USERNAME));
+        TrainerTrainingFilter capturedFilter = filterCaptor.getValue();
+
+        assertThat(capturedFilter.getFromDate()).isEqualTo(filter.getFromDate());
+        assertThat(capturedFilter.getToDate()).isEqualTo(filter.getToDate());
+        assertThat(capturedFilter.getJoinFullName()).isEqualTo(filter.getJoinFullName());
     }
 }

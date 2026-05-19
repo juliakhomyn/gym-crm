@@ -15,6 +15,7 @@ import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -24,7 +25,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -140,13 +143,12 @@ class TrainerControllerTest {
         verify(facade).toggleActiveStatus(request, USERNAME);
     }
 
-
     @Test
     void getTrainerTrainings_shouldReturnResponse_whenExist() throws Exception {
         TrainerTrainingFilter filter = TestDataProvider.buildTrainerTrainingFilter();
         List<com.gia.openapi.model.GetTrainerTrainingResponse> response = List.of(TestDataProvider.buildGetTrainerTrainingResponse());
 
-        when(facade.getTrainerTrainingsByFilter(filter, USERNAME)).thenReturn(response);
+        when(facade.getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class), any(String.class))).thenReturn(response);
 
         mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")
                         .param("fromDate", "2024-01-01")
@@ -159,6 +161,13 @@ class TrainerControllerTest {
                 .andExpect(jsonPath("$[0].trainingType").value(response.get(0).getTrainingType()))
                 .andExpect(jsonPath("$[0].trainingDuration").value(response.get(0).getTrainingDuration()))
                 .andExpect(jsonPath("$[0].traineeName").value(response.get(0).getTraineeName()));
-        verify(facade).getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class), any(String.class));
+
+        ArgumentCaptor<TrainerTrainingFilter> filterCaptor = ArgumentCaptor.forClass(TrainerTrainingFilter.class);
+        verify(facade).getTrainerTrainingsByFilter(filterCaptor.capture(), eq(USERNAME));
+        TrainerTrainingFilter capturedFilter = filterCaptor.getValue();
+
+        assertThat(capturedFilter.getFromDate()).isEqualTo(filter.getFromDate());
+        assertThat(capturedFilter.getToDate()).isEqualTo(filter.getToDate());
+        assertThat(capturedFilter.getJoinFullName()).isEqualTo(filter.getJoinFullName());
     }
 }

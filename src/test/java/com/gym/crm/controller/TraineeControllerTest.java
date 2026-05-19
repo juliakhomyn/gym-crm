@@ -12,12 +12,14 @@ import com.gia.openapi.model.TraineeCreateResponse;
 import com.gia.openapi.model.TraineeGetResponse;
 import com.gia.openapi.model.TraineeUpdateRequest;
 import com.gia.openapi.model.TraineeUpdateResponse;
+import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
@@ -27,7 +29,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -209,9 +213,9 @@ class TraineeControllerTest {
     @Test
     void getTraineeTrainings_shouldReturnResponse_whenExist() throws Exception {
         TraineeTrainingFilter filter = TestDataProvider.buildTraineeTrainingFilter();
-        List<com.gia.openapi.model.GetTraineeTrainingResponse> response = List.of(TestDataProvider.buildGetTraineeTrainingResponse());
+        List<GetTraineeTrainingResponse> response = List.of(TestDataProvider.buildGetTraineeTrainingResponse());
 
-        when(facade.getTraineeTrainingsByFilter(filter, USERNAME)).thenReturn(response);
+        when(facade.getTraineeTrainingsByFilter(any(TraineeTrainingFilter.class), any(String.class))).thenReturn(response);
 
         mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")
                         .param("fromDate", "2024-01-01")
@@ -225,7 +229,14 @@ class TraineeControllerTest {
                 .andExpect(jsonPath("$[0].trainingType").value(response.get(0).getTrainingType()))
                 .andExpect(jsonPath("$[0].trainingDuration").value(response.get(0).getTrainingDuration()))
                 .andExpect(jsonPath("$[0].trainerName").value(response.get(0).getTrainerName()));
-        verify(facade).getTraineeTrainingsByFilter(any(TraineeTrainingFilter.class), any(String.class));
-    }
 
+        ArgumentCaptor<TraineeTrainingFilter> filterCaptor = ArgumentCaptor.forClass(TraineeTrainingFilter.class);
+        verify(facade).getTraineeTrainingsByFilter(filterCaptor.capture(), eq(USERNAME));
+        TraineeTrainingFilter capturedFilter = filterCaptor.getValue();
+
+        assertThat(capturedFilter.getFromDate()).isEqualTo(filter.getFromDate());
+        assertThat(capturedFilter.getToDate()).isEqualTo(filter.getToDate());
+        assertThat(capturedFilter.getJoinFullName()).isEqualTo(filter.getJoinFullName());
+        assertThat(capturedFilter.getTrainingTypeName()).isEqualTo(filter.getTrainingTypeName());
+    }
 }

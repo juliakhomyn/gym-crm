@@ -47,7 +47,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Change login password", description = "Changes the password for a given trainer")
+    @Operation(summary = "Change login password", description = "Changes the password for a given user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access",

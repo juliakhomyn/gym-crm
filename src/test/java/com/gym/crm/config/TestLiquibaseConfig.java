@@ -16,7 +16,6 @@ public class TestLiquibaseConfig {
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
         SpringLiquibase liquibase = new SpringLiquibase();
-
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(changeLog);
 

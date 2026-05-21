@@ -15,6 +15,8 @@ public class LiquibaseConfig {
 
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
+        System.setProperty("liquibase.duplicateFileMode", "WARN");
+
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(changeLog);

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "User Profile", description = "Login and account management")
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("${app.api.base-path}/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

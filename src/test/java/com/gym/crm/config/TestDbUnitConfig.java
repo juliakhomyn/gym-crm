@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 @Configuration
-public class DbUnitConfig {
+public class TestDbUnitConfig {
 
     @Bean
     public DatabaseConfigBean dbUnitDatabaseConfig() {

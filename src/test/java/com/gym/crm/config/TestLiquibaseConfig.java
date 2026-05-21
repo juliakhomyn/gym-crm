@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 @Configuration
-public class LiquibaseConfig {
+public class TestLiquibaseConfig {
 
     @Value("${liquibase.changelog.master}")
     private String changeLog;
@@ -16,6 +16,7 @@ public class LiquibaseConfig {
     @Bean
     public SpringLiquibase liquibase(DataSource dataSource) {
         SpringLiquibase liquibase = new SpringLiquibase();
+
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(changeLog);
 

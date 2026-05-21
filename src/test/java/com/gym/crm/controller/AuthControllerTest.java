@@ -36,7 +36,9 @@ class AuthControllerTest {
     @BeforeEach
     void setUp() {
         AuthController controller = new AuthController(facade);
+
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .addPlaceholderValue("app.api.base-path", "/api/v1")
                 .build();
     }
 

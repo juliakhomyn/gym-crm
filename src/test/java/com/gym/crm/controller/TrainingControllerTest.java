@@ -82,7 +82,6 @@ class TrainingControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: traineeUsername must not be null");
         verifyNoInteractions(facade);
@@ -102,7 +101,6 @@ class TrainingControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: trainingDuration must be greater than or equal to 1");
         verifyNoInteractions(facade);

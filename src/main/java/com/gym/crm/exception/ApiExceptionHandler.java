@@ -41,7 +41,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        log.error("Bad credentials: {}", ex.getMessage());
+        log.warn("Bad credentials: {}", ex.getMessage());
 
         return buildErrorResponse(AUTHENTICATION_ERROR, ex.getMessage());
     }
@@ -69,14 +69,14 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(PersistenceException.class)
     public ResponseEntity<ErrorResponse> handlePersistentException(PersistenceException ex) {
-        log.error("Database access failure: {}", ex.getMessage());
+        log.error("Database access failure:", ex);
 
         return buildErrorResponse(DATABASE_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
-        log.error("Unhandled exception: {}", ex.getMessage());
+        log.error("Unhandled exception:", ex);
 
         return buildErrorResponse(SERVICE_ERROR, ex.getMessage());
     }

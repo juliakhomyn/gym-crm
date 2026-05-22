@@ -110,7 +110,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: firstName must not be null");
         verifyNoInteractions(facade);
@@ -132,7 +131,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: Date of birth must be in the past");
         verify(facade).createTrainee(any(TraineeCreateRequest.class));
@@ -183,7 +181,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).getTraineeByUsername(USERNAME);
@@ -226,7 +223,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: firstName must not be null");
         verifyNoInteractions(facade);
@@ -246,7 +242,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).updateTrainee(any(TraineeUpdateRequest.class), eq(USERNAME));
@@ -266,7 +261,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
         verify(facade).updateTrainee(any(TraineeUpdateRequest.class), eq(USERNAME));
@@ -291,7 +285,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).deleteTraineeByUsername(USERNAME);
@@ -341,7 +334,6 @@ class TraineeControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
         verify(facade).updateTraineeTrainersList(any(TraineeAssignedTrainersUpdateRequest.class), eq(USERNAME));

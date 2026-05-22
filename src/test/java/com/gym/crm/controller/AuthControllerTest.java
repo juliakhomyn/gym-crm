@@ -77,7 +77,6 @@ class AuthControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: Invalid credentials for user");
         verify(facade).login(any(LoginRequest.class));
@@ -96,7 +95,6 @@ class AuthControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).login(any(LoginRequest.class));
@@ -125,7 +123,6 @@ class AuthControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
@@ -145,7 +142,6 @@ class AuthControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHORIZATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("User is not authorized for request operation: Authenticated user with username: other does not match with requested user with username: " + USERNAME);
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
@@ -164,7 +160,6 @@ class AuthControllerTest {
                 .getContentAsString();
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));

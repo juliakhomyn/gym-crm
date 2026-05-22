@@ -68,7 +68,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(PersistenceException.class)
-    public ResponseEntity<ErrorResponse> handlePersistentException(PersistenceException ex) {
+    public ResponseEntity<ErrorResponse> handlePersistenceException(PersistenceException ex) {
         log.error("Database access failure:", ex);
 
         return buildErrorResponse(DATABASE_ERROR, ex.getMessage());

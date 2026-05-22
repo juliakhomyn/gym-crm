@@ -1,5 +1,6 @@
 package com.gym.crm.auth;
 
+import com.gym.crm.exception.UserAuthorizationException;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.UserAuthenticationException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class AuthenticationAspect {
                 .orElseThrow(() -> new UserAuthenticationException("User is not authenticated: no request to check authentication"));
 
         if (!user.getUsername().equals(username)) {
-            throw new UserAuthenticationException(String.format("Authenticated user with username: %s does not match with requested user with username: %s", user.getUsername(), username));
+            throw new UserAuthorizationException(String.format("Authenticated user with username: %s does not match with requested user with username: %s", user.getUsername(), username));
         }
     }
 }

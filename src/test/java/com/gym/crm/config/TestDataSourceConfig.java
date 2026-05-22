@@ -3,11 +3,13 @@ package com.gym.crm.config;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import javax.sql.DataSource;
 
-@SpringJUnitConfig(TestAppConfig.class)
+@Configuration
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 public class TestDataSourceConfig {
 
     @Value("${db.driver}")

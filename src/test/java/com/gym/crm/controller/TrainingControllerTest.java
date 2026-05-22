@@ -3,8 +3,11 @@ package com.gym.crm.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.gia.openapi.model.ErrorResponse;
 import com.gia.openapi.model.TrainingCreateRequest;
 import com.gia.openapi.model.TrainingTypeResponse;
+import com.gym.crm.exception.ApiError;
+import com.gym.crm.exception.ApiExceptionHandler;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -48,6 +52,7 @@ class TrainingControllerTest {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new ApiExceptionHandler())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
                 .addPlaceholderValue("app.api.base-path", "/api/v1")
                 .build();
@@ -66,13 +71,41 @@ class TrainingControllerTest {
 
     @Test
     void addTraining_shouldReturnBadRequest_whenRequiredFieldsMissing() throws Exception {
-        TrainingCreateRequest request = new TrainingCreateRequest();
-        request.setTraineeUsername(TRAINEE_USERNAME);
+        TrainingCreateRequest request = TestDataProvider.buildTrainingCreateRequest();
+        request.setTraineeUsername(null);
 
-        mockMvc.perform(post(BASE_URL + "/trainings")
+        String content = mockMvc.perform(post(BASE_URL + "/trainings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: traineeUsername must not be null");
+        verifyNoInteractions(facade);
+    }
+
+    @Test
+    void addTraining_shouldReturnBadRequest_whenDurationNegative() throws Exception {
+        TrainingCreateRequest request = TestDataProvider.buildTrainingCreateRequest();
+        request.setTrainingDuration(-1);
+
+        String content = mockMvc.perform(post(BASE_URL + "/trainings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: trainingDuration must be greater than or equal to 1");
         verifyNoInteractions(facade);
     }
 

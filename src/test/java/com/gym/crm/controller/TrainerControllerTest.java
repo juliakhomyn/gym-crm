@@ -4,14 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gia.openapi.model.ActivationStatusRequest;
+import com.gia.openapi.model.ErrorResponse;
 import com.gia.openapi.model.TrainerCreateRequest;
 import com.gia.openapi.model.TrainerCreateResponse;
 import com.gia.openapi.model.TrainerGetResponse;
 import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
+import com.gia.openapi.model.GetTrainerTrainingResponse;
+import com.gym.crm.exception.ApiError;
+import com.gym.crm.exception.ApiExceptionHandler;
+import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.testutils.TestDataProvider;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +35,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -44,6 +52,7 @@ class TrainerControllerTest {
     private static final String TRAINEE_NAME = "Simone Radcliffe";
     private static final String BASE_URL = "/api/v1/trainers";
 
+    private final TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
     private final ObjectMapper mapper = new ObjectMapper();
 
     private MockMvc mockMvc;
@@ -59,6 +68,7 @@ class TrainerControllerTest {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new ApiExceptionHandler())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
                 .addPlaceholderValue("app.api.base-path", "/api/v1")
                 .build();
@@ -81,14 +91,22 @@ class TrainerControllerTest {
     }
 
     @Test
-    void register_shouldReturnBadRequest_whenFirstNameMissing() throws Exception {
-        TrainerCreateRequest request = new TrainerCreateRequest();
-        request.setLastName("Castleberry");
+    void register_shouldReturnNotValid_whenFirstNameMissing() throws Exception {
+        TrainerCreateRequest request = TestDataProvider.buildTrainerCreateRequest();
+        request.setFirstName(null);
 
-        mockMvc.perform(post(BASE_URL + "/register")
+        String content = mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: firstName must not be null");
         verifyNoInteractions(facade);
     }
 
@@ -111,8 +129,24 @@ class TrainerControllerTest {
     }
 
     @Test
+    void getTrainerProfile_shouldReturnNotFound_whenTrainerNotFound() throws Exception {
+        doThrow(new EntityNotFoundException("User not found")).when(facade).getTrainerByUsername(eq(USERNAME));
+
+        String content = mockMvc.perform(get(BASE_URL + "/" + USERNAME))
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
+        verify(facade).getTrainerByUsername(eq(USERNAME));
+    }
+
+    @Test
     void updateTrainerProfile_shouldReturnResponse_whenValid() throws Exception {
-        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
         TrainerUpdateResponse response = TestDataProvider.buildTrainerUpdateResponse();
 
         when(facade.updateTrainer(request, USERNAME)).thenReturn(response);
@@ -133,6 +167,103 @@ class TrainerControllerTest {
     }
 
     @Test
+    void updateTrainerProfile_shouldReturnNotValid_whenFirstNameMissing() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
+        request.setFirstName(null);
+
+        String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: firstName must not be null");
+        verifyNoInteractions(facade);
+    }
+
+    @Test
+    void updateTrainerProfile_shouldReturnNotFound_whenTrainerNotFound() throws Exception {
+        doThrow(new EntityNotFoundException("User not found")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+
+        String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
+        verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+    }
+
+    @Test
+    void updateTrainerProfile_shouldReturnUnauthorized_whenNoUserAuthenticated() throws Exception {
+        doThrow(new UserAuthenticationException("No user authenticated")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+
+        String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
+        verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+    }
+
+    @Test
+    void updateTrainerProfile_shouldReturnDBFailure_whenPersistenceException() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
+        doThrow(new PersistenceException()).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+
+        String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.DATABASE_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Unexpected database access failure");
+        verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+    }
+
+    @Test
+    void updateTrainerProfile_shouldReturnUnhandledException_whenUnexpectedError() throws Exception {
+        doThrow(new RuntimeException()).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+
+        String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
+
+        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.SERVICE_ERROR.getCode());
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Internal processing error");
+        verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+    }
+
+    @Test
     void toggleActive_shouldReturnOk_whenValid() throws Exception {
         ActivationStatusRequest request = TestDataProvider.buildActivationStatusRequest();
 
@@ -146,7 +277,7 @@ class TrainerControllerTest {
     @Test
     void getTrainerTrainings_shouldReturnResponse_whenExist() throws Exception {
         TrainerTrainingFilter filter = TestDataProvider.buildTrainerTrainingFilter();
-        List<com.gia.openapi.model.GetTrainerTrainingResponse> response = List.of(TestDataProvider.buildGetTrainerTrainingResponse());
+        List<GetTrainerTrainingResponse> response = List.of(TestDataProvider.buildGetTrainerTrainingResponse());
 
         when(facade.getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class), any(String.class))).thenReturn(response);
 

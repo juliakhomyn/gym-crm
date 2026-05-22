@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class TrainingControllerTest {
-    private static final String TRAINEE_USERNAME = "Simone.Radcliffe";
     private static final String BASE_URL = "/api/v1";
 
     private final ObjectMapper mapper = new ObjectMapper();

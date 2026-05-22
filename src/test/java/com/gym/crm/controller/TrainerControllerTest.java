@@ -52,7 +52,6 @@ class TrainerControllerTest {
     private static final String TRAINEE_NAME = "Simone Radcliffe";
     private static final String BASE_URL = "/api/v1/trainers";
 
-    private final TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
     private final ObjectMapper mapper = new ObjectMapper();
 
     private MockMvc mockMvc;
@@ -130,7 +129,7 @@ class TrainerControllerTest {
 
     @Test
     void getTrainerProfile_shouldReturnNotFound_whenTrainerNotFound() throws Exception {
-        doThrow(new EntityNotFoundException("User not found")).when(facade).getTrainerByUsername(eq(USERNAME));
+        doThrow(new EntityNotFoundException("User not found")).when(facade).getTrainerByUsername(USERNAME);
 
         String content = mockMvc.perform(get(BASE_URL + "/" + USERNAME))
                 .andExpect(status().isNotFound())
@@ -142,11 +141,12 @@ class TrainerControllerTest {
 
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
-        verify(facade).getTrainerByUsername(eq(USERNAME));
+        verify(facade).getTrainerByUsername(USERNAME);
     }
 
     @Test
     void updateTrainerProfile_shouldReturnResponse_whenValid() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
         TrainerUpdateResponse response = TestDataProvider.buildTrainerUpdateResponse();
 
         when(facade.updateTrainer(request, USERNAME)).thenReturn(response);
@@ -188,6 +188,7 @@ class TrainerControllerTest {
 
     @Test
     void updateTrainerProfile_shouldReturnNotFound_whenTrainerNotFound() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
         doThrow(new EntityNotFoundException("User not found")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
@@ -207,6 +208,7 @@ class TrainerControllerTest {
 
     @Test
     void updateTrainerProfile_shouldReturnUnauthorized_whenNoUserAuthenticated() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
         doThrow(new UserAuthenticationException("No user authenticated")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
@@ -246,6 +248,7 @@ class TrainerControllerTest {
 
     @Test
     void updateTrainerProfile_shouldReturnUnhandledException_whenUnexpectedError() throws Exception {
+        TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
         doThrow(new RuntimeException()).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)

@@ -59,7 +59,6 @@ class TraineeControllerTest {
     private static final String TRAINING_TYPE = "Cardio";
     private static final String BASE_URL = "/api/v1/trainees";
 
-    private final TraineeUpdateRequest request = TestDataProvider.buildTraineeUpdateRequest();
     private final ObjectMapper mapper = new ObjectMapper();
 
     private MockMvc mockMvc;
@@ -175,7 +174,7 @@ class TraineeControllerTest {
 
     @Test
     void getTraineeProfile_shouldReturnNotFound_whenTraineeNotFound() throws Exception {
-        doThrow(new EntityNotFoundException("User not found")).when(facade).getTraineeByUsername(eq(USERNAME));
+        doThrow(new EntityNotFoundException("User not found")).when(facade).getTraineeByUsername(USERNAME);
 
         String content = mockMvc.perform(get(BASE_URL + "/" + USERNAME))
                 .andExpect(status().isNotFound())
@@ -187,11 +186,12 @@ class TraineeControllerTest {
 
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
-        verify(facade).getTraineeByUsername(eq(USERNAME));
+        verify(facade).getTraineeByUsername(USERNAME);
     }
 
     @Test
     void updateTraineeProfile_shouldReturnResponse_whenValid() throws Exception {
+        TraineeUpdateRequest request = TestDataProvider.buildTraineeUpdateRequest();
         TraineeUpdateResponse response = TestDataProvider.buildTraineeUpdateResponse();
 
         when(facade.updateTrainee(request, USERNAME)).thenReturn(response);
@@ -234,6 +234,7 @@ class TraineeControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnNotFound_whenTraineeNotFound() throws Exception {
+        TraineeUpdateRequest request = TestDataProvider.buildTraineeUpdateRequest();
         doThrow(new EntityNotFoundException("User not found")).when(facade).updateTrainee(any(TraineeUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
@@ -253,6 +254,7 @@ class TraineeControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnUnauthorized_whenNoUserAuthenticated() throws Exception {
+        TraineeUpdateRequest request = TestDataProvider.buildTraineeUpdateRequest();
         doThrow(new UserAuthenticationException("No user authenticated")).when(facade).updateTrainee(any(TraineeUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
@@ -280,7 +282,7 @@ class TraineeControllerTest {
 
     @Test
     void deleteTrainee_shouldReturnNotFound_whenTraineeNotFound() throws Exception {
-        doThrow(new EntityNotFoundException("User not found")).when(facade).deleteTraineeByUsername(eq(USERNAME));
+        doThrow(new EntityNotFoundException("User not found")).when(facade).deleteTraineeByUsername(USERNAME);
 
         String content = mockMvc.perform(delete(BASE_URL + "/" + USERNAME))
                 .andExpect(status().isNotFound())
@@ -292,7 +294,7 @@ class TraineeControllerTest {
 
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
-        verify(facade).deleteTraineeByUsername(eq(USERNAME));
+        verify(facade).deleteTraineeByUsername(USERNAME);
     }
 
     @Test

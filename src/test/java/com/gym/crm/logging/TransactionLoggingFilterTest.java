@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class TransactionLoggingFilterTest {
+class TransactionLoggingFilterTest {
 
     private static final String TRANSACTION_ID = "transactionId";
     private static final String TRACE_HEADER = "X-Trace-Id";

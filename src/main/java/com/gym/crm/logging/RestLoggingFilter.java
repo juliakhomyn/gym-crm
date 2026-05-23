@@ -19,7 +19,7 @@ public class RestLoggingFilter extends OncePerRequestFilter {
     private static final String PASSWORD_REGEX = "(\"password\"\\s*:\\s*\")([^\"]+)(\")";
     private static final String OLD_PASSWORD_REGEX = "(\"oldPassword\"\\s*:\\s*\")([^\"]+)(\")";
     private static final String NEW_PASSWORD_REGEX = "(\"newPassword\"\\s*:\\s*\")([^\"]+)(\")";
-    private static final String PASSWORD_REPLACEMENT = "$1***$3";
+    private static final String REPLACEMENT = "$1***$3";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -55,8 +55,8 @@ public class RestLoggingFilter extends OncePerRequestFilter {
         }
 
         return body
-                .replaceAll(PASSWORD_REGEX, PASSWORD_REPLACEMENT)
-                .replaceAll(OLD_PASSWORD_REGEX, PASSWORD_REPLACEMENT)
-                .replaceAll(NEW_PASSWORD_REGEX, PASSWORD_REPLACEMENT);
+                .replaceAll(PASSWORD_REGEX, REPLACEMENT)
+                .replaceAll(OLD_PASSWORD_REGEX, REPLACEMENT)
+                .replaceAll(NEW_PASSWORD_REGEX, REPLACEMENT);
     }
 }

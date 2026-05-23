@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class RestLoggingFilterTest {
+class RestLoggingFilterTest {
 
     private final RestLoggingFilter filter = new RestLoggingFilter();
 

@@ -43,11 +43,8 @@ class UserServiceImplTest {
 
     private final User user = TestDataProvider.buildTraineeUser();
     private final User savedUser = user.toBuilder().id(VALID_ID).build();
-    private final PasswordChangeRequest request = TestDataProvider.buildPasswordChangeRequest();
-    private final PasswordChangeRequest passwordChangeRequestBlankUsername = TestDataProvider.buildPasswordChangeRequestBlankUsername();
-    private final PasswordChangeRequest passwordChangeRequestShortNewPassword = TestDataProvider.buildPasswordChangeRequestShortNewPassword();
+    private final PasswordChangeRequest passwordChangeRequest = TestDataProvider.buildPasswordChangeRequest();
     private final ToggleActiveRequestDTO toggleActiveRequestDTO = TestDataProvider.buildToggleActiveRequest();
-    private final ToggleActiveRequestDTO invalidToggleActiveRequest = TestDataProvider.buildInvalidToggleActiveRequest();
 
     @Mock
     private UserDAO dao;
@@ -118,7 +115,7 @@ class UserServiceImplTest {
         when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
 
-        service.changePassword(request);
+        service.changePassword(passwordChangeRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(dao).update(userCaptor.capture());
@@ -129,9 +126,10 @@ class UserServiceImplTest {
 
     @Test
     void changePassword_shouldThrowIfUserNotFound() {
+        PasswordChangeRequest requestDTO = TestDataProvider.buildInvalidPasswordChangeRequest();
         when(dao.findByUsername(NON_EXISTENT_USERNAME)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.changePassword(TestDataProvider.buildInvalidPasswordChangeRequest()));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.changePassword(requestDTO));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
     }
@@ -141,27 +139,29 @@ class UserServiceImplTest {
         when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
 
-        service.changePassword(request);
+        service.changePassword(passwordChangeRequest);
 
-        verify(userInputValidator).validate(request, "Password change request");
+        verify(userInputValidator).validate(passwordChangeRequest, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenUsernameIsBlank() {
-        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(passwordChangeRequestBlankUsername, "Password change request");
+        PasswordChangeRequest request = TestDataProvider.buildPasswordChangeRequestBlankUsername();
 
-        assertThrows(ValidationFailedException.class, () -> service.changePassword(passwordChangeRequestBlankUsername));
+        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(request, "Password change request");
 
-        verify(userInputValidator).validate(passwordChangeRequestBlankUsername, "Password change request");
+        assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
+        verify(userInputValidator).validate(request, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenNewPasswordTooShort() {
-        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(userInputValidator).validate(passwordChangeRequestShortNewPassword, "Password change request");
+        PasswordChangeRequest request = TestDataProvider.buildPasswordChangeRequestShortNewPassword();
 
-        assertThrows(ValidationFailedException.class, () -> service.changePassword(passwordChangeRequestShortNewPassword));
+        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(userInputValidator).validate(request, "Password change request");
 
-        verify(userInputValidator).validate(passwordChangeRequestShortNewPassword, "Password change request");
+        assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
+        verify(userInputValidator).validate(request, "Password change request");
     }
 
     @Test
@@ -180,9 +180,10 @@ class UserServiceImplTest {
 
     @Test
     void toggleActive_shouldThrow_whenUserNotFound() {
+        ToggleActiveRequestDTO requestDTO = TestDataProvider.buildToggleActiveRequestNonExistent();
         when(dao.findByUsername(NON_EXISTENT_USERNAME)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.toggleActive(TestDataProvider.buildToggleActiveRequestNonExistent()));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.toggleActive(requestDTO));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
     }
@@ -199,6 +200,7 @@ class UserServiceImplTest {
 
     @Test
     void toggleActive_shouldThrowValidationException_whenUsernameIsBlank() {
+        ToggleActiveRequestDTO invalidToggleActiveRequest = TestDataProvider.buildInvalidToggleActiveRequest();
         doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(invalidToggleActiveRequest, "Toggle active request");
 
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidToggleActiveRequest));

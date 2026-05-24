@@ -72,7 +72,9 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer saved = dao.save(withCredentials);
         log.info("Trainer created successfully: username={}", saved.getUser().getUsername());
 
-        return mapper.toDto(saved);
+        TrainerResponseDTO response = mapper.toDto(saved);
+
+        return response.toBuilder().password(rawPassword).build();
     }
 
     @Transactional

@@ -72,7 +72,9 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee saved = dao.save(withCredentials);
         log.info("Trainee created successfully: username={}", saved.getUser().getUsername());
 
-        return mapper.toDto(saved);
+        TraineeResponseDTO response = mapper.toDto(saved);
+
+        return response.toBuilder().password(rawPassword).build();
     }
 
     @Transactional

@@ -8,7 +8,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @ToString
 @EqualsAndHashCode
 public class TraineeResponseDTO {

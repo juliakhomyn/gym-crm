@@ -111,6 +111,8 @@ class TraineeServiceImplTest {
 
     @Test
     void createTrainee_shouldSaveTraineeWithCredentials() {
+        TraineeResponseDTO expected = response.toBuilder().password(RAW_PASSWORD).build();
+
         when(mapper.toEntity(request)).thenReturn(trainee);
         when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
@@ -120,7 +122,7 @@ class TraineeServiceImplTest {
 
         TraineeResponseDTO actual = service.createTrainee(request);
 
-        assertThat(actual).isEqualTo(response);
+        assertThat(actual).isEqualTo(expected);
         verify(userInputValidator).validate(request, "Trainee");
         verify(mapper).toEntity(request);
         verify(userProfileService).generateUsername(FIRST_NAME, LAST_NAME);

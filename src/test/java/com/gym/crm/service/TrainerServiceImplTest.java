@@ -83,6 +83,8 @@ class TrainerServiceImplTest {
 
     @Test
     void createTrainer_shouldSaveTrainerWithCredentials() {
+        TrainerResponseDTO expected = response.toBuilder().password(RAW_PASSWORD).build();
+
         when(mapper.toEntity(request)).thenReturn(trainer);
         when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
@@ -93,7 +95,7 @@ class TrainerServiceImplTest {
 
         TrainerResponseDTO actual = service.createTrainer(request);
 
-        assertThat(actual).isEqualTo(response);
+        assertThat(actual).isEqualTo(expected);
         verify(userInputValidator).validate(request, "Trainer");
         verify(mapper).toEntity(request);
         verify(userProfileService).generateUsername(FIRST_NAME, LAST_NAME);

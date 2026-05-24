@@ -1,5 +1,6 @@
 package com.gym.crm.service;
 
+import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
@@ -9,6 +10,7 @@ import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainerMapper;
+import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.service.common.UserInputValidator;
@@ -53,9 +55,12 @@ class TrainerServiceImplTest {
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
     private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
+    private static final String USER_REGISTERED_AS_TRAINEE = "User with username %s is already registered as a trainee";
 
     @Mock
     private TrainerDAO dao;
+    @Mock
+    private TraineeDAO traineeDAO;
     @Mock
     private TrainingTypeDAO trainingTypeDAO;
     @Mock
@@ -115,6 +120,19 @@ class TrainerServiceImplTest {
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, SPECIALIZATION));
         verify(dao, never()).save(any(Trainer.class));
+    }
+
+    @Test
+    void createTrainee_shouldThrowValidationFailedException_ifTrainerExists() {
+        when(mapper.toEntity(request)).thenReturn(trainer);
+        when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(traineeDAO.findByUsername(USERNAME)).thenReturn(Optional.of(new Trainee()));
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainer(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(USER_REGISTERED_AS_TRAINEE, USERNAME));
+        verify(dao, never()).save(any());
     }
 
     @Test

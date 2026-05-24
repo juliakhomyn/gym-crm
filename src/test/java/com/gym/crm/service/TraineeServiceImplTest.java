@@ -68,6 +68,7 @@ class TraineeServiceImplTest {
     private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
     private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
+    private static final String USER_REGISTERED_AS_TRAINER = "User with username %s is already registered as a trainer";
 
     private final Trainee trainee = TestDataProvider.buildTrainee();
     private final Trainee savedTrainee = TestDataProvider.buildSavedTrainee();
@@ -136,6 +137,19 @@ class TraineeServiceImplTest {
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainee(null));
 
         assertThat(exception.getMessage()).isEqualTo(TRAINEE_CANNOT_BE_NULL);
+    }
+
+    @Test
+    void createTrainee_shouldThrowValidationFailedException_ifTrainerExists() {
+        when(mapper.toEntity(request)).thenReturn(trainee);
+        when(userProfileService.generateUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
+        when(userProfileService.generatePassword()).thenReturn(RAW_PASSWORD);
+        when(trainerDAO.findByUsername(USERNAME)).thenReturn(Optional.of(new Trainer()));
+
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTrainee(request));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(USER_REGISTERED_AS_TRAINER, USERNAME));
+        verify(dao, never()).save(any());
     }
 
     @Test

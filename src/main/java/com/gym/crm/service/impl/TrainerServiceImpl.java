@@ -1,5 +1,6 @@
 package com.gym.crm.service.impl;
 
+import com.gym.crm.dao.TraineeDAO;
 import com.gym.crm.dao.TrainerDAO;
 import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
@@ -7,6 +8,7 @@ import com.gym.crm.dto.trainer.TrainerRequestDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
@@ -32,6 +34,7 @@ public class TrainerServiceImpl implements TrainerService {
     private static final String TRAINER = "Trainer";
 
     private final TrainerDAO dao;
+    private final TraineeDAO traineeDAO;
     private final TrainingTypeDAO trainingTypeDAO;
     private final UserProfileService userProfileService;
     private final UserInputValidator userInputValidator;
@@ -42,11 +45,16 @@ public class TrainerServiceImpl implements TrainerService {
     public TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO request) {
         userInputValidator.validate(request, TRAINER);
 
-        log.info("Creating trainer: firstName={} lastName{}", request.getFirstName(), request.getLastName());
+        log.info("Creating trainer: firstName={} lastName={}", request.getFirstName(), request.getLastName());
 
         Trainer trainer = mapper.toEntity(request);
         String username = userProfileService.generateUsername(request.getFirstName(), request.getLastName());
         String rawPassword = userProfileService.generatePassword();
+
+        traineeDAO.findByUsername(username).ifPresent(trainee -> {
+            log.info("Registration failed: user with username {} is already registered as trainee", username);
+            throw new ValidationFailedException(String.format("User with username %s is already registered as a trainee", username));
+        });
 
         TrainingType trainingType = trainingTypeDAO.findByTrainingTypeName(request.getSpecialization()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, request.getSpecialization())));

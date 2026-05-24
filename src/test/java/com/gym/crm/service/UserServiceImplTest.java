@@ -8,7 +8,7 @@ import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
 import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.UserServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,16 +22,16 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-    private static final String USERNAME = "Owen.Castleberry";
-    private static final String NON_EXISTENT_USERNAME = "Non.Existent";
-    private static final String BLANK_USERNAME = " ";
-    private static final String OLD_PASSWORD = "oldPassword";
+    private static final String USERNAME = "Simone.Radcliffe";
+    private static final String NON_EXISTENT_USERNAME = "Not.Found";
     private static final String NEW_PASSWORD = "newPassword";
     private static final long VALID_ID = 1L;
     private static final long NOT_FOUND_ID = 999L;
@@ -39,6 +39,15 @@ class UserServiceImplTest {
     
     private static final String USER_NOT_FOUND_BY_USERNAME = "User not found by username: %s";
     private static final String USER_NOT_FOUND_BY_ID = "User not found by id: %s";
+    private static final String USER_ALREADY_ACTIVATED = "Could not activate user %s: user is already activated";
+
+    private final User user = TestDataProvider.buildTraineeUser();
+    private final User savedUser = user.toBuilder().id(VALID_ID).build();
+    private final PasswordChangeRequest request = TestDataProvider.buildPasswordChangeRequest();
+    private final PasswordChangeRequest passwordChangeRequestBlankUsername = TestDataProvider.buildPasswordChangeRequestBlankUsername();
+    private final PasswordChangeRequest passwordChangeRequestShortNewPassword = TestDataProvider.buildPasswordChangeRequestShortNewPassword();
+    private final ToggleActiveRequestDTO toggleActiveRequestDTO = TestDataProvider.buildToggleActiveRequest();
+    private final ToggleActiveRequestDTO invalidToggleActiveRequest = TestDataProvider.buildInvalidToggleActiveRequest();
 
     @Mock
     private UserDAO dao;
@@ -49,13 +58,6 @@ class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl service;
-
-    private User savedUser;
-
-    @BeforeEach
-    void setUp() {
-        savedUser = buildUser();
-    }
 
     @Test
     void getById_shouldReturnUser_whenUserExists() {
@@ -70,8 +72,7 @@ class UserServiceImplTest {
     void getById_shouldThrowException_whenUserNotFound() {
         when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                () -> service.getById(NOT_FOUND_ID));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getById(NOT_FOUND_ID));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_ID, NOT_FOUND_ID));
     }
@@ -114,9 +115,6 @@ class UserServiceImplTest {
 
     @Test
     void changePassword_shouldUpdatePassword_whenUserValid() {
-        User user = buildUser();
-        PasswordChangeRequest request = buildPasswordChangeRequest();
-
         when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
 
@@ -133,16 +131,13 @@ class UserServiceImplTest {
     void changePassword_shouldThrowIfUserNotFound() {
         when(dao.findByUsername(NON_EXISTENT_USERNAME)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.changePassword(buildInvalidPasswordChangeRequest()));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.changePassword(TestDataProvider.buildInvalidPasswordChangeRequest()));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
     }
 
     @Test
     void changePassword_shouldCallValidationService() {
-        PasswordChangeRequest request = buildPasswordChangeRequest();
-        User user = buildUser();
-
         when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
 
@@ -153,38 +148,33 @@ class UserServiceImplTest {
 
     @Test
     void changePassword_shouldThrowValidationException_whenUsernameIsBlank() {
-        PasswordChangeRequest request = buildPasswordChangeRequestBlankUsername();
+        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(passwordChangeRequestBlankUsername, "Password change request");
 
-        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(request, "Password change request");
+        assertThrows(ValidationFailedException.class, () -> service.changePassword(passwordChangeRequestBlankUsername));
 
-        assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
-
-        verify(userInputValidator).validate(request, "Password change request");
+        verify(userInputValidator).validate(passwordChangeRequestBlankUsername, "Password change request");
     }
 
     @Test
     void changePassword_shouldThrowValidationException_whenNewPasswordTooShort() {
-        PasswordChangeRequest request = buildPasswordChangeRequestShortNewPassword();
+        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(userInputValidator).validate(passwordChangeRequestShortNewPassword, "Password change request");
 
-        doThrow(new ValidationFailedException("Password must be between 10 and 100 characters long")).when(userInputValidator).validate(request, "Password change request");
+        assertThrows(ValidationFailedException.class, () -> service.changePassword(passwordChangeRequestShortNewPassword));
 
-        assertThrows(ValidationFailedException.class, () -> service.changePassword(request));
-
-        verify(userInputValidator).validate(request, "Password change request");
+        verify(userInputValidator).validate(passwordChangeRequestShortNewPassword, "Password change request");
     }
 
     @Test
     void toggleActive_shouldToggleStatus_whenValid() {
-        User user = buildUser();
+        User inactive = user.toBuilder().isActive(false).build();
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(inactive));
 
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
-
-        service.toggleActive(buildToggleActiveRequest());
+        service.toggleActive(TestDataProvider.buildToggleActiveRequest());
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(dao).update(userCaptor.capture());
         User updatedUser = userCaptor.getValue();
-        assertThat(updatedUser.getIsActive()).isFalse();
+        assertThat(updatedUser.getIsActive()).isTrue();
         assertThat(updatedUser.getUsername()).isEqualTo(USERNAME);
     }
 
@@ -192,92 +182,38 @@ class UserServiceImplTest {
     void toggleActive_shouldThrow_whenUserNotFound() {
         when(dao.findByUsername(NON_EXISTENT_USERNAME)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.toggleActive(buildToggleActiveRequestNonExistent()));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.toggleActive(TestDataProvider.buildToggleActiveRequestNonExistent()));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
     }
 
     @Test
     void toggleActive_shouldCallValidationService() {
-        User user = buildUser();
-        ToggleActiveRequestDTO request = buildToggleActiveRequest();
+        User inactive = user.toBuilder().isActive(false).build();
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(inactive));
 
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        service.toggleActive(toggleActiveRequestDTO);
 
-        service.toggleActive(request);
-
-        verify(userInputValidator).validate(request,  "Toggle active request");
+        verify(userInputValidator).validate(toggleActiveRequestDTO,  "Toggle active request");
     }
 
     @Test
     void toggleActive_shouldThrowValidationException_whenUsernameIsBlank() {
-        ToggleActiveRequestDTO invalidRequest = buildInvalidToggleActiveRequest();
+        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(invalidToggleActiveRequest, "Toggle active request");
 
-        doThrow(new ValidationFailedException("Username is required")).when(userInputValidator).validate(invalidRequest, "Toggle active request");
-
-        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidRequest));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(invalidToggleActiveRequest));
 
         assertThat(exception.getMessage()).contains("Username is required");
-        verify(userInputValidator).validate(invalidRequest, "Toggle active request");
+        verify(userInputValidator).validate(invalidToggleActiveRequest, "Toggle active request");
     }
 
-    private User buildUser() {
-        return User.builder()
-                .id(VALID_ID)
-                .username(USERNAME)
-                .password(OLD_PASSWORD)
-                .isActive(true)
-                .build();
-    }
+    @Test
+    void toggleActive_shouldThrowValidationFailedException_ifStatusIsAlreadySet() {
+        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
 
-    private PasswordChangeRequest buildPasswordChangeRequest() {
-        return PasswordChangeRequest.builder()
-                .username(USERNAME)
-                .oldPassword(OLD_PASSWORD)
-                .newPassword(NEW_PASSWORD)
-                .build();
-    }
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.toggleActive(toggleActiveRequestDTO));
 
-    private PasswordChangeRequest buildInvalidPasswordChangeRequest() {
-        return PasswordChangeRequest.builder()
-                .username(NON_EXISTENT_USERNAME)
-                .oldPassword(OLD_PASSWORD)
-                .newPassword(NEW_PASSWORD)
-                .build();
-    }
-
-    private ToggleActiveRequestDTO buildToggleActiveRequest() {
-        return ToggleActiveRequestDTO.builder()
-                .username(USERNAME)
-                .isActive(true)
-                .build();
-    }
-
-    private ToggleActiveRequestDTO buildInvalidToggleActiveRequest() {
-        return ToggleActiveRequestDTO.builder()
-                .username(BLANK_USERNAME)
-                .build();
-    }
-
-    private ToggleActiveRequestDTO buildToggleActiveRequestNonExistent() {
-        return ToggleActiveRequestDTO.builder()
-                .username(NON_EXISTENT_USERNAME)
-                .build();
-    }
-
-    private PasswordChangeRequest buildPasswordChangeRequestBlankUsername() {
-        return PasswordChangeRequest.builder()
-                .username(BLANK_USERNAME)
-                .oldPassword(OLD_PASSWORD)
-                .newPassword(NEW_PASSWORD)
-                .build();
-    }
-
-    private PasswordChangeRequest buildPasswordChangeRequestShortNewPassword() {
-        return PasswordChangeRequest.builder()
-                .username(USERNAME)
-                .oldPassword(OLD_PASSWORD)
-                .newPassword("short")
-                .build();
+        assertThat(exception.getMessage()).isEqualTo(String.format(USER_ALREADY_ACTIVATED, USERNAME));
+        verify(dao, never()).update(any());
     }
 }

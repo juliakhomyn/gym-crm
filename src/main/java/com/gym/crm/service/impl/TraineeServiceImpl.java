@@ -9,6 +9,7 @@ import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.model.Trainee;
@@ -53,6 +54,11 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = mapper.toEntity(request);
         String username = userProfileService.generateUsername(request.getFirstName(), request.getLastName());
         String rawPassword = userProfileService.generatePassword();
+
+        trainerDAO.findByUsername(username).ifPresent(trainer -> {
+            log.info("Registration failed: user with username {} is already registered as trainer", username);
+            throw new ValidationFailedException(String.format("User with username %s is already registered as a trainer", username));
+        });
 
         User user = trainee.getUser().toBuilder()
                 .username(username)

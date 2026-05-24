@@ -543,4 +543,47 @@ public class TestDataProvider {
 
         return response;
     }
+
+    public static PasswordChangeRequest buildInvalidPasswordChangeRequest() {
+        return PasswordChangeRequest.builder()
+                .username(NOT_FOUND_USERNAME)
+                .oldPassword(PASSWORD)
+                .newPassword(NEW_PASSWORD)
+                .build();
+    }
+
+    public static ToggleActiveRequestDTO buildToggleActiveRequest() {
+        return ToggleActiveRequestDTO.builder()
+                .username(USERNAME)
+                .isActive(true)
+                .build();
+    }
+
+    public static ToggleActiveRequestDTO buildInvalidToggleActiveRequest() {
+        return ToggleActiveRequestDTO.builder()
+                .username(" ")
+                .build();
+    }
+
+    public static ToggleActiveRequestDTO buildToggleActiveRequestNonExistent() {
+        return ToggleActiveRequestDTO.builder()
+                .username(NOT_FOUND_USERNAME)
+                .build();
+    }
+
+    public static PasswordChangeRequest buildPasswordChangeRequestBlankUsername() {
+        return PasswordChangeRequest.builder()
+                .username(" ")
+                .oldPassword(PASSWORD)
+                .newPassword(NEW_PASSWORD)
+                .build();
+    }
+
+    public static PasswordChangeRequest buildPasswordChangeRequestShortNewPassword() {
+        return PasswordChangeRequest.builder()
+                .username(USERNAME)
+                .oldPassword(PASSWORD)
+                .newPassword("short")
+                .build();
+    }
 }

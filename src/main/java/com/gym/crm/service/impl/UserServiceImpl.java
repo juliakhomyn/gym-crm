@@ -3,6 +3,7 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.UserDAO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.service.UserService;
@@ -73,8 +74,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, request.getUsername())));
 
         boolean currentStatus = user.getIsActive();
+        if (currentStatus == request.isActive()) {
+            String status = currentStatus ? "activate" : "deactivate";
+            log.warn("Could not {} user: username={} is already {}d", status, request.getUsername(), status);
+
+            throw new ValidationFailedException(String.format("Could not %s user %s: user is already %sd", status, request.getUsername(), status));
+        }
+
         User userWithChangedStatus = user.toBuilder()
-                .isActive(!currentStatus)
+                .isActive(request.isActive())
                 .build();
 
         dao.update(userWithChangedStatus);

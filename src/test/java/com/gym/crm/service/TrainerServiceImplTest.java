@@ -51,6 +51,7 @@ class TrainerServiceImplTest {
     private static final String TRAINER_CANNOT_BE_NULL = "Trainer cannot be null";
     private static final String TRAINER_NOT_FOUND_BY_ID = "Trainer not found by id: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
+    private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
     private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
     private static final String USERNAME_CANNOT_BE_NULL = "Username cannot be null or empty";
@@ -222,23 +223,23 @@ class TrainerServiceImplTest {
 
     @Test
     void getTrainerByUsername_shouldReturnTrainer_whenExists() {
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(trainer));
+        when(dao.findByUsernameWithTrainees(USERNAME)).thenReturn(Optional.of(trainer));
         when(mapper.toInfoDto(trainer)).thenReturn(info);
 
         TrainerInfoDTO actual = service.getTrainerByUsername(USERNAME);
 
         assertThat(actual).isEqualTo(info);
-        verify(dao).findByUsername(USERNAME);
+        verify(dao).findByUsernameWithTrainees(USERNAME);
     }
 
     @Test
     void getTrainerByUsername_shouldThrowException_whenNotFound() {
-        when(dao.findByUsername(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
+        when(dao.findByUsernameWithTrainees(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTrainerByUsername(NOT_FOUND_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINER_NOT_FOUND_BY_USERNAME, NOT_FOUND_USERNAME));
-        verify(dao).findByUsername(NOT_FOUND_USERNAME);
+        verify(dao).findByUsernameWithTrainees(NOT_FOUND_USERNAME);
     }
 
     @Test
@@ -248,7 +249,7 @@ class TrainerServiceImplTest {
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainerByUsername(BLANK_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
-        verify(dao, never()).findByUsername(any());
+        verify(dao, never()).findByUsernameWithTrainees(any());
     }
 
     @Test
@@ -277,6 +278,7 @@ class TrainerServiceImplTest {
         TrainerInfoDTO trainerInfoDTO1 = TestDataProvider.buildNotAssignedTrainerInfoDTO("trainer1");
         TrainerInfoDTO trainerInfoDTO2 = TestDataProvider.buildNotAssignedTrainerInfoDTO("trainer2");
 
+        when(traineeDAO.findByUsername(USERNAME)).thenReturn(Optional.of(new Trainee()));
         when(dao.findNotAssignedToTrainee(USERNAME)).thenReturn(List.of(trainer1, trainer2));
         when(mapper.toInfoDto(trainer1)).thenReturn(trainerInfoDTO1);
         when(mapper.toInfoDto(trainer2)).thenReturn(trainerInfoDTO2);
@@ -295,6 +297,7 @@ class TrainerServiceImplTest {
     @Test
     void getNotAssignedToTrainee_shouldReturnEmptyList_whenNoTrainers() {
         when(dao.findNotAssignedToTrainee(USERNAME)).thenReturn(List.of());
+        when(traineeDAO.findByUsername(USERNAME)).thenReturn(Optional.of(new Trainee()));
 
         List<TrainerInfoDTO> actual = service.getNotAssignedToTrainee(USERNAME);
 
@@ -312,6 +315,17 @@ class TrainerServiceImplTest {
 
         assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
         verify(userInputValidator).validateUsername(BLANK_USERNAME);
+        verify(dao, never()).findNotAssignedToTrainee(any());
+        verify(mapper, never()).toInfoDto(any());
+    }
+
+    @Test
+    void getNotAssignedToTrainee_shouldThrow_whenTraineeNotFound() {
+        doThrow(new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, USERNAME))).when(traineeDAO).findByUsername(USERNAME);
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getNotAssignedToTrainee(USERNAME));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, USERNAME));
         verify(dao, never()).findNotAssignedToTrainee(any());
         verify(mapper, never()).toInfoDto(any());
     }

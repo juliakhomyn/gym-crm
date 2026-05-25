@@ -1,6 +1,7 @@
 package com.gym.crm.dao;
 
 import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -161,6 +163,19 @@ class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
         assertThat(actual).containsAll(expected);
     }
 
+    @Test
+    void findByUsernameWithTrainees_shouldReturnTrainer_whenExists() {
+        Trainer expected = buildExpectedTrainerWithTrainees();
+
+        Optional<Trainer> actual = dao.findByUsernameWithTrainees("Callum.Whitfield");
+
+        assertThat(actual)
+                .isPresent()
+                .contains(expected);
+        assertThat(actual.get().getTrainees())
+                .containsExactlyInAnyOrderElementsOf(actual.get().getTrainees());
+    }
+
     private Trainer buildTrainer() {
         return Trainer.builder()
                 .user(buildUser())
@@ -220,5 +235,15 @@ class TrainerDAOImplTest extends AbstractDaoTest<TrainerDAO> {
                 .build();
 
         return List.of(buildExpectedTrainer(), trainer);
+    }
+
+    private Trainer buildExpectedTrainerWithTrainees() {
+        Trainee trainee = Trainee.builder()
+                .id(1L)
+                .user(buildExpectedUser())
+                .build();
+        return buildExpectedTrainer().toBuilder()
+                .trainees(Set.of(trainee))
+                .build();
     }
 }

@@ -31,6 +31,7 @@ public class TrainerServiceImpl implements TrainerService {
     private static final String TRAINER_NOT_FOUND_BY_ID = "Trainer not found by id: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
+    private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String TRAINER = "Trainer";
 
     private final TrainerDAO dao;
@@ -121,7 +122,7 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Getting trainer by username: username={}", username);
         userInputValidator.validateUsername(username);
 
-        Trainer trainer = dao.findByUsername(username)
+        Trainer trainer = dao.findByUsernameWithTrainees(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, username)));
 
         return mapper.toInfoDto(trainer);
@@ -142,6 +143,8 @@ public class TrainerServiceImpl implements TrainerService {
         userInputValidator.validateUsername(traineeUsername);
 
         log.info("Getting all trainers not assigned to trainee: username={}", traineeUsername);
+
+        traineeDAO.findByUsername(traineeUsername).orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, traineeUsername)));
 
         return dao.findNotAssignedToTrainee(traineeUsername).stream()
                 .map(mapper::toInfoDto)

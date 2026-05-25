@@ -306,23 +306,23 @@ class TraineeServiceImplTest {
 
     @Test
     void getTraineeByUsername_shouldReturnTrainee_whenExists() {
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(trainee));
+        when(dao.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(trainee));
         when(mapper.toInfoDto(trainee)).thenReturn(info);
 
         TraineeInfoDTO actual = service.getTraineeByUsername(USERNAME);
 
         assertThat(actual).isEqualTo(info);
-        verify(dao).findByUsername(USERNAME);
+        verify(dao).findByUsernameWithTrainers(USERNAME);
     }
 
     @Test
     void getTraineeByUsername_shouldThrowException_whenNotFound() {
-        when(dao.findByUsername(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
+        when(dao.findByUsernameWithTrainers(NOT_FOUND_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTraineeByUsername(NOT_FOUND_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, NOT_FOUND_USERNAME));
-        verify(dao).findByUsername(NOT_FOUND_USERNAME);
+        verify(dao).findByUsernameWithTrainers(NOT_FOUND_USERNAME);
     }
 
     @Test
@@ -332,7 +332,7 @@ class TraineeServiceImplTest {
         ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTraineeByUsername(BLANK_USERNAME));
 
         assertThat(exception.getMessage()).isEqualTo(USERNAME_CANNOT_BE_NULL);
-        verify(dao, never()).findByUsername(any());
+        verify(dao, never()).findByUsernameWithTrainers(any());
     }
 
     @Test
@@ -382,9 +382,9 @@ class TraineeServiceImplTest {
 
         when(trainerDAO.findByUsername(TRAINER_USERNAME1)).thenReturn(Optional.of(trainer1));
         when(trainerDAO.findByUsername(TRAINER_USERNAME2)).thenReturn(Optional.of(trainer2));
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(updatedTrainee));
-        when(trainerMapper.toInfoDto(trainer1)).thenReturn(trainerInfo1);
-        when(trainerMapper.toInfoDto(trainer2)).thenReturn(trainerInfo2);
+        when(dao.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(updatedTrainee));
+        when(trainerMapper.toInfoDtoWithoutTrainees(trainer1)).thenReturn(trainerInfo1);
+        when(trainerMapper.toInfoDtoWithoutTrainees(trainer2)).thenReturn(trainerInfo2);
 
         List<TrainerInfoDTO> actual = service.updateTrainersList(trainerAssignmentUpdateDTO);
 
@@ -392,9 +392,9 @@ class TraineeServiceImplTest {
         verify(trainerDAO).findByUsername(TRAINER_USERNAME1);
         verify(trainerDAO).findByUsername(TRAINER_USERNAME2);
         verify(dao).updateTrainersList(eq(USERNAME), anyList());
-        verify(dao).findByUsername(USERNAME);
-        verify(trainerMapper).toInfoDto(trainer1);
-        verify(trainerMapper).toInfoDto(trainer2);
+        verify(dao).findByUsernameWithTrainers(USERNAME);
+        verify(trainerMapper).toInfoDtoWithoutTrainees(trainer1);
+        verify(trainerMapper).toInfoDtoWithoutTrainees(trainer2);
         assertThat(actual).containsExactlyInAnyOrder(trainerInfo1, trainerInfo2);
     }
 

@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 public class TrainerDAOImpl implements TrainerDAO {
+    private static final String USERNAME_PARAMETER = "username";
 
     private final TransactionManager transactionManager;
 
@@ -48,7 +49,7 @@ public class TrainerDAOImpl implements TrainerDAO {
 
         return transactionManager.performReturningWithinTx(manager ->
             manager.createQuery("FROM Trainer t JOIN FETCH t.user WHERE t.user.username = :username", Trainer.class)
-                    .setParameter("username", username)
+                    .setParameter(USERNAME_PARAMETER, username)
                     .getResultStream()
                     .findFirst()
         );
@@ -76,7 +77,7 @@ public class TrainerDAOImpl implements TrainerDAO {
                                         "  JOIN trn.trainers tr2 " +
                                         "  WHERE trn.user.username = :username)",
                                 Trainer.class)
-                    .setParameter("username", traineeUsername)
+                    .setParameter(USERNAME_PARAMETER, traineeUsername)
                     .getResultList()
         );
     }
@@ -93,7 +94,7 @@ public class TrainerDAOImpl implements TrainerDAO {
                                         "LEFT JOIN FETCH trn.user " +
                                         "WHERE t.user.username = :username",
                                 Trainer.class)
-                        .setParameter("username", username)
+                        .setParameter(USERNAME_PARAMETER, username)
                         .getResultStream()
                         .findFirst()
         );

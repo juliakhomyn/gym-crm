@@ -1,22 +1,17 @@
 package com.gym.crm.dto.trainer;
 
-import com.gym.crm.dto.trainee.AssignedTraineeDTO;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @Builder
 @ToString
 @EqualsAndHashCode
-public class TrainerInfoDTO {
+public class AssignedTrainerDTO {
+    private final String username;
     private final String firstName;
     private final String lastName;
-    private final String username;
-    private final Boolean isActive;
     private final String specialization;
-    private final List<AssignedTraineeDTO> assignedTrainees;
 }

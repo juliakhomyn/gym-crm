@@ -1,9 +1,12 @@
 package com.gym.crm.dto.trainer;
 
+import com.gym.crm.dto.trainee.AssignedTraineeDTO;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
+import java.util.List;
 
 @Getter
 @Builder(toBuilder = true)
@@ -18,4 +21,5 @@ public class TrainerResponseDTO {
     private final String password;
     private final String specialization;
     private final Boolean isActive;
+    private final List<AssignedTraineeDTO> assignedTrainees;
 }

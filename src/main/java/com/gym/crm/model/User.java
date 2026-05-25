@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder(toBuilder = true)
-@ToString(exclude = {"trainee", "trainer", "password"})
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @Entity
@@ -36,15 +34,10 @@ public class User {
     @Column(nullable = false, unique = true, length = 110)
     private String username;
 
+    @ToString.Exclude
     @Column(nullable = false, length = 100)
     private String password;
 
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT(1)")
     private Boolean isActive;
-
-    @OneToOne(mappedBy = "user")
-    private Trainee trainee;
-
-    @OneToOne(mappedBy = "user")
-    private Trainer trainer;
 }

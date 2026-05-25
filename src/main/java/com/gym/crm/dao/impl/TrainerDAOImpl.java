@@ -67,12 +67,35 @@ public class TrainerDAOImpl implements TrainerDAO {
         Validator.validateNotBlank(traineeUsername, "Trainee Username");
 
         return transactionManager.performReturningWithinTx(manager ->
-                manager.createQuery("SELECT t FROM Trainer t " +
-                                        "LEFT JOIN t.trainees trn WITH trn.user.username = :username " +
-                                        "WHERE trn IS NULL",
-                            Trainer.class)
+                manager.createQuery("SELECT DISTINCT t FROM Trainer t " +
+                                        "LEFT JOIN FETCH t.user " +
+                                        "LEFT JOIN FETCH t.trainees tr " +
+                                        "LEFT JOIN FETCH tr.user " +
+                                        "WHERE t NOT IN (" +
+                                        "  SELECT tr2 FROM Trainee trn " +
+                                        "  JOIN trn.trainers tr2 " +
+                                        "  WHERE trn.user.username = :username)",
+                                Trainer.class)
                     .setParameter("username", traineeUsername)
                     .getResultList()
+        );
+    }
+
+    @Override
+    public Optional<Trainer> findByUsernameWithTrainees(String username) {
+        Validator.validateNotBlank(username, "Username");
+
+        return transactionManager.performReturningWithinTx(manager ->
+                manager.createQuery(
+                                "FROM Trainer t " +
+                                        "JOIN FETCH t.user " +
+                                        "LEFT JOIN FETCH t.trainees trn " +
+                                        "LEFT JOIN FETCH trn.user " +
+                                        "WHERE t.user.username = :username",
+                                Trainer.class)
+                        .setParameter("username", username)
+                        .getResultStream()
+                        .findFirst()
         );
     }
 }

@@ -20,6 +20,7 @@ public interface TrainerRestMapper {
 
     TrainerCreateResponse toRest(TrainerResponseDTO dto);
 
+    @Mapping(target = "trainees", source = "assignedTrainees")
     TrainerGetResponse toRestGetResponse(TrainerInfoDTO dto);
 
     AssignedTrainerResponse toRest(TrainerInfoDTO dto);
@@ -27,5 +28,6 @@ public interface TrainerRestMapper {
     @Mapping(target = "username", source = "username")
     TrainerUpdateDTO toDto(String username, TrainerUpdateRequest request);
 
+    @Mapping(target = "trainees", source = "assignedTrainees")
     TrainerUpdateResponse toRestUpdateResponse(TrainerResponseDTO dto);
 }

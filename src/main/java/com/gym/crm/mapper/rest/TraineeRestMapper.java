@@ -19,10 +19,12 @@ public interface TraineeRestMapper {
 
     TraineeCreateResponse toRest(TraineeResponseDTO dto);
 
+    @Mapping(target = "trainers", source = "assignedTrainers")
     TraineeGetResponse toRest(TraineeInfoDTO dto);
 
     @Mapping(target = "username", source = "username")
     TraineeUpdateDTO toDto(String username, TraineeUpdateRequest request);
 
+    @Mapping(target = "trainers", source = "assignedTrainers")
     TraineeUpdateResponse toRestUpdateResponse(TraineeResponseDTO dto);
 }

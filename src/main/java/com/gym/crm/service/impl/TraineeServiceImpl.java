@@ -122,7 +122,8 @@ public class TraineeServiceImpl implements TraineeService {
         userInputValidator.validateUsername(username);
 
         log.info("Deleting trainee by username: username={}", username);
-        getTraineeByUsername(username);
+        dao.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, username)));
 
         dao.deleteByUsername(username);
         log.info("Trainee deleted successfully: username={}", username);
@@ -144,7 +145,7 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Getting trainee by username: username={}", username);
         userInputValidator.validateUsername(username);
 
-        Trainee trainee = dao.findByUsername(username)
+        Trainee trainee = dao.findByUsernameWithTrainers(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, username)));
 
         return mapper.toInfoDto(trainee);
@@ -174,11 +175,11 @@ public class TraineeServiceImpl implements TraineeService {
         dao.updateTrainersList(dto.getTraineeUsername(), trainers);
         log.info("Trainers list updated successfully: username={}", dto.getTraineeUsername());
 
-        Trainee updatedTrainee = dao.findByUsername(dto.getTraineeUsername())
+        Trainee updatedTrainee = dao.findByUsernameWithTrainers(dto.getTraineeUsername())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, dto.getTraineeUsername())));
 
         return updatedTrainee.getTrainers().stream()
-                .map(trainerMapper::toInfoDto)
+                .map(trainerMapper::toInfoDtoWithoutTrainees)
                 .toList();
     }
 }

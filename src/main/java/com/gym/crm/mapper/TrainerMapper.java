@@ -1,9 +1,11 @@
 package com.gym.crm.mapper;
 
+import com.gym.crm.dto.trainee.AssignedTraineeDTO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.dto.trainer.TrainerRequestDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
+import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.TrainingType;
 import org.mapstruct.Mapper;
@@ -38,7 +40,21 @@ public interface TrainerMapper {
     @Mapping(target = "lastName", source = "user.lastName")
     @Mapping(target = "isActive", source = "user.isActive")
     @Mapping(target = "specialization", source = "specialization")
+    @Mapping(target = "assignedTrainees", source = "trainees")
     TrainerInfoDTO toInfoDto(Trainer trainer);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "isActive", source = "user.isActive")
+    @Mapping(target = "specialization", source = "specialization")
+    @Mapping(target = "assignedTrainees", ignore = true)
+    TrainerInfoDTO toInfoDtoWithoutTrainees(Trainer trainer);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "firstName", source = "user.firstName")
+    @Mapping(target = "lastName", source = "user.lastName")
+    AssignedTraineeDTO toAssignedTraineeDto(Trainee trainee);
 
     default TrainingType map(String type) {
         return type == null ? null : TrainingType.builder().trainingTypeName(type).build();

@@ -3,21 +3,25 @@ package com.gym.crm.service;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.dto.training.TrainingTypeDTO;
+import com.gym.crm.dto.validation.ValidId;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
+@Validated
 public interface TrainingService {
-    TrainingResponseDTO createTraining(TrainingRequestDTO trainingRequestDTO);
+    TrainingResponseDTO createTraining(@Valid TrainingRequestDTO trainingRequestDTO);
 
-    TrainingResponseDTO getTrainingById(Long id);
+    TrainingResponseDTO getTrainingById(@ValidId Long id);
 
     List<TrainingResponseDTO> getAllTrainings();
 
-    List<TrainingResponseDTO> getTraineeTrainings(TraineeTrainingFilter filter);
+    List<TrainingResponseDTO> getTraineeTrainings(@Valid TraineeTrainingFilter filter);
 
-    List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingFilter filter);
+    List<TrainingResponseDTO> getTrainerTrainings(@Valid TrainerTrainingFilter filter);
 
     List<TrainingTypeDTO> getAllTrainingTypes();
 }

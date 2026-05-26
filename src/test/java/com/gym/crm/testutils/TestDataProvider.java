@@ -55,6 +55,8 @@ public class TestDataProvider {
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String PASSWORD = "password";
     private static final String NEW_PASSWORD = "newPassword";
+    private static final String INVALID_PASSWORD = "invalidPassword";
+    private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final LocalDate DATE_OF_BIRTH = LocalDate.of(2000, 1, 1);
     private static final String ADDRESS = "123 Main St";
     private static final String TRAINER_USERNAME1 = "trainer1";
@@ -68,13 +70,23 @@ public class TestDataProvider {
     private static final LocalDate TRAINING_DATE = LocalDate.of(2024, 1, 15);
     private static final int TRAINING_DURATION = 60;
     private static final String NOT_FOUND_USERNAME = "Not.Found";
-    private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final long VALID_ID = 1L;
     private static final long NOT_FOUND_ID = 999L;
     private static final LocalDate FROM_DATE = LocalDate.of(2024, 1, 1);
     private static final LocalDate TO_DATE = LocalDate.of(2024, 1, 30);
 
     private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
+
+    public static User buildUser(String firstName, String lastName, String username) {
+        return User.builder()
+                .id(VALID_ID)
+                .firstName(firstName)
+                .lastName(lastName)
+                .username(username)
+                .password(ENCODED_PASSWORD)
+                .isActive(true)
+                .build();
+    }
 
     public static TraineeRequestDTO buildTraineeRequestDTO() {
         return TraineeRequestDTO.builder()
@@ -559,31 +571,55 @@ public class TestDataProvider {
                 .build();
     }
 
-    public static ToggleActiveRequestDTO buildInvalidToggleActiveRequest() {
-        return ToggleActiveRequestDTO.builder()
-                .username(" ")
-                .build();
-    }
-
     public static ToggleActiveRequestDTO buildToggleActiveRequestNonExistent() {
         return ToggleActiveRequestDTO.builder()
                 .username(NOT_FOUND_USERNAME)
                 .build();
     }
 
-    public static PasswordChangeRequest buildPasswordChangeRequestBlankUsername() {
-        return PasswordChangeRequest.builder()
-                .username(" ")
-                .oldPassword(PASSWORD)
-                .newPassword(NEW_PASSWORD)
+    public static Training buildExpectedTraining() {
+        return Training.builder()
+                .id(1L)
+                .trainingName("Hot Yoga")
+                .trainingDate(LocalDate.of(2026, 4, 15))
+                .trainingDuration(60)
+                .trainingType(buildTrainingType())
+                .trainee(buildTrainee())
+                .trainer(buildTrainer())
                 .build();
     }
 
-    public static PasswordChangeRequest buildPasswordChangeRequestShortNewPassword() {
-        return PasswordChangeRequest.builder()
+    public static List<Training> buildExpectedTrainings() {
+        User user = User.builder()
+                .id(3L)
+                .firstName("Ellis")
+                .lastName("Hargrove")
+                .username("Ellis.Hargrove")
+                .password("pass333")
+                .isActive(true)
+                .build();
+        Trainee trainee = Trainee.builder()
+                .id(2L)
+                .user(user)
+                .dateOfBirth(LocalDate.of(2002, 7, 15))
+                .build();
+        Training training = Training.builder()
+                .id(2L)
+                .trainingName("Hot Yoga")
+                .trainingDate(LocalDate.of(2026, 4, 20))
+                .trainingDuration(60)
+                .trainingType(buildTrainingType())
+                .trainee(trainee)
+                .trainer(buildTrainer())
+                .build();
+
+        return List.of(buildExpectedTraining(), training);
+    }
+
+    public static AuthRequestDTO buildAuthRequestDTOWithInvalidPassword() {
+        return AuthRequestDTO.builder()
                 .username(USERNAME)
-                .oldPassword(PASSWORD)
-                .newPassword("short")
+                .password(INVALID_PASSWORD)
                 .build();
     }
 }

@@ -1,33 +1,30 @@
 package com.gym.crm.service.common;
 
-import com.gym.crm.dao.UserDAO;
+import com.gym.crm.repository.UserRepository;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Component
+@Validated
 @RequiredArgsConstructor
 public class UsernameGenerator {
-    private static final String FIRST_NAME = "First name";
-    private static final String LAST_NAME = "Last name";
     private static final String SEPARATOR = ".";
 
-    private final UserDAO dao;
-    private final UserInputValidator validator;
+    private final UserRepository repository;
 
-    public String generateUsername(String firstName, String lastName) {
-        validator.validateNotBlank(firstName, FIRST_NAME);
-        validator.validateNotBlank(lastName, LAST_NAME);
-
+    public String generateUsername(@NotBlank String firstName, @NotBlank String lastName) {
         String baseUsername = (firstName + SEPARATOR + lastName);
 
-        if (!dao.existsByUsername(baseUsername)) {
+        if (!repository.existsByUsername(baseUsername)) {
             return baseUsername;
         }
 
         long serialNumber = 1;
-        while (dao.existsByUsername(baseUsername + serialNumber)) {
+        while (repository.existsByUsername(baseUsername + serialNumber)) {
             serialNumber++;
         }
 

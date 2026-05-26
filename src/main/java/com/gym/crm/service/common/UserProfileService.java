@@ -3,6 +3,7 @@ package com.gym.crm.service.common;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -11,6 +12,7 @@ public class UserProfileService {
     private final PasswordGenerator passwordGenerator;
     private final UsernameGenerator usernameGenerator;
 
+    @Transactional(readOnly = true)
     public String generateUsername(String firstName, String lastName) {
         return usernameGenerator.generateUsername(firstName, lastName);
     }

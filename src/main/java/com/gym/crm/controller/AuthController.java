@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,7 @@ public class AuthController {
                     ))
     })
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request) {
         facade.login(request);
 
         return ResponseEntity.ok().build();
@@ -67,7 +68,7 @@ public class AuthController {
                     ))
     })
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(@RequestBody LoginChangeRequest request) {
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid LoginChangeRequest request) {
         facade.changePassword(request, request.getUsername());
 
         return ResponseEntity.ok().build();

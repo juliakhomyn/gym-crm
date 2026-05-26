@@ -1,4 +1,0 @@
-userId,firstName,lastName,username,password,isActive,dateOfBirth,address
-1,John,Doe,John.Doe,test123,true,2004-05-15,123 Main St
-2,Jane,Smith,Jane.Smith,test456,false,1999-11-30,456 Oak Ave
-3,Alex,Brown,Alex.Brown,test789,true,2000-01-20,789 Pine Rd

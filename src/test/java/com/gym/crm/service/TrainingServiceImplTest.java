@@ -1,22 +1,21 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dao.TraineeDAO;
-import com.gym.crm.dao.TrainerDAO;
-import com.gym.crm.dao.TrainingDAO;
-import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.dto.training.TrainingTypeDTO;
 import com.gym.crm.exception.EntityNotFoundException;
-import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.repository.TraineeRepository;
+import com.gym.crm.repository.TrainerRepository;
+import com.gym.crm.repository.TrainingRepositoryCriteria;
+import com.gym.crm.repository.TrainingRepository;
+import com.gym.crm.repository.TrainingTypeRepository;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
-import com.gym.crm.service.common.UserInputValidator;
 import com.gym.crm.service.impl.TrainingServiceImpl;
 import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,16 +40,12 @@ class TrainingServiceImplTest {
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final long VALID_ID = 1L;
-    private static final long INVALID_ID = -1L;
     private static final long NOT_FOUND_ID = 999L;
 
     private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
-    private static final String TRAINING_CANNOT_BE_NULL = "Training cannot be null";
     private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by id: %s";
-    private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
-    private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
 
     private final Trainee trainee = TestDataProvider.buildTrainee();
     private final Trainer trainer = TestDataProvider.buildTrainer();
@@ -62,17 +56,17 @@ class TrainingServiceImplTest {
     private final TrainingTypeDTO trainingTypeDTO = TestDataProvider.buildTrainingTypeDTO();
 
     @Mock
-    private TrainingDAO dao;
+    private TrainingRepository trainingRepository;
     @Mock
-    private TraineeDAO traineeDAO;
+    private TrainingRepositoryCriteria trainingRepositoryCriteria;
     @Mock
-    private TrainerDAO trainerDAO;
+    private TraineeRepository traineeRepository;
     @Mock
-    private TrainingTypeDAO trainingTypeDAO;
+    private TrainerRepository trainerRepository;
+    @Mock
+    private TrainingTypeRepository trainingTypeRepository;
     @Mock
     private TrainingMapper mapper;
-    @Mock
-    private UserInputValidator userInputValidator;
 
     @InjectMocks
     private TrainingServiceImpl service;
@@ -80,10 +74,10 @@ class TrainingServiceImplTest {
     @Test
     void createTraining_shouldSaveTrainingWithCredentials() {
         when(mapper.toEntity(request)).thenReturn(savedTraining);
-        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
-        when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
-        when(trainingTypeDAO.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.ofNullable(trainingType));
-        when(dao.save(any(Training.class))).thenReturn(savedTraining);
+        when(traineeRepository.findByUserUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
+        when(trainerRepository.findByUserUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
+        when(trainingTypeRepository.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.ofNullable(trainingType));
+        when(trainingRepository.save(any(Training.class))).thenReturn(savedTraining);
         when(mapper.toDto(savedTraining)).thenReturn(response);
 
         TrainingResponseDTO actual = service.createTraining(request);
@@ -91,58 +85,48 @@ class TrainingServiceImplTest {
         assertThat(actual).isEqualTo(response);
         verify(mapper).toEntity(request);
         verify(mapper).toDto(savedTraining);
-        verify(userInputValidator).validate(request, "Training");
-        verify(dao).save(any(Training.class));
-    }
-
-    @Test
-    void createTraining_shouldThrowException_whenTrainingIsNull() {
-        doThrow(new ValidationFailedException(TRAINING_CANNOT_BE_NULL)).when(userInputValidator).validate(null, "Training");
-
-        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.createTraining(null));
-
-        assertThat(exception.getMessage()).isEqualTo(TRAINING_CANNOT_BE_NULL);
+        verify(trainingRepository).save(any(Training.class));
     }
 
     @Test
     void updateTrainer_shouldThrowException_whenTraineeNotFound() {
         when(mapper.toEntity(request)).thenReturn(savedTraining);
-        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.empty());
+        when(traineeRepository.findByUserUsername(TRAINEE_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, TRAINEE_USERNAME));
-        verify(dao, never()).save(any(Training.class));
+        verify(trainingRepository, never()).save(any(Training.class));
     }
 
     @Test
-    void updateTrainer_shouldThrowException_whenTrainerNotFlund() {
+    void updateTrainer_shouldThrowException_whenTrainerNotFound() {
         when(mapper.toEntity(request)).thenReturn(savedTraining);
-        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
-        when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.empty());
+        when(traineeRepository.findByUserUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
+        when(trainerRepository.findByUserUsername(TRAINER_USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINER_NOT_FOUND_BY_USERNAME, TRAINER_USERNAME));
-        verify(dao, never()).save(any(Training.class));
+        verify(trainingRepository, never()).save(any(Training.class));
     }
 
     @Test
     void updateTrainer_shouldThrowException_whenTrainingTypeNotFound() {
         when(mapper.toEntity(request)).thenReturn(savedTraining);
-        when(traineeDAO.findByUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
-        when(trainerDAO.findByUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
-        when(trainingTypeDAO.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.empty());
+        when(traineeRepository.findByUserUsername(TRAINEE_USERNAME)).thenReturn(Optional.ofNullable(trainee));
+        when(trainerRepository.findByUserUsername(TRAINER_USERNAME)).thenReturn(Optional.ofNullable(trainer));
+        when(trainingTypeRepository.findByTrainingTypeName(TRAINING_NAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.createTraining(request));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, TRAINING_NAME));
-        verify(dao, never()).save(any(Training.class));
+        verify(trainingRepository, never()).save(any(Training.class));
     }
 
     @Test
     void getTrainingById_shouldReturnTraining_whenTrainingExists() {
-        when(dao.findById(VALID_ID)).thenReturn(Optional.of(savedTraining));
+        when(trainingRepository.findById(VALID_ID)).thenReturn(Optional.of(savedTraining));
         when(mapper.toDto(savedTraining)).thenReturn(response);
 
         TrainingResponseDTO actual = service.getTrainingById(VALID_ID);
@@ -152,7 +136,7 @@ class TrainingServiceImplTest {
 
     @Test
     void getTrainingById_shouldThrowException_whenTrainingNotFound() {
-        when(dao.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
+        when(trainingRepository.findById(NOT_FOUND_ID)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.getTrainingById(NOT_FOUND_ID));
 
@@ -160,26 +144,8 @@ class TrainingServiceImplTest {
     }
 
     @Test
-    void getTrainingById_shouldThrow_whenIdIsNull() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NULL)).when(userInputValidator).validateId(null);
-
-        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainingById(null));
-
-        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NULL);
-    }
-
-    @Test
-    void getTrainingById_shouldThrow_whenIdIsNegative() {
-        doThrow(new ValidationFailedException(ID_CANNOT_BE_NEGATIVE)).when(userInputValidator).validateId(INVALID_ID);
-
-        ValidationFailedException exception = assertThrows(ValidationFailedException.class, () -> service.getTrainingById(INVALID_ID));
-
-        assertThat(exception.getMessage()).isEqualTo(ID_CANNOT_BE_NEGATIVE);
-    }
-
-    @Test
     void getAllTrainings_shouldReturnAllTrainings_whenExist() {
-        when(dao.findAll()).thenReturn(List.of(savedTraining));
+        when(trainingRepository.findAll()).thenReturn(List.of(savedTraining));
         when(mapper.toDto(savedTraining)).thenReturn(response);
 
         List<TrainingResponseDTO> actual = service.getAllTrainings();
@@ -189,7 +155,7 @@ class TrainingServiceImplTest {
 
     @Test
     void getAllTrainings_shouldReturnEmptyList_whenNoTrainings() {
-        when(dao.findAll()).thenReturn(List.of());
+        when(trainingRepository.findAll()).thenReturn(List.of());
 
         List<TrainingResponseDTO> actual = service.getAllTrainings();
 
@@ -202,7 +168,7 @@ class TrainingServiceImplTest {
         List<Training> trainings = List.of(savedTraining);
         TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
-        when(dao.findByTraineeCriteria(filter)).thenReturn(trainings);
+        when(trainingRepositoryCriteria.findByTraineeCriteria(filter)).thenReturn(trainings);
         when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTraineeTrainings(filter);
@@ -210,7 +176,7 @@ class TrainingServiceImplTest {
         assertThat(actual)
                 .hasSize(1)
                 .contains(expected);
-        verify(dao).findByTraineeCriteria(filter);
+        verify(trainingRepositoryCriteria).findByTraineeCriteria(filter);
         verify(mapper).toDto(savedTraining);
     }
 
@@ -220,7 +186,7 @@ class TrainingServiceImplTest {
         List<Training> trainings = List.of(savedTraining);
         TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
-        when(dao.findByTrainerCriteria(filter)).thenReturn(trainings);
+        when(trainingRepositoryCriteria.findByTrainerCriteria(filter)).thenReturn(trainings);
         when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTrainerTrainings(filter);
@@ -228,13 +194,13 @@ class TrainingServiceImplTest {
         assertThat(actual)
                 .hasSize(1)
                 .contains(expected);
-        verify(dao).findByTrainerCriteria(filter);
+        verify(trainingRepositoryCriteria).findByTrainerCriteria(filter);
         verify(mapper).toDto(savedTraining);
     }
 
     @Test
     void getAllTrainingTypes_shouldReturnAllTrainingTypes_whenExist() {
-        when(trainingTypeDAO.findAll()).thenReturn(List.of(trainingType));
+        when(trainingTypeRepository.findAll()).thenReturn(List.of(trainingType));
         when(mapper.toDto(trainingType)).thenReturn(trainingTypeDTO);
 
         List<TrainingTypeDTO> actual = service.getAllTrainingTypes();

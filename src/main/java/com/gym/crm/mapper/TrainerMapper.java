@@ -13,6 +13,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface TrainerMapper {
+
     @Mapping(target = "user.firstName", source = "firstName")
     @Mapping(target = "user.lastName", source = "lastName")
     @Mapping(target = "specialization", ignore = true)

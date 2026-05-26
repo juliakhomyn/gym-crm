@@ -1,24 +1,21 @@
 package com.gym.crm.service.impl;
 
-import com.gym.crm.dao.UserDAO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.EntityNotFoundException;
+import com.gym.crm.repository.UserRepository;
 import com.gym.crm.service.UserService;
-import com.gym.crm.service.common.UserInputValidator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
-@Validated
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -26,51 +23,50 @@ public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND_BY_USERNAME = "User not found by username: %s";
 
     private final PasswordEncoder passwordEncoder;
-    private final UserDAO dao;
-    private final UserInputValidator userInputValidator;
 
+    private final UserRepository repository;
+
+    @Transactional(readOnly = true)
     @Override
     public User getByUsername(String username) {
-        userInputValidator.validateUsername(username);
-
-        return dao.findByUsername(username)
+        return repository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, username)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User getById(Long id) {
-        userInputValidator.validateId(id);
-
-        return dao.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_ID, id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<User> getAll() {
-        return dao.findAll();
+        return repository.findAll();
     }
 
+    @Transactional
     @Override
-    public void changePassword(@Valid PasswordChangeRequest request) {
-        userInputValidator.validate(request, "Password change request");
+    public void changePassword(PasswordChangeRequest request) {
         log.info("Changing password for user: username={}", request.getUsername());
 
-        User user = dao.findByUsername(request.getUsername())
+        User user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, request.getUsername())));
         User userWithNewPassword = user.toBuilder()
                 .password(passwordEncoder.encode(request.getNewPassword()))
                 .build();
 
-        dao.update(userWithNewPassword);
+        repository.save(userWithNewPassword);
         log.info("Changed password for user: username={}", request.getUsername());
     }
 
+    @Transactional
     @Override
-    public void toggleActive(@Valid ToggleActiveRequestDTO request) {
-        userInputValidator.validate(request, "Toggle active request");
+    public void toggleActive(ToggleActiveRequestDTO request) {
         log.info("Changing active status for user: username={}", request.getUsername());
 
-        User user = dao.findByUsername(request.getUsername())
+        User user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, request.getUsername())));
 
         boolean currentStatus = user.getIsActive();
@@ -85,7 +81,7 @@ public class UserServiceImpl implements UserService {
                 .isActive(request.isActive())
                 .build();
 
-        dao.update(userWithChangedStatus);
+        repository.save(userWithChangedStatus);
         log.info("User {}: username={}", currentStatus ? "deactivated" : "activated", request.getUsername());
     }
 }

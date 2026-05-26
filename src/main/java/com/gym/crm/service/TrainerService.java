@@ -4,19 +4,24 @@ import com.gym.crm.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.dto.trainer.TrainerRequestDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.trainer.TrainerUpdateDTO;
+import com.gym.crm.dto.validation.ValidId;
+import com.gym.crm.dto.validation.ValidUsername;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
+@Validated
 public interface TrainerService {
-    TrainerResponseDTO createTrainer(TrainerRequestDTO trainer);
+    TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO trainer);
 
-    TrainerResponseDTO updateTrainer(TrainerUpdateDTO trainer);
+    TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO trainer);
 
-    TrainerInfoDTO getTrainerById(Long id);
+    TrainerInfoDTO getTrainerById(@ValidId Long id);
 
-    TrainerInfoDTO getTrainerByUsername(String username);
+    TrainerInfoDTO getTrainerByUsername(@ValidUsername String username);
 
     List<TrainerInfoDTO> getAllTrainers();
 
-    List<TrainerInfoDTO> getNotAssignedToTrainee(String traineeUsername);
+    List<TrainerInfoDTO> getNotAssignedToTrainee(@ValidUsername String traineeUsername);
 }

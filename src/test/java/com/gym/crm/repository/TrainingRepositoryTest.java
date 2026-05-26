@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataSet(value = "/dataset/training.xml", cleanBefore = true)
-public class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> {
+class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> {
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String TRAINEE_USERNAME1 = "Simone.Radcliffe";
     private static final String YOGA = "Yoga";

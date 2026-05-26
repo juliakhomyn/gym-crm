@@ -9,8 +9,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataSet(value = "/dataset/trainee.xml", cleanBefore = true)
-public class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository> {
-    private final static String USERNAME = "Nora.Pemberton";
+class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository> {
+    private static final String USERNAME = "Nora.Pemberton";
 
     @Test
     void findByUsername_shouldReturnTrainee_whenExists() {

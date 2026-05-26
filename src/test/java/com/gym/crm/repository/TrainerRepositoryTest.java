@@ -10,7 +10,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataSet(value = "/dataset/trainer.xml", cleanBefore = true)
-public class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
+class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
     private static final String USERNAME = "Callum.Whitfield";
     private static final String TRAINEE_USERNAME = "Owen.Castleberry";
 

@@ -162,13 +162,13 @@ class TraineeServiceImplTest {
 
     @Test
     void deleteByUsername_shouldDelete_whenTraineeExists() {
-        Trainee trainee = TestDataProvider.buildTraineeWithTrainers(new HashSet<>());
-        when(repository.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(trainee));
+        Trainee traineeWithTrainers = TestDataProvider.buildTraineeWithTrainers(new HashSet<>());
+        when(repository.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(traineeWithTrainers));
 
         service.deleteByUsername(USERNAME);
 
-        verify(repository).save(trainee);
-        verify(repository).delete(trainee);
+        verify(repository).save(traineeWithTrainers);
+        verify(repository).delete(traineeWithTrainers);
     }
 
     @Test
@@ -264,14 +264,14 @@ class TraineeServiceImplTest {
     void updateTrainersList_shouldUpdateTrainers_whenAllExist() {
         Trainer trainer1 = TestDataProvider.buildTrainer(VALID_ID, TRAINER_USERNAME1);
         Trainer trainer2 = TestDataProvider.buildTrainer(VALID_ID1, TRAINER_USERNAME2);
-        Trainee trainee = TestDataProvider.buildTraineeWithTrainers(new HashSet<>(Set.of(trainer1, trainer2)));
+        Trainee traineeWithTrainers = TestDataProvider.buildTraineeWithTrainers(new HashSet<>(Set.of(trainer1, trainer2)));
         TrainerInfoDTO trainerInfo1 = TestDataProvider.buildTrainerInfoDTO(TRAINER_USERNAME1);
         TrainerInfoDTO trainerInfo2 = TestDataProvider.buildTrainerInfoDTO(TRAINER_USERNAME2);
 
-        when(repository.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(trainee));
+        when(repository.findByUsernameWithTrainers(USERNAME)).thenReturn(Optional.of(traineeWithTrainers));
         when(trainerRepository.findByUserUsername(TRAINER_USERNAME1)).thenReturn(Optional.of(trainer1));
         when(trainerRepository.findByUserUsername(TRAINER_USERNAME2)).thenReturn(Optional.of(trainer2));
-        when(repository.save(trainee)).thenReturn(trainee);
+        when(repository.save(traineeWithTrainers)).thenReturn(traineeWithTrainers);
         when(trainerMapper.toInfoDtoWithoutTrainees(trainer1)).thenReturn(trainerInfo1);
         when(trainerMapper.toInfoDtoWithoutTrainees(trainer2)).thenReturn(trainerInfo2);
 
@@ -280,7 +280,7 @@ class TraineeServiceImplTest {
         verify(repository).findByUsernameWithTrainers(USERNAME);
         verify(trainerRepository).findByUserUsername(TRAINER_USERNAME1);
         verify(trainerRepository).findByUserUsername(TRAINER_USERNAME2);
-        verify(repository).save(trainee);
+        verify(repository).save(traineeWithTrainers);
         verify(trainerMapper).toInfoDtoWithoutTrainees(trainer1);
         verify(trainerMapper).toInfoDtoWithoutTrainees(trainer2);
         assertThat(actual).containsExactlyInAnyOrder(trainerInfo1, trainerInfo2);

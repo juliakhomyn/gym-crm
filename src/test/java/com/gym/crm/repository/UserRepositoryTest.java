@@ -11,7 +11,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataSet(value = "/dataset/user.xml", cleanBefore = true)
-public class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
+class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
     private static final String USERNAME = "Simone.Radcliffe";
 
     @Test
@@ -34,7 +34,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
         Optional<User> actual = repository.findById(1L);
 
         assertThat(actual).isPresent();
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
         assertThat(actual.get().getUsername()).isEqualTo(expected.getUsername());
     }
 
@@ -52,7 +52,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
         Optional<User> actual = repository.findByUsername(USERNAME);
 
         assertThat(actual).isPresent();
-        assertThat(actual.get()).isEqualTo(expected);
+        assertThat(actual).contains(expected);
         assertThat(actual.get().getUsername()).isEqualTo(expected.getUsername());
     }
 

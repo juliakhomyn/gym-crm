@@ -23,10 +23,11 @@ import static com.gym.crm.exception.ApiError.VALIDATION_ERROR;
 @Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private static final String VALIDATION_ERROR_LOG_MESSAGE = "Validation error: {}";
 
     @ExceptionHandler(ValidationFailedException.class)
     public ResponseEntity<ErrorResponse> handleValidationFailedException(ValidationFailedException ex) {
-        log.warn("Validation error: {}", ex.getMessage());
+        log.warn(VALIDATION_ERROR_LOG_MESSAGE, ex.getMessage());
 
         return buildErrorResponse(VALIDATION_ERROR, ex.getMessage());
     }
@@ -36,7 +37,7 @@ public class ApiExceptionHandler {
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-        log.warn("Validation error: {}", errorMessage);
+        log.warn(VALIDATION_ERROR_LOG_MESSAGE, errorMessage);
 
         return buildErrorResponse(VALIDATION_ERROR, errorMessage);
     }
@@ -46,7 +47,7 @@ public class ApiExceptionHandler {
         String errorMessage = ex.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining("; "));
-        log.warn("Validation error: {}", errorMessage);
+        log.warn(VALIDATION_ERROR_LOG_MESSAGE, errorMessage);
 
         return buildErrorResponse(VALIDATION_ERROR, errorMessage);
     }

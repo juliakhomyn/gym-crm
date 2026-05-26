@@ -11,6 +11,7 @@ import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.repository.TraineeRepository;
 import com.gym.crm.repository.TrainerRepository;
+import com.gym.crm.repository.TrainingRepositoryCriteria;
 import com.gym.crm.repository.TrainingRepository;
 import com.gym.crm.repository.TrainingTypeRepository;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
@@ -33,6 +34,7 @@ public class TrainingServiceImpl implements TrainingService {
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
 
     private final TrainingRepository trainingRepository;
+    private final TrainingRepositoryCriteria trainingRepositoryCriteria;
     private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final TrainingTypeRepository trainingTypeRepository;
@@ -88,7 +90,7 @@ public class TrainingServiceImpl implements TrainingService {
     public List<TrainingResponseDTO> getTraineeTrainings(TraineeTrainingFilter filter) {
         log.info("Getting trainee trainings by filter: {}", filter);
 
-        return trainingRepository.findByTraineeCriteria(filter)
+        return trainingRepositoryCriteria.findByTraineeCriteria(filter)
                 .stream()
                 .map(mapper::toDto)
                 .toList();
@@ -98,7 +100,7 @@ public class TrainingServiceImpl implements TrainingService {
     public List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingFilter filter) {
         log.info("Getting trainer trainings by filter: {}", filter);
 
-        return trainingRepository.findByTrainerCriteria(filter)
+        return trainingRepositoryCriteria.findByTrainerCriteria(filter)
                 .stream()
                 .map(mapper::toDto)
                 .toList();

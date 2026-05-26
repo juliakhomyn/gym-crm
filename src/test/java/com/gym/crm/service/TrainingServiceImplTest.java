@@ -11,6 +11,7 @@ import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
 import com.gym.crm.repository.TraineeRepository;
 import com.gym.crm.repository.TrainerRepository;
+import com.gym.crm.repository.TrainingRepositoryCriteria;
 import com.gym.crm.repository.TrainingRepository;
 import com.gym.crm.repository.TrainingTypeRepository;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
@@ -56,6 +57,8 @@ class TrainingServiceImplTest {
 
     @Mock
     private TrainingRepository trainingRepository;
+    @Mock
+    private TrainingRepositoryCriteria trainingRepositoryCriteria;
     @Mock
     private TraineeRepository traineeRepository;
     @Mock
@@ -165,7 +168,7 @@ class TrainingServiceImplTest {
         List<Training> trainings = List.of(savedTraining);
         TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
-        when(trainingRepository.findByTraineeCriteria(filter)).thenReturn(trainings);
+        when(trainingRepositoryCriteria.findByTraineeCriteria(filter)).thenReturn(trainings);
         when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTraineeTrainings(filter);
@@ -173,7 +176,7 @@ class TrainingServiceImplTest {
         assertThat(actual)
                 .hasSize(1)
                 .contains(expected);
-        verify(trainingRepository).findByTraineeCriteria(filter);
+        verify(trainingRepositoryCriteria).findByTraineeCriteria(filter);
         verify(mapper).toDto(savedTraining);
     }
 
@@ -183,7 +186,7 @@ class TrainingServiceImplTest {
         List<Training> trainings = List.of(savedTraining);
         TrainingResponseDTO expected = TestDataProvider.buildTrainingResponseDTO();
 
-        when(trainingRepository.findByTrainerCriteria(filter)).thenReturn(trainings);
+        when(trainingRepositoryCriteria.findByTrainerCriteria(filter)).thenReturn(trainings);
         when(mapper.toDto(savedTraining)).thenReturn(expected);
 
         List<TrainingResponseDTO> actual = service.getTrainerTrainings(filter);
@@ -191,7 +194,7 @@ class TrainingServiceImplTest {
         assertThat(actual)
                 .hasSize(1)
                 .contains(expected);
-        verify(trainingRepository).findByTrainerCriteria(filter);
+        verify(trainingRepositoryCriteria).findByTrainerCriteria(filter);
         verify(mapper).toDto(savedTraining);
     }
 

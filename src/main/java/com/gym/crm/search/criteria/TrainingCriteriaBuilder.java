@@ -4,39 +4,37 @@ import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.Training;
 import com.gym.crm.search.filter.TrainingFilter;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class TrainingCriteriaBuilder {
-    public CriteriaQuery<Training> build(CriteriaBuilder cb, TrainingFilter filter) {
-        CriteriaQuery<Training> cq = cb.createQuery(Training.class);
-        Root<Training> root = cq.from(Training.class);
-        List<Predicate> predicates = new ArrayList<>();
+    public Specification<Training> build(TrainingFilter filter) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        Join<?, ?> mainUserJoin = (Join<?, ?>) root
-                .fetch(getMainJoinType(), JoinType.LEFT)
-                .fetch("user", JoinType.LEFT);
-        Join<?, ?> oppositeUserJoin = (Join<?, ?>) root
-                .fetch(getOppositeJoinType(), JoinType.LEFT)
-                .fetch("user", JoinType.LEFT);
+            Join<?, ?> mainUserJoin = (Join<?, ?>) root
+                    .join(getMainJoinType(), JoinType.LEFT)
+                    .join("user", JoinType.LEFT);
+            Join<?, ?> oppositeUserJoin = (Join<?, ?>) root
+                    .join(getOppositeJoinType(), JoinType.LEFT)
+                    .join("user", JoinType.LEFT);
 
-        addUsernamePredicate(cb, mainUserJoin, filter, predicates);
-        addFullNamePredicate(cb, oppositeUserJoin, filter, predicates);
-        addDateRangePredicate(cb, root, filter, predicates);
-        addSpecificPredicates(cb, root, filter, predicates);
+            addUsernamePredicate(cb, mainUserJoin, filter, predicates);
+            addFullNamePredicate(cb, oppositeUserJoin, filter, predicates);
+            addDateRangePredicate(cb, root, filter, predicates);
+            addSpecificPredicates(cb, root, filter, predicates);
 
-        cq.where(predicates.toArray(new Predicate[0]));
-        cq.distinct(true);
-
-        return cq;
+            query.distinct(true);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     protected abstract String getMainJoinType();

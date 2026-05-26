@@ -8,6 +8,7 @@ import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.dto.training.TrainingTypeDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface TrainingRestMapper {
@@ -16,7 +17,11 @@ public interface TrainingRestMapper {
 
     TrainingTypeResponse toRest(TrainingTypeDTO dto);
 
+    @Mapping(target = "trainingType", source = "trainingTypeName")
+    @Mapping(target = "trainerName", source = "trainerUsername")
     GetTraineeTrainingResponse toRestTraineeResponse(TrainingResponseDTO dto);
 
+    @Mapping(target = "trainingType", source = "trainingTypeName")
+    @Mapping(target = "traineeName", source = "traineeUsername")
     GetTrainerTrainingResponse toRestTrainerResponse(TrainingResponseDTO dto);
 }

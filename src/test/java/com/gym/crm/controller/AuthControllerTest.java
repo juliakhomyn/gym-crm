@@ -104,7 +104,7 @@ class AuthControllerTest {
     void changePassword_shouldReturnOk() throws Exception {
         mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(loginRequest)))
+                        .content(mapper.writeValueAsString(loginChangeRequest)))
                 .andExpect(status().isOk());
         verify(facade).changePassword(any(LoginChangeRequest.class), any(String.class));
     }

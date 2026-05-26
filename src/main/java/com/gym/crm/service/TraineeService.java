@@ -6,23 +6,26 @@ import com.gym.crm.dto.trainee.TraineeResponseDTO;
 import com.gym.crm.dto.trainee.TraineeUpdateDTO;
 import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
 import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.dto.validation.ValidId;
+import com.gym.crm.dto.validation.ValidUsername;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
+@Validated
 public interface TraineeService {
-    TraineeResponseDTO createTrainee(TraineeRequestDTO trainee);
+    TraineeResponseDTO createTrainee(@Valid TraineeRequestDTO request);
 
-    TraineeResponseDTO updateTrainee(TraineeUpdateDTO trainee);
+    TraineeResponseDTO updateTrainee(@Valid TraineeUpdateDTO request);
 
-    void deleteTraineeById(Long id);
+    void deleteByUsername(@ValidUsername String username);
 
-    void deleteByUsername(String username);
+    TraineeInfoDTO getTraineeById(@ValidId Long id);
 
-    TraineeInfoDTO getTraineeById(Long id);
-
-    TraineeInfoDTO getTraineeByUsername(String username);
+    TraineeInfoDTO getTraineeByUsername(@ValidUsername String username);
 
     List<TraineeInfoDTO> getAllTrainees();
 
-    List<TrainerInfoDTO> updateTrainersList(TrainerAssignmentUpdateDTO dto);
+    List<TrainerInfoDTO> updateTrainersList(@Valid TrainerAssignmentUpdateDTO dto);
 }

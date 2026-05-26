@@ -1,13 +1,13 @@
 package com.gym.crm.service.common;
 
 import com.gym.crm.auth.SessionContext;
-import com.gym.crm.dao.UserDAO;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.User;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.repository.UserRepository;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,68 +25,57 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
-    private static final String USERNAME = "Cillian.Mercer";
+    private static final String USERNAME = "Simone.Radcliffe";
     private static final String PASSWORD = "password";
-    private static final String INVALID_PASSWORD = "invalid";
+    private static final String ENCODED_PASSWORD = "encodedPassword";
+    private static final String INVALID_PASSWORD = "invalidPassword";
 
     private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
 
-    @Mock
-    private UserDAO dao;
+    private final User user = TestDataProvider.buildTraineeUser();
+    private final AuthRequestDTO request = TestDataProvider.buildAuthRequestDTO();
+    private final AuthRequestDTO requestInvalidPassword = TestDataProvider.buildAuthRequestDTOWithInvalidPassword();
+
     @Mock
     private UserProfileService userProfileService;
     @Mock
-    private UserInputValidator validator;
-    @Mock
     private SessionContext sessionContext;
+    @Mock
+    private UserRepository repository;
 
     @InjectMocks
     private AuthenticationService service;
 
-    private User user;
-    private AuthRequestDTO request;
-    private AuthRequestDTO requestInvalidPassword;
-
-    @BeforeEach
-    void setUp() {
-        user = buildUser();
-        request = buildAuthRequestDTO();
-        requestInvalidPassword = buildAuthRequestDTOWithInvalidPassword();
-    }
-
     @Test
     void authenticate_shouldReturnResponse_whenCredentialsAreValid() {
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
-        when(userProfileService.checkPassword(PASSWORD, PASSWORD)).thenReturn(true);
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        when(userProfileService.checkPassword(PASSWORD, ENCODED_PASSWORD)).thenReturn(true);
 
         AuthResponseDTO actual = service.authenticate(request);
 
         assertThat(actual.getUsername()).isEqualTo(USERNAME);
         assertThat(actual.getMessage()).isEqualTo(AUTH_SUCCESS_MESSAGE);
         verify(sessionContext).setAuthenticatedUser(user);
-        verify(validator).validate(request, "Authentication request");
     }
 
     @Test
     void authenticate_shouldThrowEntityNotFoundException_whenUserNotFound() {
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.empty());
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.authenticate(request));
 
         assertThat(exception.getMessage()).contains("User not found");
-        verify(validator).validate(request, "Authentication request");
         verify(sessionContext, never()).setAuthenticatedUser(any());
     }
 
     @Test
     void authenticate_shouldThrowBadCredentialsException_whenPasswordInvalid() {
-        when(dao.findByUsername(USERNAME)).thenReturn(Optional.of(user));
-        when(userProfileService.checkPassword(INVALID_PASSWORD, PASSWORD)).thenReturn(false);
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        when(userProfileService.checkPassword(INVALID_PASSWORD, ENCODED_PASSWORD)).thenReturn(false);
 
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> service.authenticate(requestInvalidPassword));
 
         assertThat(exception.getMessage()).contains("Invalid credentials");
-        verify(validator).validate(requestInvalidPassword, "Authentication request");
         verify(sessionContext, never()).setAuthenticatedUser(any());
     }
 
@@ -102,32 +91,11 @@ class AuthenticationServiceTest {
     @Test
     void logout_shouldClearAuthenticatedUser() {
         SessionContext realSessionContext = new SessionContext();
-        AuthenticationService realService = new AuthenticationService(dao, userProfileService, validator, realSessionContext);
+        AuthenticationService realService = new AuthenticationService(repository, userProfileService, realSessionContext);
         realSessionContext.setAuthenticatedUser(user);
 
         realService.logout();
 
         assertThat(realSessionContext.getAuthenticatedUser()).isNull();
-    }
-
-    private AuthRequestDTO buildAuthRequestDTO() {
-        return AuthRequestDTO.builder()
-                .username(USERNAME)
-                .password(PASSWORD)
-                .build();
-    }
-
-    private AuthRequestDTO buildAuthRequestDTOWithInvalidPassword() {
-        return AuthRequestDTO.builder()
-                .username(USERNAME)
-                .password(INVALID_PASSWORD)
-                .build();
-    }
-
-    private User buildUser() {
-        return User.builder()
-                .username(USERNAME)
-                .password(PASSWORD)
-                .build();
     }
 }

@@ -2,6 +2,8 @@ package com.gym.crm.exception;
 
 import com.gia.openapi.model.ErrorResponse;
 import jakarta.persistence.PersistenceException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,16 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        log.warn("Validation error: {}", errorMessage);
+
+        return buildErrorResponse(VALIDATION_ERROR, errorMessage);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining("; "));
         log.warn("Validation error: {}", errorMessage);
 

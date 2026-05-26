@@ -1,6 +1,7 @@
-package com.gym.crm.dao;
+package com.gym.crm.repository;
 
-import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
@@ -8,6 +9,7 @@ import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import com.gym.crm.testutils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,41 +23,17 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DatabaseSetup(value = "/dataset/training.xml")
-class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
-
-    @Test
-    void save_shouldSaveTraining_whenValid() {
-        Training training = buildTraining();
-
-        Training actual = dao.save(training);
-
-        assertThat(actual.getId()).isNotNull();
-        assertThat(dao.findById(actual.getId())).isPresent();
-        assertThat(actual.getTrainingName()).isEqualTo("Morning Yoga");
-        assertThat(actual.getTrainingDate()).isEqualTo(LocalDate.of(2026, 4, 30));
-        assertThat(actual.getTrainingDuration()).isEqualTo(60);
-        assertThat(actual.getTrainingType().getTrainingTypeName()).isEqualTo("Yoga");
-        assertThat(actual.getTrainee().getUser().getUsername()).isEqualTo("Nora.Pemberton");
-        assertThat(actual.getTrainee().getUser().getIsActive()).isTrue();
-        assertThat(actual.getTrainee().getDateOfBirth()).isEqualTo(LocalDate.of(2000, 3, 10));
-        assertThat(actual.getTrainee().getAddress()).isEqualTo("123 Main St");
-        assertThat(actual.getTrainer().getUser().getUsername()).isEqualTo("Callum.Whitfield");
-    }
-
-    @Test
-    void save_shouldThrowException_whenSavingNullTraining() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.save(null));
-
-        assertThat(exception.getMessage()).isEqualTo("Training cannot be null");
-    }
+@DataSet(value = "/dataset/training.xml", cleanBefore = true)
+public class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> {
+    private static final String TRAINER_USERNAME = "Owen.Castleberry";
+    private static final String TRAINEE_USERNAME1 = "Simone.Radcliffe";
+    private static final String YOGA = "Yoga";
 
     @Test
     void findById_shouldReturnTraining_whenExists() {
-        Training expected = buildExpectedTraining();
+        Training expected = TestDataProvider.buildExpectedTraining();
 
-        Optional<Training> actual = dao.findById(1L);
+        Optional<Training> actual = repository.findById(1L);
 
         assertThat(actual).isPresent();
         assertThat(actual.get().getTrainingName()).isEqualTo("Hot Yoga");
@@ -65,24 +43,16 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
 
     @Test
     void findById_shouldReturnEmptyOptional_whenNotFound() {
-        Optional<Training> actual = dao.findById(999L);
+        Optional<Training> actual = repository.findById(999L);
 
         assertThat(actual).isEmpty();
     }
 
     @Test
-    void findById_shouldThrowException_whenIdIsZero() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.findById(0L));
-
-        assertThat(exception.getMessage()).isEqualTo("ID must be positive and not null, got: 0");
-    }
-
-    @Test
     void findAll_shouldReturnAllTrainings_whenExist() {
-        List<Training> expected = buildExpectedTrainings();
+        List<Training> expected = TestDataProvider.buildExpectedTrainings();
 
-        List<Training> actual = dao.findAll();
+        List<Training> actual = repository.findAll();
 
         assertThat(actual)
                 .isNotEmpty()
@@ -101,8 +71,8 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
 
     @Test
     void findByTraineeCriteria_shouldThrowException_whenNullFilter() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.findByTraineeCriteria(null));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class,
+                () -> repository.findByTraineeCriteria(null));
 
         assertThat(exception.getMessage()).isEqualTo("Filter cannot be null");
     }
@@ -110,8 +80,8 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     @Test
     void findByTraineeCriteria_shouldThrowException_whenNoUsername() {
         TraineeTrainingFilter filter = TraineeTrainingFilter.builder().build();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.findByTraineeCriteria(filter));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class,
+                () -> repository.findByTraineeCriteria(filter));
 
         assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
     }
@@ -120,15 +90,15 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     void findByTraineeCriteria_shouldReturnEmptyList_whenNonExistingUsername() {
         TraineeTrainingFilter filter = TraineeTrainingFilter.builder().username("Non-Existing Username").build();
 
-        List<Training> actual = dao.findByTraineeCriteria(filter);
+        List<Training> actual = repository.findByTraineeCriteria(filter);
 
         assertThat(actual).isEmpty();
     }
 
     @Test
     void findByTrainerCriteria_shouldThrowException_whenNullFilter() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.findByTrainerCriteria(null));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class,
+                () -> repository.findByTrainerCriteria(null));
 
         assertThat(exception.getMessage()).isEqualTo("Filter cannot be null");
     }
@@ -136,8 +106,8 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     @Test
     void findByTrainerCriteria_shouldThrowException_whenNoUsername() {
         TrainerTrainingFilter filter = TrainerTrainingFilter.builder().build();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> dao.findByTrainerCriteria(filter));
+        ValidationFailedException exception = assertThrows(ValidationFailedException.class,
+                () -> repository.findByTrainerCriteria(filter));
 
         assertThat(exception.getMessage()).isEqualTo("Username cannot be null or empty");
     }
@@ -146,7 +116,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     void findByTrainerCriteria_shouldReturnEmptyList_whenNonExistingUsername() {
         TrainerTrainingFilter filter = TrainerTrainingFilter.builder().username("Non-Existing Username").build();
 
-        List<Training> actual = dao.findByTrainerCriteria(filter);
+        List<Training> actual = repository.findByTrainerCriteria(filter);
 
         assertThat(actual).isEmpty();
     }
@@ -154,18 +124,18 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     @ParameterizedTest
     @MethodSource("traineeFilterProviderExisting")
     void findByTraineeCriteria_shouldReturnCorrectTrainings_whenExist(TraineeTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
-        List<Training> actual = dao.findByTraineeCriteria(filter);
+        List<Training> actual = repository.findByTraineeCriteria(filter);
 
         assertThat(actual).hasSize(expectedSize);
         assertThat(actual)
-                .extracting(Training::getId)
+                .extracting("id")
                 .containsExactlyInAnyOrderElementsOf(expectedIds);
     }
 
     @ParameterizedTest
     @MethodSource("traineeFilterProviderNonExisting")
     void findByTraineeCriteria_shouldReturnCorrectTrainings_whenNotExist(TraineeTrainingFilter filter) {
-        List<Training> actual = dao.findByTraineeCriteria(filter);
+        List<Training> actual = repository.findByTraineeCriteria(filter);
 
         assertThat(actual).isEmpty();
     }
@@ -173,18 +143,18 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     @ParameterizedTest
     @MethodSource("trainerFilterProviderExisting")
     void findByTrainerCriteria_shouldReturnCorrectTrainings_whenExist(TrainerTrainingFilter filter, int expectedSize, List<Long> expectedIds) {
-        List<Training> actual = dao.findByTrainerCriteria(filter);
+        List<Training> actual = repository.findByTrainerCriteria(filter);
 
         assertThat(actual).hasSize(expectedSize);
         assertThat(actual)
-                .extracting(Training::getId)
+                .extracting("id")
                 .containsExactlyInAnyOrderElementsOf(expectedIds);
     }
 
     @ParameterizedTest
     @MethodSource("trainerFilterProviderNonExisting")
     void findByTrainerCriteria_shouldReturnCorrectTrainings_whenNotExist(TrainerTrainingFilter filter) {
-        List<Training> actual = dao.findByTrainerCriteria(filter);
+        List<Training> actual = repository.findByTrainerCriteria(filter);
 
         assertThat(actual).isEmpty();
     }
@@ -192,7 +162,7 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     private static Stream<Arguments> traineeFilterProviderExisting() {
         return Stream.of(
                 Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
+                                .username(TRAINEE_USERNAME1)
                                 .build(),
                         1,
                         List.of(1L)),
@@ -202,21 +172,21 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
                         1,
                         List.of(2L)),
                 Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
+                                .username(TRAINEE_USERNAME1)
                                 .fromDate(LocalDate.of(2026, 4, 1))
                                 .toDate(LocalDate.of(2026, 4, 30))
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .trainingTypeName("Yoga")
+                                .username(TRAINEE_USERNAME1)
+                                .trainingTypeName(YOGA)
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TraineeTrainingFilter.builder()
-                                .username("Nora.Pemberton")
-                                .joinFullName("Callum Whitfield")
+                                .username(TRAINEE_USERNAME1)
+                                .joinFullName("Owen Castleberry")
                                 .build(),
                         1,
                         List.of(1L))
@@ -226,24 +196,24 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     private static Stream<Arguments> traineeFilterProviderNonExisting() {
         return Stream.of(
                 Arguments.of(TraineeTrainingFilter.builder()
-                        .username("Nora.Pemberton")
+                        .username(TRAINEE_USERNAME1)
                         .fromDate(LocalDate.of(2020, 1, 1))
                         .toDate(LocalDate.of(2020, 12, 31))
                         .build()),
                 Arguments.of(TraineeTrainingFilter.builder()
-                        .username("Nora.Pemberton")
+                        .username(TRAINEE_USERNAME1)
                         .trainingTypeName("Cardio")
                         .build()),
                 Arguments.of(TraineeTrainingFilter.builder()
-                        .username("Nora.Pemberton")
+                        .username(TRAINEE_USERNAME1)
                         .trainingTypeName("Cardio")
                         .build()),
                 Arguments.of(TraineeTrainingFilter.builder()
-                        .username("Nora.Pemberton")
-                        .joinFullName("Callum Whitfield")
+                        .username(TRAINEE_USERNAME1)
+                        .joinFullName(TRAINER_USERNAME)
                         .fromDate(LocalDate.of(2026, 4, 16))
                         .toDate(LocalDate.of(2026, 4, 30))
-                        .trainingTypeName("Yoga")
+                        .trainingTypeName(YOGA)
                         .build())
         );
     }
@@ -251,43 +221,43 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     private static Stream<Arguments> trainerFilterProviderExisting() {
         return Stream.of(
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .build(),
                         2,
                         List.of(1L, 2L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
-                                .joinFullName("Nora Pemberton")
+                                .username(TRAINER_USERNAME)
+                                .joinFullName("Simone Radcliffe")
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .joinFullName("Ellis Hargrove")
                                 .build(),
                         1,
                         List.of(2L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .fromDate(LocalDate.of(2026, 4, 16))
                                 .build(),
                         1,
                         List.of(2L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .toDate(LocalDate.of(2026, 4, 18))
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .fromDate(LocalDate.of(2026, 4, 14))
                                 .toDate(LocalDate.of(2026, 4, 16))
                                 .build(),
                         1,
                         List.of(1L)),
                 Arguments.of(TrainerTrainingFilter.builder()
-                                .username("Callum.Whitfield")
+                                .username(TRAINER_USERNAME)
                                 .joinFullName("Ellis Hargrove")
                                 .fromDate(LocalDate.of(2026, 4, 19))
                                 .build(),
@@ -299,110 +269,18 @@ class TrainingDAOImplTest extends AbstractDaoTest<TrainingDAO> {
     private static Stream<Arguments> trainerFilterProviderNonExisting() {
         return Stream.of(
                 Arguments.of(TrainerTrainingFilter.builder()
-                        .username("Callum.Whitfield")
+                        .username(TRAINER_USERNAME)
                         .joinFullName("NonExistent")
                         .build()),
                 Arguments.of(TrainerTrainingFilter.builder()
-                        .username("Callum.Whitfield")
+                        .username(TRAINER_USERNAME)
                         .fromDate(LocalDate.of(2026, 4, 21))
                         .build()),
                 Arguments.of(TrainerTrainingFilter.builder()
-                        .username("Callum.Whitfield")
-                        .joinFullName("Nora Pemberton")
+                        .username(TRAINER_USERNAME)
+                        .joinFullName("Simone Radcliffe")
                         .fromDate(LocalDate.of(2026, 4, 16))
                         .build())
         );
-    }
-
-    private Trainer buildTrainer() {
-        User user = User.builder()
-                .id(1L)
-                .firstName("Callum")
-                .lastName("Whitfield")
-                .username("Callum.Whitfield")
-                .password("pass111")
-                .isActive(true)
-                .build();
-
-        return Trainer.builder()
-                .id(1L)
-                .user(user)
-                .specialization(buildTrainingType())
-                .build();
-    }
-
-    private Trainee buildTrainee() {
-        User user = User.builder()
-                .id(2L)
-                .firstName("Nora")
-                .lastName("Pemberton")
-                .username("Nora.Pemberton")
-                .password("pass222")
-                .isActive(true)
-                .build();
-
-        return Trainee.builder()
-                .id(1L)
-                .user(user)
-                .dateOfBirth(LocalDate.of(2000, 3, 10))
-                .address("123 Main St")
-                .build();
-    }
-
-    private TrainingType buildTrainingType() {
-        return TrainingType.builder()
-                .id(1L)
-                .trainingTypeName("Yoga")
-                .build();
-    }
-
-    private Training buildTraining() {
-        return Training.builder()
-                .trainingName("Morning Yoga")
-                .trainingDate(LocalDate.of(2026, 4, 30))
-                .trainingDuration(60)
-                .trainingType(buildTrainingType())
-                .trainer(buildTrainer())
-                .trainee(buildTrainee())
-                .build();
-    }
-
-    private Training buildExpectedTraining() {
-        return Training.builder()
-                .id(1L)
-                .trainingName("Hot Yoga")
-                .trainingDate(LocalDate.of(2026, 4, 15))
-                .trainingDuration(60)
-                .trainingType(buildTrainingType())
-                .trainee(buildTrainee())
-                .trainer(buildTrainer())
-                .build();
-    }
-
-    private List<Training> buildExpectedTrainings() {
-        User user = User.builder()
-                .id(3L)
-                .firstName("Ellis")
-                .lastName("Hargrove")
-                .username("Ellis.Hargrove")
-                .password("pass333")
-                .isActive(true)
-                .build();
-        Trainee trainee = Trainee.builder()
-                .id(2L)
-                .user(user)
-                .dateOfBirth(LocalDate.of(2002, 7, 15))
-                .build();
-        Training training = Training.builder()
-                .id(2L)
-                .trainingName("Hot Yoga")
-                .trainingDate(LocalDate.of(2026, 4, 20))
-                .trainingDuration(60)
-                .trainingType(buildTrainingType())
-                .trainee(trainee)
-                .trainer(buildTrainer())
-                .build();
-
-        return List.of(buildExpectedTraining(), training);
     }
 }

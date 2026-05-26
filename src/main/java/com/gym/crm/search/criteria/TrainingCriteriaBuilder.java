@@ -1,8 +1,8 @@
 package com.gym.crm.search.criteria;
 
+import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.Training;
 import com.gym.crm.search.filter.TrainingFilter;
-import com.gym.crm.util.Validator;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -54,7 +54,9 @@ public abstract class TrainingCriteriaBuilder {
 
     private void addUsernamePredicate(CriteriaBuilder cb, Join<?, ?> join, TrainingFilter filter, List<Predicate> predicates) {
         String username = filter.getUsername();
-        Validator.validateNotBlank(username, "Username");
+        if (username == null || username.isEmpty()) {
+            throw new ValidationFailedException("Username cannot be null or empty");
+        }
 
         predicates.add(cb.equal(join.get("username"), username));
     }

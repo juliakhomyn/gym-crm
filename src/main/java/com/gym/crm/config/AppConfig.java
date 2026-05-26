@@ -1,26 +1,17 @@
 package com.gym.crm.config;
 
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+import com.gym.crm.logging.RestLoggingFilter;
+import com.gym.crm.logging.TransactionLoggingFilter;
+import jakarta.servlet.DispatcherType;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.Ordered;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-@ComponentScan(
-        basePackages = "com.gym.crm",
-        excludeFilters = @ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE,
-                classes = WebConfig.class
-        )
-)
 @Configuration
-@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @EnableAspectJAutoProxy
 public class AppConfig {
 
@@ -30,15 +21,24 @@ public class AppConfig {
     }
 
     @Bean
-    public jakarta.validation.Validator validator() {
-        LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
-        factoryBean.setMessageInterpolator(new ParameterMessageInterpolator());
-
-        return factoryBean;
+    public FilterRegistrationBean<RestLoggingFilter> restLoggingFilterBean() {
+        FilterRegistrationBean<RestLoggingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new RestLoggingFilter());
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        registrationBean.setAsyncSupported(true);
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return registrationBean;
     }
 
     @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
+    public FilterRegistrationBean<TransactionLoggingFilter> transactionLoggingFilterBean() {
+        FilterRegistrationBean<TransactionLoggingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new TransactionLoggingFilter());
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        registrationBean.setAsyncSupported(true);
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registrationBean;
     }
 }

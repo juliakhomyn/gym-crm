@@ -1,9 +1,5 @@
 package com.gym.crm.service.impl;
 
-import com.gym.crm.dao.TraineeDAO;
-import com.gym.crm.dao.TrainerDAO;
-import com.gym.crm.dao.TrainingDAO;
-import com.gym.crm.dao.TrainingTypeDAO;
 import com.gym.crm.dto.training.TrainingRequestDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.dto.training.TrainingTypeDTO;
@@ -13,21 +9,21 @@ import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
 import com.gym.crm.model.TrainingType;
+import com.gym.crm.repository.TraineeRepository;
+import com.gym.crm.repository.TrainerRepository;
+import com.gym.crm.repository.TrainingRepository;
+import com.gym.crm.repository.TrainingTypeRepository;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.TrainingService;
-import com.gym.crm.service.common.UserInputValidator;
-import com.gym.crm.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
-@Validated
 @Service
 @RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
@@ -35,29 +31,25 @@ public class TrainingServiceImpl implements TrainingService {
     private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
-    private static final String TRAINING = "Training";
 
-    private final TrainingDAO dao;
-    private final TraineeDAO traineeDAO;
-    private final TrainerDAO trainerDAO;
-    private final TrainingTypeDAO trainingTypeDAO;
-    private final UserInputValidator userInputValidator;
+    private final TrainingRepository trainingRepository;
+    private final TraineeRepository traineeRepository;
+    private final TrainerRepository trainerRepository;
+    private final TrainingTypeRepository trainingTypeRepository;
     private final TrainingMapper mapper;
 
     @Transactional
     @Override
-    public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
-        userInputValidator.validate(request, TRAINING);
-
+    public TrainingResponseDTO createTraining(TrainingRequestDTO request) {
         log.info("Creating training: trainingName={}", request.getTrainingName());
 
         Training mapped = mapper.toEntity(request);
 
-        Trainee trainee = traineeDAO.findByUsername(request.getTraineeUsername()).orElseThrow(
+        Trainee trainee = traineeRepository.findByUserUsername(request.getTraineeUsername()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, request.getTraineeUsername())));
-        Trainer trainer = trainerDAO.findByUsername(request.getTrainerUsername()).orElseThrow(
+        Trainer trainer = trainerRepository.findByUserUsername(request.getTrainerUsername()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINER_NOT_FOUND_BY_USERNAME, request.getTrainerUsername())));
-        TrainingType trainingType = trainingTypeDAO.findByTrainingTypeName(request.getTrainingName()).orElseThrow(
+        TrainingType trainingType = trainingTypeRepository.findByTrainingTypeName(request.getTrainingName()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, request.getTrainingName())));
 
         Training training = mapped.toBuilder()
@@ -66,7 +58,7 @@ public class TrainingServiceImpl implements TrainingService {
                 .trainingType(trainingType)
                 .build();
 
-        Training saved = dao.save(training);
+        Training saved = trainingRepository.save(training);
         log.info("Training created successfully: id={}", saved.getId());
 
         return mapper.toDto(saved);
@@ -75,9 +67,8 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public TrainingResponseDTO getTrainingById(Long id) {
         log.info("Getting training by id: id={}", id);
-        userInputValidator.validateId(id);
 
-        Training training = dao.findById(id)
+        Training training = trainingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(TRAINING_NOT_FOUND_BY_ID, id)));
 
         return mapper.toDto(training);
@@ -87,29 +78,27 @@ public class TrainingServiceImpl implements TrainingService {
     public List<TrainingResponseDTO> getAllTrainings() {
         log.info("Getting all trainings");
 
-        return dao.findAll()
+        return trainingRepository.findAll()
                 .stream()
                 .map(mapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<TrainingResponseDTO> getTraineeTrainings(@Valid TraineeTrainingFilter filter) {
-        userInputValidator.validate(filter, "Filter");
+    public List<TrainingResponseDTO> getTraineeTrainings(TraineeTrainingFilter filter) {
         log.info("Getting trainee trainings by filter: {}", filter);
 
-        return dao.findByTraineeCriteria(filter)
+        return trainingRepository.findByTraineeCriteria(filter)
                 .stream()
                 .map(mapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<TrainingResponseDTO> getTrainerTrainings(@Valid TrainerTrainingFilter filter) {
-        userInputValidator.validate(filter, "Filter");
+    public List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingFilter filter) {
         log.info("Getting trainer trainings by filter: {}", filter);
 
-        return dao.findByTrainerCriteria(filter)
+        return trainingRepository.findByTrainerCriteria(filter)
                 .stream()
                 .map(mapper::toDto)
                 .toList();
@@ -117,7 +106,7 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     public List<TrainingTypeDTO> getAllTrainingTypes() {
-        return trainingTypeDAO.findAll().stream()
+        return trainingTypeRepository.findAll().stream()
                 .map(mapper::toDto)
                 .toList();
     }

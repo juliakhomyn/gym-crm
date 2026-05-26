@@ -2,11 +2,7 @@ package com.gym.crm.repository;
 
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.gym.crm.exception.ValidationFailedException;
-import com.gym.crm.model.Trainee;
-import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;
-import com.gym.crm.model.TrainingType;
-import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.testutils.TestDataProvider;

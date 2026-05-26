@@ -15,12 +15,6 @@ spring:
     username: gymuser
     password: gympass
 
-storage:
-  data:
-    trainee: src/main/resources/data/trainees.csv
-    trainer: src/main/resources/data/trainers.csv
-    training: src/main/resources/data/trainings.csv
-
 app:
   api:
     base-path: /api/v1

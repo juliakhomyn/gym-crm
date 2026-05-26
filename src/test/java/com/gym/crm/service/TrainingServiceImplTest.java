@@ -29,7 +29,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,16 +39,12 @@ class TrainingServiceImplTest {
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String TRAINING_NAME = "Morning Cardio";
     private static final long VALID_ID = 1L;
-    private static final long INVALID_ID = -1L;
     private static final long NOT_FOUND_ID = 999L;
 
     private static final String TRAINEE_NOT_FOUND_BY_USERNAME = "Trainee not found by username: %s";
     private static final String TRAINER_NOT_FOUND_BY_USERNAME = "Trainer not found by username: %s";
     private static final String TRAINING_TYPE_NOT_FOUND_BY_NAME = "Training type not found by name: %s";
-    private static final String TRAINING_CANNOT_BE_NULL = "Training cannot be null";
     private static final String TRAINING_NOT_FOUND_BY_ID = "Training not found by id: %s";
-    private static final String ID_CANNOT_BE_NULL = "ID cannot be null";
-    private static final String ID_CANNOT_BE_NEGATIVE = "ID must be a positive number";
 
     private final Trainee trainee = TestDataProvider.buildTrainee();
     private final Trainer trainer = TestDataProvider.buildTrainer();

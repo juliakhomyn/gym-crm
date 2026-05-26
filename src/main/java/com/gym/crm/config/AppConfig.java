@@ -28,6 +28,7 @@ public class AppConfig {
         registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
         registrationBean.setAsyncSupported(true);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+
         return registrationBean;
     }
 
@@ -39,6 +40,7 @@ public class AppConfig {
         registrationBean.setDispatcherTypes(DispatcherType.REQUEST);
         registrationBean.setAsyncSupported(true);
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+
         return registrationBean;
     }
 }

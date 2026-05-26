@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,23 +26,27 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
 
+    @Transactional(readOnly = true)
     @Override
     public User getByUsername(String username) {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, username)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User getById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_ID, id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<User> getAll() {
         return repository.findAll();
     }
 
+    @Transactional
     @Override
     public void changePassword(PasswordChangeRequest request) {
         log.info("Changing password for user: username={}", request.getUsername());
@@ -56,6 +61,7 @@ public class UserServiceImpl implements UserService {
         log.info("Changed password for user: username={}", request.getUsername());
     }
 
+    @Transactional
     @Override
     public void toggleActive(ToggleActiveRequestDTO request) {
         log.info("Changing active status for user: username={}", request.getUsername());

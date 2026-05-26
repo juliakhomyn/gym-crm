@@ -107,6 +107,7 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Trainee deleted successfully: username={}", username);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TraineeInfoDTO getTraineeById(Long id) {
         log.info("Getting trainee by id: id={}", id);
@@ -117,6 +118,7 @@ public class TraineeServiceImpl implements TraineeService {
         return mapper.toInfoDto(trainee);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TraineeInfoDTO getTraineeByUsername(String username) {
         log.info("Getting trainee by username: username={}", username);
@@ -127,6 +129,7 @@ public class TraineeServiceImpl implements TraineeService {
         return mapper.toInfoDto(trainee);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TraineeInfoDTO> getAllTrainees() {
         log.info("Getting all trainees");

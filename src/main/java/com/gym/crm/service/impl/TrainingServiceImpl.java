@@ -66,6 +66,7 @@ public class TrainingServiceImpl implements TrainingService {
         return mapper.toDto(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainingResponseDTO getTrainingById(Long id) {
         log.info("Getting training by id: id={}", id);
@@ -76,6 +77,7 @@ public class TrainingServiceImpl implements TrainingService {
         return mapper.toDto(training);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingResponseDTO> getAllTrainings() {
         log.info("Getting all trainings");
@@ -86,6 +88,7 @@ public class TrainingServiceImpl implements TrainingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingResponseDTO> getTraineeTrainings(TraineeTrainingFilter filter) {
         log.info("Getting trainee trainings by filter: {}", filter);
@@ -96,6 +99,7 @@ public class TrainingServiceImpl implements TrainingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingResponseDTO> getTrainerTrainings(TrainerTrainingFilter filter) {
         log.info("Getting trainer trainings by filter: {}", filter);
@@ -106,6 +110,7 @@ public class TrainingServiceImpl implements TrainingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingTypeDTO> getAllTrainingTypes() {
         return trainingTypeRepository.findAll().stream()

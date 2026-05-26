@@ -98,6 +98,7 @@ public class TrainerServiceImpl implements TrainerService {
         return mapper.toDto(saved);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainerInfoDTO getTrainerById(Long id) {
         log.info("Getting trainer by id: id={}", id);
@@ -108,6 +109,7 @@ public class TrainerServiceImpl implements TrainerService {
         return mapper.toInfoDto(trainer);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainerInfoDTO getTrainerByUsername(String username) {
         log.info("Getting trainer by username: username={}", username);
@@ -118,6 +120,7 @@ public class TrainerServiceImpl implements TrainerService {
         return mapper.toInfoDto(trainer);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainerInfoDTO> getAllTrainers() {
         log.info("Getting all trainers");
@@ -128,6 +131,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainerInfoDTO> getNotAssignedToTrainee(String traineeUsername) {
         log.info("Getting all trainers not assigned to trainee: username={}", traineeUsername);

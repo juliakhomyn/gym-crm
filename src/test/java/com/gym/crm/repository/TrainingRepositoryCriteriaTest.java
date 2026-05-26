@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Import({TrainingRepositoryCriteriaImpl.class, TraineeTrainingCriteriaBuilder.class, TrainerTrainingCriteriaBuilder.class})
 @DataSet(value = "/dataset/training.xml", cleanBefore = true)
-public class TrainingRepositoryCriteriaTest extends AbstractRepositoryTest<TrainingRepositoryCriteria> {
+class TrainingRepositoryCriteriaTest extends AbstractRepositoryTest<TrainingRepositoryCriteria> {
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String TRAINEE_USERNAME1 = "Simone.Radcliffe";
     private static final String YOGA = "Yoga";

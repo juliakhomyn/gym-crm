@@ -9,6 +9,7 @@ import com.gym.crm.search.criteria.TrainerTrainingCriteriaBuilder;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,8 +29,9 @@ public class TrainingRepositoryCriteriaImpl implements TrainingRepositoryCriteri
         if (Objects.isNull(filter)) {
             throw new ValidationFailedException(FILTER_NOT_NULL);
         }
+        Specification<Training> specification = traineeCriteriaBuilder.build(filter);
 
-        return repository.findAll(traineeCriteriaBuilder.build(filter));
+        return repository.findAll(specification);
     }
 
     @Override
@@ -37,7 +39,8 @@ public class TrainingRepositoryCriteriaImpl implements TrainingRepositoryCriteri
         if (Objects.isNull(filter)) {
             throw new ValidationFailedException(FILTER_NOT_NULL);
         }
+        Specification<Training> specification = trainerCriteriaBuilder.build(filter);
 
-        return repository.findAll(trainerCriteriaBuilder.build(filter));
+        return repository.findAll(specification);
     }
 }

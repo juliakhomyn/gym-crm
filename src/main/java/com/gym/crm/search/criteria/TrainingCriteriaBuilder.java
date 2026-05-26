@@ -20,11 +20,9 @@ public abstract class TrainingCriteriaBuilder {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            Join<?, ?> mainUserJoin = (Join<?, ?>) root
-                    .join(getMainJoinType(), JoinType.LEFT)
+            Join<?, ?> mainUserJoin = root.join(getMainJoinType(), JoinType.LEFT)
                     .join("user", JoinType.LEFT);
-            Join<?, ?> oppositeUserJoin = (Join<?, ?>) root
-                    .join(getOppositeJoinType(), JoinType.LEFT)
+            Join<?, ?> oppositeUserJoin = root.join(getOppositeJoinType(), JoinType.LEFT)
                     .join("user", JoinType.LEFT);
 
             addUsernamePredicate(cb, mainUserJoin, filter, predicates);

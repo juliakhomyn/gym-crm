@@ -33,8 +33,8 @@ class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
 
         Optional<User> actual = repository.findById(1L);
 
-        assertThat(actual).isPresent();
-        assertThat(actual).contains(expected);
+        assertThat(actual).isPresent()
+                .contains(expected);
         assertThat(actual.get().getUsername()).isEqualTo(expected.getUsername());
     }
 
@@ -51,8 +51,8 @@ class UserRepositoryTest extends AbstractRepositoryTest<UserRepository> {
 
         Optional<User> actual = repository.findByUsername(USERNAME);
 
-        assertThat(actual).isPresent();
-        assertThat(actual).contains(expected);
+        assertThat(actual).isPresent()
+                .contains(expected);
         assertThat(actual.get().getUsername()).isEqualTo(expected.getUsername());
     }
 

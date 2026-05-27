@@ -8,6 +8,15 @@ spring:
   liquibase:
     changelog: classpath:db/migration/master.xml
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
 app:
   api:
     base-path: /api/v1

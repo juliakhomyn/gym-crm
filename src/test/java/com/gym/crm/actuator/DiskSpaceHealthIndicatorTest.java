@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
-public class DiskSpaceHealthIndicatorTest {
+class DiskSpaceHealthIndicatorTest {
 
     @Spy
     private DiskSpaceHealthIndicator indicator;
@@ -23,7 +23,7 @@ public class DiskSpaceHealthIndicatorTest {
         Health health = indicator.health();
 
         assertThat(health.getStatus()).isEqualTo(Status.UP);
-        assertThat(health.getDetails().get("free_memory_bytes")).isEqualTo(200L * 1024 * 1024);
+        assertThat(health.getDetails()).containsEntry("free_memory_bytes", 200L * 1024 * 1024);
     }
 
     @Test
@@ -33,6 +33,6 @@ public class DiskSpaceHealthIndicatorTest {
         Health health = indicator.health();
 
         assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails().get("message")).isEqualTo("Low disk space");
+        assertThat(health.getDetails()).containsEntry("message", "Low disk space");
     }
 }

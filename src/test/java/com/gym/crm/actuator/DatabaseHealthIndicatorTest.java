@@ -42,8 +42,8 @@ class DatabaseHealthIndicatorTest {
         Health health = indicator.health();
 
         assertThat(health.getStatus()).isEqualTo(Status.UP);
-        assertThat(health.getDetails().get("database")).isEqualTo("MySQL");
-        assertThat(health.getDetails().get("status")).isEqualTo("Connection successful");
+        assertThat(health.getDetails()).containsEntry("database", "MySQL");
+        assertThat(health.getDetails()).containsEntry("status", "Connection successful");
         verify(connection, times(1)).close();
     }
 
@@ -57,8 +57,8 @@ class DatabaseHealthIndicatorTest {
         Health health = indicator.health();
 
         assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails().get("database")).isEqualTo("MySQL");
-        assertThat(health.getDetails().get("status")).isEqualTo("Connection invalid");
+        assertThat(health.getDetails()).containsEntry("database", "MySQL");
+        assertThat(health.getDetails()).containsEntry("status", "Connection invalid");
         verify(connection, times(1)).close();
     }
 
@@ -69,6 +69,6 @@ class DatabaseHealthIndicatorTest {
         Health health = indicator.health();
 
         assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails().get("error")).isEqualTo("Database Connection Error");
+        assertThat(health.getDetails()).containsEntry("error", "Database Connection Error");
     }
 }

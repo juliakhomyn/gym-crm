@@ -8,7 +8,7 @@ import java.io.File;
 
 @Component
 public class DiskSpaceHealthIndicator implements HealthIndicator {
-    private static final long THRESHOLD = 100 * 1024 * 1024;
+    private static final long THRESHOLD = 100L * 1024 * 1024;
 
     @Override
     public Health health() {

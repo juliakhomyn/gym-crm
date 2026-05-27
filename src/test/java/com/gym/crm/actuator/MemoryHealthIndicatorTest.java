@@ -30,7 +30,7 @@ class MemoryHealthIndicatorTest {
                 .contains("allocated_memory_bytes")
                 .contains("max_memory_bytes")
                 .contains("used_memory_bytes");
-        assertThat(actual.getDetails().get("usage_percentage")).isEqualTo("10.00%");
+        assertThat(actual.getDetails()).containsEntry("usage_percentage", "10.00%");
     }
 
     @Test
@@ -42,7 +42,7 @@ class MemoryHealthIndicatorTest {
         Health actual = indicator.health();
 
         assertThat(actual.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(actual.getDetails().get("message")).isEqualTo("Memory threshold exceeded");
+        assertThat(actual.getDetails()).containsEntry("message", "Memory threshold exceeded");
     }
 
     @Test
@@ -54,6 +54,6 @@ class MemoryHealthIndicatorTest {
         Health actual = indicator.health();
 
         assertThat(actual.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(actual.getDetails().get("message")).isEqualTo("Memory threshold exceeded");
+        assertThat(actual.getDetails()).containsEntry("message", "Memory threshold exceeded");
     }
 }

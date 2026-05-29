@@ -23,51 +23,51 @@ class RegistrationMetricsTest {
     void incrementTraineeCount_shouldIncrementSuccessCounter_whenSuccess() {
         metrics.incrementTraineeCount(true);
 
-        Counter counter = registry.find("gym.user.registrations")
+        Counter actual = registry.find("gym.user.registrations")
                 .tag("type", "trainee")
                 .tag("status", "success")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 
     @Test
     void incrementTraineeCount_shouldIncrementFailureCounter_whenFailure() {
         metrics.incrementTraineeCount(false);
 
-        Counter counter = registry.find("gym.user.registrations")
+        Counter actual = registry.find("gym.user.registrations")
                 .tag("type", "trainee")
                 .tag("status", "failure")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 
     @Test
     void incrementTrainerCount_shouldIncrementSuccessCounter_whenSuccess() {
         metrics.incrementTrainerCount(true);
 
-        Counter counter = registry.find("gym.user.registrations")
+        Counter actual = registry.find("gym.user.registrations")
                 .tag("type", "trainer")
                 .tag("status", "success")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 
     @Test
     void incrementTrainerCount_shouldIncrementFailureCounter_whenFailure() {
         metrics.incrementTrainerCount(false);
 
-        Counter counter = registry.find("gym.user.registrations")
+        Counter actual = registry.find("gym.user.registrations")
                 .tag("type", "trainer")
                 .tag("status", "failure")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 }

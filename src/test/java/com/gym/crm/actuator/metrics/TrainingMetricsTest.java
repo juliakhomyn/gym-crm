@@ -23,12 +23,12 @@ class TrainingMetricsTest {
     void incrementCounter_shouldCreateAndIncrementCounter_whenNewType() {
         metrics.incrementCounter("Yoga");
 
-        Counter counter = registry.find("gym.training.creations")
+        Counter actual = registry.find("gym.training.creations")
                 .tag("type", "Yoga")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 
     @Test
@@ -36,12 +36,12 @@ class TrainingMetricsTest {
         metrics.incrementCounter("Yoga");
         metrics.incrementCounter("Yoga");
 
-        Counter counter = registry.find("gym.training.creations")
+        Counter actual = registry.find("gym.training.creations")
                 .tag("type", "Yoga")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(2.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(2.0);
     }
 
     @Test

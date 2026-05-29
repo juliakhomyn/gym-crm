@@ -23,23 +23,23 @@ class LoginMetricsTest {
     void incrementCount_shouldIncrementSuccessCounter_whenSuccess() {
         metrics.incrementCount(true);
 
-        Counter counter = registry.find("gym.auth.login.attempts")
+        Counter actual = registry.find("gym.auth.login.attempts")
                 .tag("status", "success")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 
     @Test
     void incrementCount_shouldIncrementFailureCounter_whenFailure() {
         metrics.incrementCount(false);
 
-        Counter counter = registry.find("gym.auth.login.attempts")
+        Counter actual = registry.find("gym.auth.login.attempts")
                 .tag("status", "failure")
                 .counter();
 
-        assertThat(counter).isNotNull();
-        assertThat(counter.count()).isEqualTo(1.0);
+        assertThat(actual).isNotNull();
+        assertThat(actual.count()).isEqualTo(1.0);
     }
 }

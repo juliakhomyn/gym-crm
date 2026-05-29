@@ -1,8 +1,6 @@
 package com.gym.crm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.ErrorResponse;
 import com.gia.openapi.model.TrainerCreateRequest;
@@ -12,23 +10,19 @@ import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
 import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gym.crm.exception.ApiError;
-import com.gym.crm.exception.ApiExceptionHandler;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.testutils.TestDataProvider;
 import jakarta.persistence.PersistenceException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -46,7 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(TrainerController.class)
 class TrainerControllerTest {
     private static final String USERNAME = "Owen.Castleberry";
     private static final String TRAINEE_NAME = "Simone Radcliffe";
@@ -54,24 +48,11 @@ class TrainerControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private GymFacade facade;
-
-    @BeforeEach
-    void setUp() {
-        TrainerController controller = new TrainerController(facade);
-
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new ApiExceptionHandler())
-                .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
-                .addPlaceholderValue("app.api.base-path", "/api/v1")
-                .build();
-    }
 
     @Test
     void register_shouldReturnCredentials_whenValid() throws Exception {

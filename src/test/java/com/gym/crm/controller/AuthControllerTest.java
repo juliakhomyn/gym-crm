@@ -5,20 +5,17 @@ import com.gia.openapi.model.ErrorResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
 import com.gym.crm.exception.ApiError;
-import com.gym.crm.exception.ApiExceptionHandler;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.exception.UserAuthorizationException;
 import com.gym.crm.facade.GymFacade;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthController.class)
 class AuthControllerTest {
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String PASSWORD = "password";
@@ -40,20 +37,11 @@ class AuthControllerTest {
     private final LoginChangeRequest loginChangeRequest = buildLoginChangeRequest();
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private GymFacade facade;
-
-    @BeforeEach
-    void setUp() {
-        AuthController controller = new AuthController(facade);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new ApiExceptionHandler())
-                .addPlaceholderValue("app.api.base-path", "/api/v1")
-                .build();
-    }
 
     @Test
     void login_shouldReturnOk() throws Exception {

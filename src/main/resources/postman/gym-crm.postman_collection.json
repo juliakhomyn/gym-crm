@@ -632,7 +632,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080/api/v1"
+      "value": "http://localhost:8080/gym-crm/api/v1"
     }
   ]
 }

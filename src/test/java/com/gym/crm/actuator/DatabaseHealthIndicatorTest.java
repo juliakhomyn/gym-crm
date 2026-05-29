@@ -39,11 +39,11 @@ class DatabaseHealthIndicatorTest {
         when(connection.getMetaData()).thenReturn(metaData);
         when(metaData.getDatabaseProductName()).thenReturn("MySQL");
 
-        Health health = indicator.health();
+        Health actual = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.UP);
-        assertThat(health.getDetails()).containsEntry("database", "MySQL");
-        assertThat(health.getDetails()).containsEntry("status", "Connection successful");
+        assertThat(actual.getStatus()).isEqualTo(Status.UP);
+        assertThat(actual.getDetails()).containsEntry("database", "MySQL");
+        assertThat(actual.getDetails()).containsEntry("status", "Connection successful");
         verify(connection, times(1)).close();
     }
 
@@ -54,11 +54,11 @@ class DatabaseHealthIndicatorTest {
         when(connection.getMetaData()).thenReturn(metaData);
         when(metaData.getDatabaseProductName()).thenReturn("MySQL");
 
-        Health health = indicator.health();
+        Health actual = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails()).containsEntry("database", "MySQL");
-        assertThat(health.getDetails()).containsEntry("status", "Connection invalid");
+        assertThat(actual.getStatus()).isEqualTo(Status.DOWN);
+        assertThat(actual.getDetails()).containsEntry("database", "MySQL");
+        assertThat(actual.getDetails()).containsEntry("status", "Connection invalid");
         verify(connection, times(1)).close();
     }
 
@@ -66,9 +66,9 @@ class DatabaseHealthIndicatorTest {
     void health_shouldReturnDown_whenSQLException() throws SQLException {
         when(dataSource.getConnection()).thenThrow(new SQLException("Database Connection Error"));
 
-        Health health = indicator.health();
+        Health actual = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails()).containsEntry("error", "Database Connection Error");
+        assertThat(actual.getStatus()).isEqualTo(Status.DOWN);
+        assertThat(actual.getDetails()).containsEntry("error", "Database Connection Error");
     }
 }

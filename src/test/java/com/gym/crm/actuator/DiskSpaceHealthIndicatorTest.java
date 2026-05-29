@@ -20,19 +20,19 @@ class DiskSpaceHealthIndicatorTest {
     void health_shouldReturnUp_whenEnoughDiskSpace() {
         doReturn(200L * 1024 * 1024).when(indicator).getFreeSpace();
 
-        Health health = indicator.health();
+        Health actual = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.UP);
-        assertThat(health.getDetails()).containsEntry("free_memory_bytes", 200L * 1024 * 1024);
+        assertThat(actual.getStatus()).isEqualTo(Status.UP);
+        assertThat(actual.getDetails()).containsEntry("free_memory_bytes", 200L * 1024 * 1024);
     }
 
     @Test
     void health_shouldReturnDown_whenLowDiskSpace() {
         doReturn(50L * 1024 * 1024).when(indicator).getFreeSpace();
 
-        Health health = indicator.health();
+        Health actual = indicator.health();
 
-        assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-        assertThat(health.getDetails()).containsEntry("message", "Low disk space");
+        assertThat(actual.getStatus()).isEqualTo(Status.DOWN);
+        assertThat(actual.getDetails()).containsEntry("message", "Low disk space");
     }
 }

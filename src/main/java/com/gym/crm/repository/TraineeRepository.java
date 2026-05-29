@@ -20,4 +20,6 @@ public interface TraineeRepository extends JpaRepository<Trainee, Long> {
             "LEFT JOIN FETCH tr.user " +
             "WHERE t.user.username = :username")
     Optional<Trainee> findByUsernameWithTrainers(@Param("username") String username);
+
+    long countByUserIsActive(boolean isActive);
 }

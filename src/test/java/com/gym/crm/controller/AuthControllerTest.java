@@ -36,7 +36,6 @@ class AuthControllerTest {
     private static final String NEW_PASSWORD = "newPassword";
     private static final String BASE_URL = "/api/v1/auth";
 
-    private final LoginRequest loginRequest = buildLoginRequest();
     private final LoginChangeRequest loginChangeRequest = buildLoginChangeRequest();
 
     @Autowired
@@ -178,10 +177,6 @@ class AuthControllerTest {
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
-    }
-
-    private LoginRequest buildLoginRequest() {
-        return new LoginRequest(USERNAME, PASSWORD);
     }
 
     private LoginChangeRequest buildLoginChangeRequest() {

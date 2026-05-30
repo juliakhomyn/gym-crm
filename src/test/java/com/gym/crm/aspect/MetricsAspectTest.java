@@ -8,7 +8,7 @@ import com.gym.crm.dto.trainee.TraineeResponseDTO;
 import com.gym.crm.dto.trainer.TrainerResponseDTO;
 import com.gym.crm.dto.training.TrainingResponseDTO;
 import com.gym.crm.exception.BadCredentialsException;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

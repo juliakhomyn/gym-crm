@@ -1,4 +1,4 @@
-package com.gym.crm.testutils;
+package com.gym.crm.utils;
 
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.AssignedTrainerResponse;

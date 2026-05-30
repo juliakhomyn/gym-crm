@@ -2,7 +2,7 @@ package com.gym.crm.repository;
 
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.gym.crm.model.Training;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

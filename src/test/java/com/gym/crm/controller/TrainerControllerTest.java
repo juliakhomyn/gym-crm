@@ -14,7 +14,7 @@ import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +46,8 @@ class TrainerControllerTest {
     private static final String TRAINEE_NAME = "Simone Radcliffe";
     private static final String BASE_URL = "/api/v1/trainers";
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;

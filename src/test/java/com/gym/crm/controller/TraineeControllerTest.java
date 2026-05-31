@@ -1,7 +1,6 @@
 package com.gym.crm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.AssignedTrainerResponse;
 import com.gia.openapi.model.ErrorResponse;
@@ -19,9 +18,10 @@ import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.gym.crm.utils.JsonUtil.readJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,7 +55,8 @@ class TraineeControllerTest {
     private static final String TRAINING_TYPE = "Cardio";
     private static final String BASE_URL = "/api/v1/trainees";
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,36 +66,38 @@ class TraineeControllerTest {
 
     @Test
     void register_shouldReturnCredentials_whenValid() throws Exception {
-        TraineeCreateRequest request = TestDataProvider.buildTraineeCreateRequest();
+        String requestBody = readJson("json/trainee/trainee_create_request.json");
+        String expectedResponse = readJson("json/trainee/trainee_create_response.json");
         TraineeCreateResponse response = TestDataProvider.buildTraineeCreateResponse();
 
-        when(facade.createTrainee(request)).thenReturn(response);
+        when(facade.createTrainee(any(TraineeCreateRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post(BASE_URL + "/register")
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(response.getUsername()))
-                .andExpect(jsonPath("$.password").value(response.getPassword()));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, true);
         verify(facade).createTrainee(any(TraineeCreateRequest.class));
     }
 
     @Test
     void register_shouldReturnNotValid_whenFirstNameMissing() throws Exception {
-        TraineeCreateRequest request = new TraineeCreateRequest();
-        request.setLastName("Radcliffe");
+        String requestBody = readJson("json/trainee/trainee_create_request_invalid.json");
+        String expectedResponse = readJson("json/trainee/firstname_null_error_response.json");
 
-        String content = mockMvc.perform(post(BASE_URL + "/register")
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                        .content(requestBody))
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.VALIDATION_ERROR.getCode());
-        assertThat(errorResponse.getErrorMessage()).isEqualTo("Validation error: firstName must not be null");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, true);
         verifyNoInteractions(facade);
     }
 

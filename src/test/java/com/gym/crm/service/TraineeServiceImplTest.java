@@ -20,7 +20,7 @@ import com.gym.crm.repository.TraineeRepository;
 import com.gym.crm.repository.TrainerRepository;
 import com.gym.crm.service.common.UserProfileService;
 import com.gym.crm.service.impl.TraineeServiceImpl;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

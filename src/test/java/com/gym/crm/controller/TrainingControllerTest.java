@@ -1,13 +1,12 @@
 package com.gym.crm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gia.openapi.model.ErrorResponse;
 import com.gia.openapi.model.TrainingCreateRequest;
 import com.gia.openapi.model.TrainingTypeResponse;
 import com.gym.crm.exception.ApiError;
 import com.gym.crm.facade.GymFacade;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TrainingControllerTest {
     private static final String BASE_URL = "/api/v1";
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;

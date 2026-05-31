@@ -11,17 +11,20 @@ import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.exception.UserAuthorizationException;
 import com.gym.crm.facade.GymFacade;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.gym.crm.utils.JsonUtil.readJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,13 +32,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
     private static final String USERNAME = "Simone.Radcliffe";
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "password123";
     private static final String NEW_PASSWORD = "newPassword";
     private static final String BASE_URL = "/api/v1/auth";
 
-    private final LoginRequest loginRequest = buildLoginRequest();
     private final LoginChangeRequest loginChangeRequest = buildLoginChangeRequest();
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,46 +49,68 @@ class AuthControllerTest {
 
     @Test
     void login_shouldReturnOk() throws Exception {
+        String requestBody = readJson("json/auth/login_request.json");
+        LoginRequest expectedResponse = mapper.readValue(requestBody, LoginRequest.class);
+
         mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(loginRequest)))
+                        .content(requestBody))
                 .andExpect(status().isOk());
-        verify(facade).login(any(LoginRequest.class));
+        verify(facade).login(expectedResponse);
+    }
+
+    @Test
+    void login_shouldReturnErrorResponse_whenUsernameNull() throws Exception {
+        String requestBody = readJson("json/auth/login_request_invalid.json");
+        String expectedResponse = readJson("json/auth/username_null_error_response.json");
+
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JSONAssert.assertEquals(expectedResponse, actualResponse, true);
+        verifyNoInteractions(facade);
     }
 
     @Test
     void login_shouldReturnBadCredentialsException_whenInvalidPassword() throws Exception {
+        String requestBody = readJson("json/auth/login_request.json");
+        String expectedResponse = readJson("json/auth/bad_credentials_error_response.json");
+
         doThrow(new BadCredentialsException("Invalid credentials for user")).when(facade).login(any(LoginRequest.class));
 
-        String content = mockMvc.perform(post(BASE_URL + "/login")
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(loginRequest)))
+                        .content(requestBody))
                 .andExpect(status().isUnauthorized())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
-        assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: Invalid credentials for user");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, true);
         verify(facade).login(any(LoginRequest.class));
     }
 
     @Test
     void login_shouldEntityNotFoundException_whenUserNotFound() throws Exception {
+        String requestBody = readJson("json/auth/login_request.json");
+        String expectedResponse = readJson("json/auth/user_not_found_error_response.json");
+
         doThrow(new EntityNotFoundException("User not found")).when(facade).login(any(LoginRequest.class));
 
-        String content = mockMvc.perform(post(BASE_URL + "/login")
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(loginRequest)))
+                        .content(requestBody))
                 .andExpect(status().isNotFound())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
-        assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
-        assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, true);
         verify(facade).login(any(LoginRequest.class));
     }
 
@@ -151,10 +177,6 @@ class AuthControllerTest {
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
-    }
-
-    private LoginRequest buildLoginRequest() {
-        return new LoginRequest(USERNAME, PASSWORD);
     }
 
     private LoginChangeRequest buildLoginChangeRequest() {

@@ -17,7 +17,7 @@ import com.gym.crm.repository.TrainingTypeRepository;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.service.impl.TrainingServiceImpl;
-import com.gym.crm.testutils.TestDataProvider;
+import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

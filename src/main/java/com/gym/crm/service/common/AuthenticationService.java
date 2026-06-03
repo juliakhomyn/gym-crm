@@ -7,6 +7,7 @@ import com.gym.crm.model.User;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.repository.UserRepository;
+import com.gym.crm.security.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 public class AuthenticationService {
     private final UserRepository repository;
     private final UserProfileService service;
+    private final JwtService jwtService;
     private final SessionContext sessionContext;
 
     @Transactional(readOnly = true)
@@ -38,7 +40,7 @@ public class AuthenticationService {
 
         return AuthResponseDTO.builder()
                 .username(user.getUsername())
-                .message("Authentication successful!")
+                .token(jwtService.generateToken(user.getUsername()))
                 .build();
     }
 

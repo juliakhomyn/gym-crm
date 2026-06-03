@@ -2,6 +2,7 @@ package com.gym.crm.controller;
 
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
+import com.gia.openapi.model.LoginResponse;
 import com.gym.crm.facade.GymFacade;
 import com.gia.openapi.model.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +30,11 @@ public class AuthController {
 
     @Operation(summary = "Login with username and password", description = "Authenticates user by username and password")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful login"),
+            @ApiResponse(responseCode = "200", description = "JWT Token",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
+                    )),
             @ApiResponse(responseCode = "404", description = "Invalid user credentials",
                     content = @Content(
                             mediaType = "application/json",
@@ -42,10 +47,10 @@ public class AuthController {
                     ))
     })
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request) {
-        facade.login(request);
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        LoginResponse response = facade.login(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Change login password", description = "Changes the password for a given user")

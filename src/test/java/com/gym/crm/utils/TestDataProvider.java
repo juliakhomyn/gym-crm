@@ -6,6 +6,7 @@ import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
+import com.gia.openapi.model.LoginResponse;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateResponse;
 import com.gia.openapi.model.TraineeCreateRequest;
@@ -44,8 +45,10 @@ import com.gym.crm.model.TrainingType;
 import com.gym.crm.model.User;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -74,8 +77,7 @@ public class TestDataProvider {
     private static final long NOT_FOUND_ID = 999L;
     private static final LocalDate FROM_DATE = LocalDate.of(2024, 1, 1);
     private static final LocalDate TO_DATE = LocalDate.of(2024, 1, 30);
-
-    private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
+    private static final String TOKEN = "token";
 
     public static User buildUser(String firstName, String lastName, String username) {
         return User.builder()
@@ -234,7 +236,7 @@ public class TestDataProvider {
     public static AuthResponseDTO buildAuthResponseDTO() {
         return AuthResponseDTO.builder()
                 .username(USERNAME)
-                .message(AUTH_SUCCESS_MESSAGE)
+                .token(TOKEN)
                 .build();
     }
 
@@ -620,6 +622,19 @@ public class TestDataProvider {
         return AuthRequestDTO.builder()
                 .username(USERNAME)
                 .password(INVALID_PASSWORD)
+                .build();
+    }
+
+    public static LoginResponse buildLoginResponse() {
+        return new LoginResponse(USERNAME, TOKEN);
+    }
+
+    public static UserDetails buildUserDetails() {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(USERNAME)
+                .password(PASSWORD)
+                .authorities(Collections.emptyList())
+                .disabled(false)
                 .build();
     }
 }

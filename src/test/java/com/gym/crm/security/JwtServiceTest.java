@@ -9,14 +9,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JwtServiceTest {
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String JWT_SECRET = "QWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo1Njc4OTAxMjM0NTY3OA==";
-    private static final long JWT_EXPiRATION_MS = 3600000;
+    private static final long JWT_EXPIRATION_MS = 3600000;
     
     private final JwtService jwtService = new JwtService();
 
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(jwtService, "jwtSecret", JWT_SECRET);
-        ReflectionTestUtils.setField(jwtService, "jwnExpirationMs", JWT_EXPiRATION_MS);
+        ReflectionTestUtils.setField(jwtService, "jwnExpirationMs", JWT_EXPIRATION_MS);
     }
 
     @Test

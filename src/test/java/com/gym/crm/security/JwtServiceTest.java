@@ -11,41 +11,45 @@ class JwtServiceTest {
     private static final String JWT_SECRET = "QWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo1Njc4OTAxMjM0NTY3OA==";
     private static final long JWT_EXPIRATION_MS = 3600000;
     
-    private final JwtService jwtService = new JwtService();
+    private final JwtService sut = new JwtService();
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(jwtService, "jwtSecret", JWT_SECRET);
-        ReflectionTestUtils.setField(jwtService, "jwnExpirationMs", JWT_EXPIRATION_MS);
+        ReflectionTestUtils.setField(sut, "jwtSecret", JWT_SECRET);
+        ReflectionTestUtils.setField(sut, "jwnExpirationMs", JWT_EXPIRATION_MS);
     }
 
     @Test
     void generateToken_shouldCreateValidToken() {
-        String token = jwtService.generateToken(USERNAME);
+        String token = sut.generateToken(USERNAME);
 
         assertThat(token).isNotNull();
     }
 
     @Test
     void extractUsername_shouldReturnCorrectUsername() {
-        String token = jwtService.generateToken(USERNAME);
+        String token = sut.generateToken(USERNAME);
 
-        String expected = jwtService.extractUsername(token);
+        String actual = sut.extractUsername(token);
 
-        assertThat(expected).isEqualTo(USERNAME);
+        assertThat(actual).isEqualTo(USERNAME);
     }
 
     @Test
     void isTokenValid_shouldReturnTrueForValidToken() {
-        String token = jwtService.generateToken(USERNAME);
+        String token = sut.generateToken(USERNAME);
 
-        assertThat(jwtService.isTokenValid(token)).isTrue();
+        boolean actual = sut.isTokenValid(token);
+
+        assertThat(actual).isTrue();
     }
 
     @Test
     void isTokenValid_shouldReturnFalseForInvalidToken() {
         String invalidToken = "invalid.token.value";
 
-        assertThat(jwtService.isTokenValid(invalidToken)).isFalse();
+        boolean actual = sut.isTokenValid(invalidToken);
+
+        assertThat(actual).isFalse();
     }
 }

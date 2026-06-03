@@ -7,6 +7,7 @@ import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.model.User;
 import com.gym.crm.repository.UserRepository;
+import com.gym.crm.security.JwtService;
 import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,8 +30,7 @@ class AuthenticationServiceTest {
     private static final String PASSWORD = "password";
     private static final String ENCODED_PASSWORD = "encodedPassword";
     private static final String INVALID_PASSWORD = "invalidPassword";
-
-    private static final String AUTH_SUCCESS_MESSAGE = "Authentication successful!";
+    private static final String TOKEN = "token";
 
     private final User user = TestDataProvider.buildTraineeUser();
     private final AuthRequestDTO request = TestDataProvider.buildAuthRequestDTO();
@@ -42,6 +42,8 @@ class AuthenticationServiceTest {
     private SessionContext sessionContext;
     @Mock
     private UserRepository repository;
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private AuthenticationService service;
@@ -50,11 +52,12 @@ class AuthenticationServiceTest {
     void authenticate_shouldReturnResponse_whenCredentialsAreValid() {
         when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(userProfileService.checkPassword(PASSWORD, ENCODED_PASSWORD)).thenReturn(true);
+        when(jwtService.generateToken(USERNAME)).thenReturn(TOKEN);
 
         AuthResponseDTO actual = service.authenticate(request);
 
         assertThat(actual.getUsername()).isEqualTo(USERNAME);
-        assertThat(actual.getMessage()).isEqualTo(AUTH_SUCCESS_MESSAGE);
+        assertThat(actual.getToken()).isEqualTo(TOKEN);
         verify(sessionContext).setAuthenticatedUser(user);
     }
 
@@ -91,7 +94,7 @@ class AuthenticationServiceTest {
     @Test
     void logout_shouldClearAuthenticatedUser() {
         SessionContext realSessionContext = new SessionContext();
-        AuthenticationService realService = new AuthenticationService(repository, userProfileService, realSessionContext);
+        AuthenticationService realService = new AuthenticationService(repository, userProfileService, jwtService, realSessionContext);
         realSessionContext.setAuthenticatedUser(user);
 
         realService.logout();

@@ -6,6 +6,7 @@ import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
+import com.gia.openapi.model.LoginResponse;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateResponse;
 import com.gia.openapi.model.TraineeCreateRequest;
@@ -106,6 +107,7 @@ class GymFacadeTest {
     private final PasswordChangeRequest passwordChangeRequest = TestDataProvider.buildPasswordChangeRequest();
 
     private final LoginRequest loginRequest = TestDataProvider.buildLoginRequest();
+    private final LoginResponse loginResponse = TestDataProvider.buildLoginResponse();
     private final LoginChangeRequest loginChangeRequest = TestDataProvider.buildLoginChangeRequest();
 
     private final AuthRequestDTO authRequestDTO = TestDataProvider.buildAuthRequestDTO();
@@ -136,11 +138,11 @@ class GymFacadeTest {
     void login_shouldSaveUserToContextAndReturnResponseDTO() {
         when(authenticationService.authenticate(authRequestDTO)).thenReturn(authResponseDTO);
 
-        facade.login(loginRequest);
+        LoginResponse actual = facade.login(loginRequest);
 
-        ArgumentCaptor<AuthRequestDTO> dtoCaptor = ArgumentCaptor.forClass(AuthRequestDTO.class);
-        verify(authenticationService).authenticate(dtoCaptor.capture());
-        assertThat(dtoCaptor.getValue()).isEqualTo(authRequestDTO);
+        assertThat(actual).isNotNull();
+        assertThat(actual.getUsername()).isEqualTo(loginResponse.getUsername());
+        assertThat(actual.getToken()).isEqualTo(loginResponse.getToken());
     }
 
     @Test

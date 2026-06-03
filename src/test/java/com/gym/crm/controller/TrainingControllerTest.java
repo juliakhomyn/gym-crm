@@ -6,6 +6,8 @@ import com.gia.openapi.model.TrainingCreateRequest;
 import com.gia.openapi.model.TrainingTypeResponse;
 import com.gym.crm.exception.ApiError;
 import com.gym.crm.facade.GymFacade;
+import com.gym.crm.security.CustomUserDetailsService;
+import com.gym.crm.security.JwtService;
 import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,12 @@ class TrainingControllerTest {
 
     @MockBean
     private GymFacade facade;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private CustomUserDetailsService userDetailsService;
 
     @Test
     void addTraining_shouldReturnOk_whenValid() throws Exception {

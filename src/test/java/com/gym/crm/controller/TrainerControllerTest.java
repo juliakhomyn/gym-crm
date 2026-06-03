@@ -14,6 +14,8 @@ import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
+import com.gym.crm.security.CustomUserDetailsService;
+import com.gym.crm.security.JwtService;
 import com.gym.crm.utils.TestDataProvider;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
@@ -56,6 +58,12 @@ class TrainerControllerTest {
 
     @MockBean
     private GymFacade facade;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private CustomUserDetailsService userDetailsService;
 
     @Test
     void register_shouldReturnCredentials_whenValid() throws Exception {

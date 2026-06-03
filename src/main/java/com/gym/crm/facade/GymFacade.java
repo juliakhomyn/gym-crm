@@ -6,6 +6,7 @@ import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.LoginChangeRequest;
 import com.gia.openapi.model.LoginRequest;
+import com.gia.openapi.model.LoginResponse;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateResponse;
 import com.gia.openapi.model.TraineeCreateRequest;
@@ -22,6 +23,7 @@ import com.gia.openapi.model.TrainingCreateRequest;
 import com.gia.openapi.model.TrainingTypeResponse;
 import com.gym.crm.auth.Authenticated;
 import com.gym.crm.dto.common.AuthRequestDTO;
+import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.dto.trainee.TraineeInfoDTO;
@@ -63,13 +65,18 @@ public class GymFacade {
     private final TrainerRestMapper trainerRestMapper;
     private final TrainingRestMapper trainingRestMapper;
 
-    public void login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         AuthRequestDTO dto = AuthRequestDTO.builder()
                 .username(request.getUsername())
                 .password(request.getPassword())
                 .build();
+        AuthResponseDTO responseDTO = authenticationService.authenticate(dto);
 
-        authenticationService.authenticate(dto);
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setUsername(responseDTO.getUsername());
+        loginResponse.setToken(responseDTO.getToken());
+
+        return loginResponse;
     }
 
     @Authenticated

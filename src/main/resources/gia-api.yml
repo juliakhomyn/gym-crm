@@ -663,6 +663,31 @@ paths:
         default:
           description: Unexpected error
 
+  /auth/logout:
+    post:
+      tags:
+        - User Profile
+      summary: Logout user
+      description: Invalidate JWT by blacklisting the token from Authorization header
+      operationId: logout
+      responses:
+        '200':
+          description: User logged out successfully
+        '401':
+          description: Missing or malformed Authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
+
   /auth/password:
     put:
       tags:

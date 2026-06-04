@@ -46,6 +46,7 @@ import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -80,8 +81,8 @@ public class GymFacade {
     }
 
     @Authenticated
-    public void logout(String username) {
-        authenticationService.logout();
+    public void logout(HttpServletRequest request) {
+        authenticationService.logout(request);
     }
 
     public TraineeCreateResponse createTrainee(TraineeCreateRequest request) {

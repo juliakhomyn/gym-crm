@@ -36,14 +36,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     }
 
     private String getErrorMessage(AuthenticationException exception) {
-        if (exception instanceof DisabledException) {
-            return "User is disabled";
-        } else if (exception instanceof LockedException) {
-            return "User account is locked";
-        } else if (exception instanceof InsufficientAuthenticationException) {
-            return "Invalid token";
-        } else {
-            return exception.getMessage();
-        }
+        return switch (exception) {
+            case DisabledException ex -> "User is disabled";
+            case LockedException ex -> "User account is locked";
+            case InsufficientAuthenticationException ex -> "Invalid token";
+            default -> "Unexpected error";
+        };
     }
 }

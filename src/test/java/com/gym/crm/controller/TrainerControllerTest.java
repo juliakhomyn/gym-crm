@@ -239,7 +239,7 @@ class TrainerControllerTest {
     @Test
     void updateTrainerProfile_shouldReturnUnhandledException_whenUnexpectedError() throws Exception {
         TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
-        doThrow(new RuntimeException("Exception")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+        doThrow(new RuntimeException()).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -251,7 +251,7 @@ class TrainerControllerTest {
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.SERVICE_ERROR.getCode());
-        assertThat(errorResponse.getErrorMessage()).isEqualTo("Internal processing error: Exception");
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Internal processing error");
         verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
     }
 

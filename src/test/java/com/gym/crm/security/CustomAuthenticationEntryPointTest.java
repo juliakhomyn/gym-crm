@@ -8,7 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -100,7 +102,7 @@ class CustomAuthenticationEntryPointTest {
 
     @Test
     void commence_shouldHandleOtherAuthenticationException() throws IOException {
-        AuthenticationException authException = new AuthenticationException("other error") {};
+        AuthenticationException authException = new AuthenticationException("unexpected") {};
 
         when(response.getOutputStream()).thenReturn(outputStream);
 
@@ -111,7 +113,7 @@ class CustomAuthenticationEntryPointTest {
         ErrorResponse actualError = errorCaptor.getValue();
         assertThat(actualError).isNotNull();
         assertThat(actualError.getErrorCode()).isEqualTo(AUTHENTICATION_ERROR.getCode());
-        assertThat(actualError.getErrorMessage()).contains("other error");
+        assertThat(actualError.getErrorMessage()).contains("Unexpected error");
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         verify(response).setContentType("application/json");
     }

@@ -155,7 +155,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void handleGeneralException_shouldReturnErrorResponse() {
-        Exception exception = new Exception("Exception");
+        Exception exception = new Exception();
 
         ResponseEntity<ErrorResponse> response = handler.handleGeneralException(exception);
 
@@ -163,6 +163,6 @@ class ApiExceptionHandlerTest {
         assertThat(response.getStatusCode().value()).isEqualTo(500);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.SERVICE_ERROR.getCode());
-        assertThat(response.getBody().getErrorMessage()).isEqualTo("Internal processing error: Exception");
+        assertThat(response.getBody().getErrorMessage()).isEqualTo("Internal processing error");
     }
 }

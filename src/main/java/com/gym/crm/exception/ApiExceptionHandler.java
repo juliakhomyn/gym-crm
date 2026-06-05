@@ -92,14 +92,14 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePersistenceException(PersistenceException ex) {
         log.error("Database access failure:", ex);
 
-        return buildErrorResponse(DATABASE_ERROR, ex.getMessage());
+        return buildErrorResponse(DATABASE_ERROR, "");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Unhandled exception:", ex);
 
-        return buildErrorResponse(SERVICE_ERROR, ex.getMessage());
+        return buildErrorResponse(SERVICE_ERROR, "");
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(ApiError apiError, String message) {

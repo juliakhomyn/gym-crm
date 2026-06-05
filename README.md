@@ -8,9 +8,11 @@
 
 To run this application, you should have the following installed:
 
-- **Java Development Kit (JDK) 17**
+- **Java Development Kit (JDK) 21**
 - **Maven**
 - **Git**
+- **Redis**
+- **MySQL Server**
 
 ## 1. Clone the project
 
@@ -29,7 +31,22 @@ GRANT ALL PRIVILEGES ON gym_db.* TO 'gymuser'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-## 3. Environment Variables
+## 3. Redis Setup
+Make sure Redis is installed and running on your machine.
+
+* On macOS, you can install Redis using Homebrew:
+```bash
+brew install redis
+brew services start redis
+```
+* On Ubuntu/Debian:
+```bash
+sudo apt-get install redis-server
+sudo systemctl start redis
+```
+* Or download from https://redis.io/download
+
+## 4. Environment Variables
 Set the following environment variables before running the application:
 
 ### Database Configuration
@@ -52,19 +69,19 @@ If you want to use specific environment, you can configure it by adding:
 SPRING_PROFILES_ACTIVE=dev
 ```
 
-## 4. Build the project
+## 5. Build the project
 
 ```bash
 mvn clean compile
 ```
 
-## 5. Run tests
+## 6. Run tests
 
 ```bash
 mvn test
 ```
 
-## 5. Run the application from console
+## 7. Run the application from console
 
 ```bash
 mvn spring-boot:run

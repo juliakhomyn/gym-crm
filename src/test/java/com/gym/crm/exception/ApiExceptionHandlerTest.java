@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -114,6 +115,19 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void handleAccessDeniedException_shouldReturnErrorResponse() {
+        AccessDeniedException exception = new AccessDeniedException("Access denied");
+
+        ResponseEntity<ErrorResponse> response = handler.handleAccessDeniedException(exception);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode().value()).isEqualTo(403);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.AUTHORIZATION_ERROR.getCode());
+        assertThat(response.getBody().getErrorMessage()).isEqualTo("User is not authorized for request operation: Access denied");
+    }
+
+    @Test
     void handleEntityNotFoundException_shouldReturnErrorResponse() {
         EntityNotFoundException exception = new EntityNotFoundException("User not found");
 
@@ -141,7 +155,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void handleGeneralException_shouldReturnErrorResponse() {
-        Exception exception = new Exception();
+        Exception exception = new Exception("Exception");
 
         ResponseEntity<ErrorResponse> response = handler.handleGeneralException(exception);
 
@@ -149,6 +163,6 @@ class ApiExceptionHandlerTest {
         assertThat(response.getStatusCode().value()).isEqualTo(500);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.SERVICE_ERROR.getCode());
-        assertThat(response.getBody().getErrorMessage()).isEqualTo("Internal processing error");
+        assertThat(response.getBody().getErrorMessage()).isEqualTo("Internal processing error: Exception");
     }
 }

@@ -239,7 +239,7 @@ class TrainerControllerTest {
     @Test
     void updateTrainerProfile_shouldReturnUnhandledException_whenUnexpectedError() throws Exception {
         TrainerUpdateRequest request = TestDataProvider.buildTrainerUpdateRequest();
-        doThrow(new RuntimeException()).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
+        doThrow(new RuntimeException("Exception")).when(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
 
         String content = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -251,7 +251,7 @@ class TrainerControllerTest {
 
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.SERVICE_ERROR.getCode());
-        assertThat(errorResponse.getErrorMessage()).isEqualTo("Internal processing error");
+        assertThat(errorResponse.getErrorMessage()).isEqualTo("Internal processing error: Exception");
         verify(facade).updateTrainer(any(TrainerUpdateRequest.class), eq(USERNAME));
     }
 
@@ -271,7 +271,7 @@ class TrainerControllerTest {
         TrainerTrainingFilter filter = TestDataProvider.buildTrainerTrainingFilter();
         List<GetTrainerTrainingResponse> response = List.of(TestDataProvider.buildGetTrainerTrainingResponse());
 
-        when(facade.getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class), any(String.class))).thenReturn(response);
+        when(facade.getTrainerTrainingsByFilter(any(TrainerTrainingFilter.class))).thenReturn(response);
 
         mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")
                         .param("fromDate", "2024-01-01")
@@ -286,7 +286,7 @@ class TrainerControllerTest {
                 .andExpect(jsonPath("$[0].traineeName").value(response.get(0).getTraineeName()));
 
         ArgumentCaptor<TrainerTrainingFilter> filterCaptor = ArgumentCaptor.forClass(TrainerTrainingFilter.class);
-        verify(facade).getTrainerTrainingsByFilter(filterCaptor.capture(), eq(USERNAME));
+        verify(facade).getTrainerTrainingsByFilter(filterCaptor.capture());
         TrainerTrainingFilter capturedFilter = filterCaptor.getValue();
 
         assertThat(capturedFilter.getFromDate()).isEqualTo(filter.getFromDate());

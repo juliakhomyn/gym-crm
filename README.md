@@ -30,14 +30,22 @@ FLUSH PRIVILEGES;
 ```
 
 ## 3. Environment Variables
-Add following configuration for environment variables:
+Set the following environment variables before running the application:
 
+### Database Configuration
 ```text
 DB_URL=jdbc:mysql://localhost:3306/gym_db
 DB_USERNAME=gymuser
 DB_PASSWORD=gympass
 ```
 
+### Redis Configuration
+```text
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+### Spring Profiles
 If you want to use specific environment, you can configure it by adding:
 
 ```text

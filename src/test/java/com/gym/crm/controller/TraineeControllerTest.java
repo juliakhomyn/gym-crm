@@ -360,7 +360,7 @@ class TraineeControllerTest {
         TraineeTrainingFilter filter = TestDataProvider.buildTraineeTrainingFilter();
         List<GetTraineeTrainingResponse> response = List.of(TestDataProvider.buildGetTraineeTrainingResponse());
 
-        when(facade.getTraineeTrainingsByFilter(any(TraineeTrainingFilter.class), any(String.class))).thenReturn(response);
+        when(facade.getTraineeTrainingsByFilter(any(TraineeTrainingFilter.class))).thenReturn(response);
 
         mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")
                         .param("fromDate", "2024-01-01")
@@ -376,7 +376,7 @@ class TraineeControllerTest {
                 .andExpect(jsonPath("$[0].trainerName").value(response.get(0).getTrainerName()));
 
         ArgumentCaptor<TraineeTrainingFilter> filterCaptor = ArgumentCaptor.forClass(TraineeTrainingFilter.class);
-        verify(facade).getTraineeTrainingsByFilter(filterCaptor.capture(), eq(USERNAME));
+        verify(facade).getTraineeTrainingsByFilter(filterCaptor.capture());
         TraineeTrainingFilter capturedFilter = filterCaptor.getValue();
 
         assertThat(capturedFilter.getFromDate()).isEqualTo(filter.getFromDate());

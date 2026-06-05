@@ -2,6 +2,7 @@ package com.gym.crm.service;
 
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 class UserServiceImplTest {
     private static final String USERNAME = "Simone.Radcliffe";
     private static final String NON_EXISTENT_USERNAME = "Not.Found";
+    private static final String OLD_PASSWORD = "password";
     private static final String NEW_PASSWORD = "newPassword";
     private static final long VALID_ID = 1L;
     private static final long NOT_FOUND_ID = 999L;
@@ -109,6 +111,7 @@ class UserServiceImplTest {
     @Test
     void changePassword_shouldUpdatePassword_whenUserValid() {
         when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(OLD_PASSWORD, user.getPassword())).thenReturn(true);
         when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
 
         service.changePassword(passwordChangeRequest);
@@ -128,6 +131,17 @@ class UserServiceImplTest {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> service.changePassword(requestDTO));
 
         assertThat(exception.getMessage()).isEqualTo(String.format(USER_NOT_FOUND_BY_USERNAME, NON_EXISTENT_USERNAME));
+    }
+
+    @Test
+    void changePassword_shouldThrowIfOldPasswordDoesNotMatch() {
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(OLD_PASSWORD, user.getPassword())).thenReturn(false);
+
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> service.changePassword(passwordChangeRequest));
+
+        assertThat(exception.getMessage()).isEqualTo("Existing password does not match with requested one");
+        verify(repository, never()).save(any());
     }
 
     @Test

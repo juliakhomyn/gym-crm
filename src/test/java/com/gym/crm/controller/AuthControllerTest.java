@@ -146,13 +146,13 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(loginChangeRequest)))
                 .andExpect(status().isOk());
-        verify(facade).changePassword(any(LoginChangeRequest.class), any(String.class));
+        verify(facade).changePassword(any(LoginChangeRequest.class));
     }
 
     @Test
     void changePassword_shouldReturnUnauthorized_whenNoUserAuthenticated() throws Exception {
         doThrow(new UserAuthenticationException("No user authenticated"))
-                .when(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+                .when(facade).changePassword(any(LoginChangeRequest.class));
 
         String content = mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -165,13 +165,13 @@ class AuthControllerTest {
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
-        verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+        verify(facade).changePassword(any(LoginChangeRequest.class));
     }
 
     @Test
     void changePassword_shouldReturnForbidden_whenUserNotAuthorized() throws Exception {
         doThrow(new UserAuthorizationException("Authenticated user with username: other does not match with requested user with username: " + USERNAME))
-                .when(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+                .when(facade).changePassword(any(LoginChangeRequest.class));
 
         String content = mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,12 +184,12 @@ class AuthControllerTest {
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.AUTHORIZATION_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("User is not authorized for request operation: Authenticated user with username: other does not match with requested user with username: " + USERNAME);
-        verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+        verify(facade).changePassword(any(LoginChangeRequest.class));
     }
 
     @Test
     void changePassword_shouldReturnNotFound_whenUserNotFound() throws Exception {
-        doThrow(new EntityNotFoundException("User not found")).when(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+        doThrow(new EntityNotFoundException("User not found")).when(facade).changePassword(any(LoginChangeRequest.class));
 
         String content = mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +202,7 @@ class AuthControllerTest {
         ErrorResponse errorResponse = mapper.readValue(content, ErrorResponse.class);
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
-        verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+        verify(facade).changePassword(any(LoginChangeRequest.class));
     }
 
     @Test

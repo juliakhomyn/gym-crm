@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,9 +95,10 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
+    @PreAuthorize("#request.username == authentication.principal.username")
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(@RequestBody @Valid LoginChangeRequest request) {
-        facade.changePassword(request, request.getUsername());
+        facade.changePassword(request);
 
         return ResponseEntity.ok().build();
     }

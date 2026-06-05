@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.AssignedTrainerResponse;
 import com.gia.openapi.model.ErrorResponse;
+import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateRequest;
 import com.gia.openapi.model.TraineeAssignedTrainersUpdateResponse;
 import com.gia.openapi.model.TraineeCreateRequest;
@@ -11,7 +12,6 @@ import com.gia.openapi.model.TraineeCreateResponse;
 import com.gia.openapi.model.TraineeGetResponse;
 import com.gia.openapi.model.TraineeUpdateRequest;
 import com.gia.openapi.model.TraineeUpdateResponse;
-import com.gia.openapi.model.GetTraineeTrainingResponse;
 import com.gym.crm.exception.ApiError;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
@@ -20,6 +20,7 @@ import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TraineeTrainingFilter;
 import com.gym.crm.security.CustomUserDetailsService;
 import com.gym.crm.security.JwtService;
+import com.gym.crm.security.TokenBlacklistService;
 import com.gym.crm.utils.TestDataProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -73,6 +74,9 @@ class TraineeControllerTest {
 
     @MockBean
     private CustomUserDetailsService userDetailsService;
+
+    @MockBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     void register_shouldReturnCredentials_whenValid() throws Exception {

@@ -48,12 +48,14 @@ import com.gym.crm.service.TrainingService;
 import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
 import com.gym.crm.utils.TestDataProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
 
@@ -147,9 +149,11 @@ class GymFacadeTest {
 
     @Test
     void logout_shouldCallClearContext() {
-        facade.logout(USERNAME);
+        HttpServletRequest request = new MockHttpServletRequest();
 
-        verify(authenticationService).logout();
+        facade.logout(request);
+
+        verify(authenticationService).logout(request);
     }
 
     @Test

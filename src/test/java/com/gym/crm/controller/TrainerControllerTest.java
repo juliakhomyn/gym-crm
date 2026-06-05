@@ -3,12 +3,12 @@ package com.gym.crm.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gia.openapi.model.ActivationStatusRequest;
 import com.gia.openapi.model.ErrorResponse;
+import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gia.openapi.model.TrainerCreateRequest;
 import com.gia.openapi.model.TrainerCreateResponse;
 import com.gia.openapi.model.TrainerGetResponse;
 import com.gia.openapi.model.TrainerUpdateRequest;
 import com.gia.openapi.model.TrainerUpdateResponse;
-import com.gia.openapi.model.GetTrainerTrainingResponse;
 import com.gym.crm.exception.ApiError;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.UserAuthenticationException;
@@ -16,6 +16,7 @@ import com.gym.crm.facade.GymFacade;
 import com.gym.crm.search.filter.TrainerTrainingFilter;
 import com.gym.crm.security.CustomUserDetailsService;
 import com.gym.crm.security.JwtService;
+import com.gym.crm.security.TokenBlacklistService;
 import com.gym.crm.utils.TestDataProvider;
 import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,9 @@ class TrainerControllerTest {
 
     @MockBean
     private CustomUserDetailsService userDetailsService;
+
+    @MockBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     void register_shouldReturnCredentials_whenValid() throws Exception {

@@ -4,7 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 class JwtServiceTest {
     private static final String USERNAME = "Simone.Radcliffe";
@@ -33,6 +36,17 @@ class JwtServiceTest {
         String actual = sut.extractUsername(token);
 
         assertThat(actual).isEqualTo(USERNAME);
+    }
+
+    @Test
+    void extractExpiration_shouldReturnCorrectDate() {
+        long now = System.currentTimeMillis();
+        String token = sut.generateToken(USERNAME);
+        Date expected = new Date(now + JWT_EXPIRATION_MS);
+
+        Date actual = sut.extractExpiration(token);
+
+        assertThat(actual.getTime()).isCloseTo(expected.getTime(), within(2000L));
     }
 
     @Test

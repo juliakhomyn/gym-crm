@@ -13,7 +13,9 @@ import com.gym.crm.exception.UserAuthorizationException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.security.CustomUserDetailsService;
 import com.gym.crm.security.JwtService;
+import com.gym.crm.security.TokenBlacklistService;
 import com.gym.crm.utils.TestDataProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,9 @@ class AuthControllerTest {
 
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @MockBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     void login_shouldReturnOk() throws Exception {
@@ -198,6 +203,22 @@ class AuthControllerTest {
         assertThat(errorResponse.getErrorCode()).isEqualTo(ApiError.NOT_FOUND_ERROR.getCode());
         assertThat(errorResponse.getErrorMessage()).isEqualTo("Requested data was not found: User not found");
         verify(facade).changePassword(any(LoginChangeRequest.class), eq(USERNAME));
+    }
+
+    @Test
+    void logout_shouldReturnOk_whenLogoutIsSuccessful() throws Exception {
+        mockMvc.perform(post(BASE_URL + "/logout")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void logout_shouldReturnClientError_whenLogoutFails() throws Exception {
+        doThrow(new UserAuthenticationException("Missing or malformed Authorization header")).when(facade).logout(any(HttpServletRequest.class));
+
+        mockMvc.perform(post(BASE_URL + "/logout")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 
     private LoginChangeRequest buildLoginChangeRequest() {

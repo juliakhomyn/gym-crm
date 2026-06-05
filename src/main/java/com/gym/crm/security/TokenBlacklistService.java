@@ -18,14 +18,14 @@ public class TokenBlacklistService {
         Date expirationDate = jwtService.extractExpiration(token);
         long remainingTime = expirationDate.getTime() - System.currentTimeMillis();
 
-        if (remainingTime > 0) {
-            template.opsForValue().set(
-                    "blacklist:" + token,
-                    "true",
-                    remainingTime,
-                    TimeUnit.MILLISECONDS
-            );
+        if (remainingTime <= 0) {
+            return;
         }
+
+        template.opsForValue().set("blacklist:" + token,
+                "true",
+                remainingTime,
+                TimeUnit.MILLISECONDS);
     }
 
     public boolean isBlacklisted(String token) {

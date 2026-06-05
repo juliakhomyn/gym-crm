@@ -62,12 +62,10 @@ class TokenBlacklistServiceTest {
         tokenBlacklistService.blacklist(TOKEN);
 
         verify(template).opsForValue();
-        verify(valueOps).set(
-                eq(BLACKLIST_KEY),
+        verify(valueOps).set(eq(BLACKLIST_KEY),
                 eq("true"),
                 anyLong(),
-                eq(TimeUnit.MILLISECONDS)
-        );
+                eq(TimeUnit.MILLISECONDS));
     }
 
     @Test

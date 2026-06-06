@@ -2,6 +2,7 @@ package com.gym.crm.service.impl;
 
 import com.gym.crm.dto.common.PasswordChangeRequest;
 import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.EntityNotFoundException;
@@ -53,10 +54,15 @@ public class UserServiceImpl implements UserService {
 
         User user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException(String.format(USER_NOT_FOUND_BY_USERNAME, request.getUsername())));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            log.warn("Existing password does not match with requested password for user: username={}", request.getUsername());
+            throw new BadCredentialsException("Existing password does not match with requested one");
+        }
+
         User userWithNewPassword = user.toBuilder()
                 .password(passwordEncoder.encode(request.getNewPassword()))
                 .build();
-
         repository.save(userWithNewPassword);
         log.info("Changed password for user: username={}", request.getUsername());
     }

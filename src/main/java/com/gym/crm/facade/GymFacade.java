@@ -21,7 +21,6 @@ import com.gia.openapi.model.TrainerUpdateResponse;
 import com.gia.openapi.model.TrainerGetResponse;
 import com.gia.openapi.model.TrainingCreateRequest;
 import com.gia.openapi.model.TrainingTypeResponse;
-import com.gym.crm.auth.Authenticated;
 import com.gym.crm.dto.common.AuthRequestDTO;
 import com.gym.crm.dto.common.AuthResponseDTO;
 import com.gym.crm.dto.common.PasswordChangeRequest;
@@ -80,7 +79,6 @@ public class GymFacade {
         return loginResponse;
     }
 
-    @Authenticated
     public void logout(HttpServletRequest request) {
         authenticationService.logout(request);
     }
@@ -92,7 +90,6 @@ public class GymFacade {
         return traineeRestMapper.toRest(traineeResponseDTO);
     }
 
-    @Authenticated
     public TraineeUpdateResponse updateTrainee(TraineeUpdateRequest request, String username) {
         TraineeUpdateDTO dto = traineeRestMapper.toDto(username, request);
         TraineeResponseDTO traineeResponseDTO = traineeService.updateTrainee(dto);
@@ -100,26 +97,22 @@ public class GymFacade {
         return traineeRestMapper.toRestUpdateResponse(traineeResponseDTO);
     }
 
-    @Authenticated
     public void deleteTraineeByUsername(String username) {
         traineeService.deleteByUsername(username);
     }
 
-    @Authenticated
     public TraineeGetResponse getTraineeByUsername(String username) {
         TraineeInfoDTO traineeInfoDTO = traineeService.getTraineeByUsername(username);
 
         return traineeRestMapper.toRest(traineeInfoDTO);
     }
 
-    @Authenticated
-    public List<TraineeGetResponse> getAllTrainees(String username) {
+    public List<TraineeGetResponse> getAllTrainees() {
         return traineeService.getAllTrainees().stream()
                 .map(traineeRestMapper::toRest)
                 .toList();
     }
 
-    @Authenticated
     public TraineeAssignedTrainersUpdateResponse updateTraineeTrainersList(TraineeAssignedTrainersUpdateRequest request, String username) {
         TrainerAssignmentUpdateDTO dto = TrainerAssignmentUpdateDTO.builder()
                 .traineeUsername(username)
@@ -143,7 +136,6 @@ public class GymFacade {
         return trainerRestMapper.toRest(trainerResponseDTO);
     }
 
-    @Authenticated
     public TrainerUpdateResponse updateTrainer(TrainerUpdateRequest request, String username) {
         TrainerUpdateDTO dto = trainerRestMapper.toDto(username, request);
         TrainerResponseDTO trainerResponseDTO = trainerService.updateTrainer(dto);
@@ -151,21 +143,18 @@ public class GymFacade {
         return trainerRestMapper.toRestUpdateResponse(trainerResponseDTO);
     }
 
-    @Authenticated
     public TrainerGetResponse getTrainerByUsername(String username) {
         TrainerInfoDTO trainerInfoDTO = trainerService.getTrainerByUsername(username);
 
         return trainerRestMapper.toRestGetResponse(trainerInfoDTO);
     }
 
-    @Authenticated
-    public List<TrainerGetResponse> getAllTrainers(String username) {
+    public List<TrainerGetResponse> getAllTrainers() {
         return trainerService.getAllTrainers().stream()
                 .map(trainerRestMapper::toRestGetResponse)
                 .toList();
     }
 
-    @Authenticated
     public List<AssignedTrainerResponse> getTrainersNotAssignedToTrainee(String username) {
         List<TrainerInfoDTO> trainers = trainerService.getNotAssignedToTrainee(username);
 
@@ -174,8 +163,7 @@ public class GymFacade {
                 .toList();
     }
 
-    @Authenticated
-    public void changePassword(LoginChangeRequest request, String username) {
+    public void changePassword(LoginChangeRequest request) {
         PasswordChangeRequest requestDTO = PasswordChangeRequest.builder()
                 .username(request.getUsername())
                 .oldPassword(request.getOldPassword())
@@ -185,7 +173,6 @@ public class GymFacade {
         userService.changePassword(requestDTO);
     }
 
-    @Authenticated
     public void toggleActiveStatus(ActivationStatusRequest request, String username) {
         ToggleActiveRequestDTO dto = ToggleActiveRequestDTO.builder()
                 .username(username)
@@ -195,28 +182,24 @@ public class GymFacade {
         userService.toggleActive(dto);
     }
 
-    @Authenticated
     public void createTraining(TrainingCreateRequest request) {
         TrainingRequestDTO dto = trainingRestMapper.toDto(request);
 
         trainingService.createTraining(dto);
     }
 
-    @Authenticated
-    public List<GetTraineeTrainingResponse> getTraineeTrainingsByFilter(TraineeTrainingFilter filter, String username) {
+    public List<GetTraineeTrainingResponse> getTraineeTrainingsByFilter(TraineeTrainingFilter filter) {
         return trainingService.getTraineeTrainings(filter).stream()
                 .map(trainingRestMapper::toRestTraineeResponse)
                 .toList();
     }
 
-    @Authenticated
-    public List<GetTrainerTrainingResponse> getTrainerTrainingsByFilter(TrainerTrainingFilter filter, String username) {
+    public List<GetTrainerTrainingResponse> getTrainerTrainingsByFilter(TrainerTrainingFilter filter) {
         return trainingService.getTrainerTrainings(filter).stream()
                 .map(trainingRestMapper::toRestTrainerResponse)
                 .toList();
     }
 
-    @Authenticated
     public List<TrainingTypeResponse> getTrainingTypes() {
         return trainingService.getAllTrainingTypes().stream()
                 .map(trainingRestMapper::toRest)

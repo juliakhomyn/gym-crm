@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -111,6 +112,19 @@ class ApiExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.AUTHORIZATION_ERROR.getCode());
         assertThat(response.getBody().getErrorMessage()).isEqualTo("User is not authorized for request operation: Authenticated user with username: username does not match with requested user with username");
+    }
+
+    @Test
+    void handleAccessDeniedException_shouldReturnErrorResponse() {
+        AccessDeniedException exception = new AccessDeniedException("Access denied");
+
+        ResponseEntity<ErrorResponse> response = handler.handleAccessDeniedException(exception);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode().value()).isEqualTo(403);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.AUTHORIZATION_ERROR.getCode());
+        assertThat(response.getBody().getErrorMessage()).isEqualTo("User is not authorized for request operation: Access denied");
     }
 
     @Test

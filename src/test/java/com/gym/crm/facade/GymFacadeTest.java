@@ -212,7 +212,7 @@ class GymFacadeTest {
         when(traineeService.getAllTrainees()).thenReturn(List.of(traineeInfoDTO));
         when(traineeMapper.toRest(traineeInfoDTO)).thenReturn(traineeGetResponse);
 
-        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees();
 
         assertThat(actual)
                 .hasSize(1)
@@ -224,7 +224,7 @@ class GymFacadeTest {
     void getAllTrainees_shouldReturnEmptyList_whenNoTrainees() {
         when(traineeService.getAllTrainees()).thenReturn(List.of());
 
-        List<TraineeGetResponse> actual = facade.getAllTrainees(USERNAME);
+        List<TraineeGetResponse> actual = facade.getAllTrainees();
 
         assertThat(actual).isEmpty();
         verify(traineeService).getAllTrainees();
@@ -281,7 +281,7 @@ class GymFacadeTest {
         when(trainerService.getAllTrainers()).thenReturn(List.of(trainerInfoDTO));
         when(trainerMapper.toRestGetResponse(trainerInfoDTO)).thenReturn(trainerGetResponse);
 
-        List<TrainerGetResponse> actual = facade.getAllTrainers(USERNAME);
+        List<TrainerGetResponse> actual = facade.getAllTrainers();
 
         assertThat(actual)
                 .hasSize(1)
@@ -293,7 +293,7 @@ class GymFacadeTest {
     void getAllTrainers_shouldReturnEmptyList_whenNoTrainers() {
         when(trainerService.getAllTrainers()).thenReturn(List.of());
 
-        List<TrainerGetResponse> actual = facade.getAllTrainers(USERNAME);
+        List<TrainerGetResponse> actual = facade.getAllTrainers();
 
         assertThat(actual).isEmpty();
         verify(trainerService).getAllTrainers();
@@ -314,7 +314,7 @@ class GymFacadeTest {
 
     @Test
     void changePassword_shouldCallUserService() {
-        facade.changePassword(loginChangeRequest, USERNAME);
+        facade.changePassword(loginChangeRequest);
 
         ArgumentCaptor<PasswordChangeRequest> dtoCaptor = ArgumentCaptor.forClass(PasswordChangeRequest.class);
         verify(userService).changePassword(dtoCaptor.capture());
@@ -337,7 +337,7 @@ class GymFacadeTest {
         when(trainingMapper.toRestTraineeResponse(trainingResponseDTO)).thenReturn(getTraineeTrainingResponse);
         when(trainingService.getTraineeTrainings(traineeTrainingFilter)).thenReturn(List.of(trainingResponseDTO));
 
-        List<GetTraineeTrainingResponse> actual = facade.getTraineeTrainingsByFilter(traineeTrainingFilter, USERNAME);
+        List<GetTraineeTrainingResponse> actual = facade.getTraineeTrainingsByFilter(traineeTrainingFilter);
 
         assertThat(actual)
                 .hasSize(1)
@@ -350,7 +350,7 @@ class GymFacadeTest {
         when(trainingMapper.toRestTrainerResponse(trainingResponseDTO)).thenReturn(getTrainerTrainingResponse);
         when(trainingService.getTrainerTrainings(trainerTrainingFilter)).thenReturn(List.of(trainingResponseDTO));
 
-        List<GetTrainerTrainingResponse> actual = facade.getTrainerTrainingsByFilter(trainerTrainingFilter, TRAINER_USERNAME);
+        List<GetTrainerTrainingResponse> actual = facade.getTrainerTrainingsByFilter(trainerTrainingFilter);
 
         assertThat(actual)
                 .hasSize(1)

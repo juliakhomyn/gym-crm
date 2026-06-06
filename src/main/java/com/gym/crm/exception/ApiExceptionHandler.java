@@ -7,6 +7,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -73,6 +74,13 @@ public class ApiExceptionHandler {
         return buildErrorResponse(AUTHORIZATION_ERROR, ex.getMessage());
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        log.warn("User is not authorized for request operation: {}", ex.getMessage());
+
+        return buildErrorResponse(AUTHORIZATION_ERROR, ex.getMessage());
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
         log.warn("Requested data was not found: {}", ex.getMessage());
@@ -84,14 +92,14 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePersistenceException(PersistenceException ex) {
         log.error("Database access failure:", ex);
 
-        return buildErrorResponse(DATABASE_ERROR, ex.getMessage());
+        return buildErrorResponse(DATABASE_ERROR, "");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Unhandled exception:", ex);
 
-        return buildErrorResponse(SERVICE_ERROR, ex.getMessage());
+        return buildErrorResponse(SERVICE_ERROR, "");
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(ApiError apiError, String message) {

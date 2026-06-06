@@ -6,7 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.TimeUnit;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Slf4j
 @Service
@@ -27,11 +27,13 @@ public class BruteForceProtectionService {
 
     public void loginFailed(String username) {
         Long attempts = template.opsForValue().increment(ATTEMPTS_PREFIX + username);
-        template.expire(ATTEMPTS_PREFIX + username, LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
+        template.expire(ATTEMPTS_PREFIX + username, LOCK_DURATION_MINUTES, MINUTES);
 
-        if (attempts != null && attempts >= MAX_ATTEMPTS) {
-            template.opsForValue().set(LOCK_PREFIX + username, "locked", LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
+        if (attempts == null || attempts < MAX_ATTEMPTS) {
+            return;
         }
+
+        template.opsForValue().set(LOCK_PREFIX + username, "locked", LOCK_DURATION_MINUTES, MINUTES);
     }
 
     public void checkIfLocked(String username) {

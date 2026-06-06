@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BruteForceProtectionServiceTest {
+class BruteForceProtectionServiceTest {
     private static final String USERNAME = "Simone.Radcliff";
     private static final String ATTEMPTS_KEY = "login:attempts:" + USERNAME;
     private static final String LOCK_KEY = "login:lock:" + USERNAME;

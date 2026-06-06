@@ -7,6 +7,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -99,6 +100,19 @@ class ApiExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
         assertThat(response.getBody().getErrorMessage()).isEqualTo("Authentication fails: No user authenticated");
+    }
+
+    @Test
+    void handleLockedException_shouldReturnErrorResponse() {
+        LockedException exception = new LockedException("User is locked for 5 minutes due to too many failed login attempts");
+
+        ResponseEntity<ErrorResponse> response = handler.handleLockedException(exception);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatusCode().value()).isEqualTo(401);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getErrorCode()).isEqualTo(ApiError.AUTHENTICATION_ERROR.getCode());
+        assertThat(response.getBody().getErrorMessage()).isEqualTo("Authentication fails: User is locked for 5 minutes due to too many failed login attempts");
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.gym.crm.model.User;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.repository.UserRepository;
+import com.gym.crm.security.BruteForceProtectionService;
 import com.gym.crm.security.JwtService;
 import com.gym.crm.security.TokenBlacklistService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,18 +33,25 @@ public class AuthenticationService {
     private final UserProfileService service;
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final BruteForceProtectionService bruteForceProtectionService;
 
     @Transactional(readOnly = true)
     public AuthResponseDTO authenticate(@Valid AuthRequestDTO dto) {
-        log.info("Authentication attempt for user: {}", dto.getUsername());
+        String username = dto.getUsername();
+        log.info("Authentication attempt for user: {}", username);
 
-        User user = repository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + dto.getUsername()));
+        bruteForceProtectionService.checkIfLocked(username);
+
+        User user = repository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
+
         if (!service.checkPassword(dto.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials for user: " + dto.getUsername());
+            bruteForceProtectionService.loginFailed(username);
+            throw new BadCredentialsException("Invalid credentials for user: " + username);
         }
 
-        log.info("Authentication successful for user: {}", dto.getUsername());
+        bruteForceProtectionService.loginSuccess(username);
+        log.info("Authentication successful for user: {}", username);
 
         return AuthResponseDTO.builder()
                 .username(user.getUsername())

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -62,6 +63,13 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(UserAuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleUserAuthenticationException(UserAuthenticationException ex) {
+        log.warn("User authentication failed: {}", ex.getMessage());
+
+        return buildErrorResponse(AUTHENTICATION_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponse> handleLockedException(LockedException ex) {
         log.warn("User authentication failed: {}", ex.getMessage());
 
         return buildErrorResponse(AUTHENTICATION_ERROR, ex.getMessage());

@@ -95,7 +95,7 @@ paths:
       tags:
       - Trainee
       summary: Update trainee profile
-      description: Updates trainee's personal information and activation status
+      description: Updates trainee's personal information
       operationId: updateTraineeProfile
       parameters:
       - $ref: '#/components/parameters/Username'
@@ -120,6 +120,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -151,6 +157,12 @@ paths:
           description: Trainee profile deleted successfully
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -200,6 +212,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Trainee not found
           content:
@@ -239,6 +257,12 @@ paths:
                 $ref: '#/components/schemas/TraineeAssignedTrainersUpdateResponse'
         '400':
           description: Invalid input data or trainer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -288,6 +312,12 @@ paths:
                   $ref: '#/components/schemas/GetTraineeTrainingResponse'
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -418,6 +448,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Trainer not found
           content:
@@ -463,6 +499,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Trainer not found
           content:
@@ -498,6 +540,12 @@ paths:
                   $ref: '#/components/schemas/AssignedTrainerResponse'
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -540,6 +588,12 @@ paths:
                   $ref: '#/components/schemas/GetTrainerTrainingResponse'
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:
@@ -648,8 +702,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
-        '404':
+        '401':
           description: Invalid user credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Username not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
+          description: User account is temporarily locked due to too many failed login attempts
           content:
             application/json:
               schema:
@@ -706,6 +772,12 @@ paths:
           description: Password changed successfully
         '401':
           description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User is not authorized for this operation
           content:
             application/json:
               schema:

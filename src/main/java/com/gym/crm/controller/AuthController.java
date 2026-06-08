@@ -37,10 +37,20 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = LoginResponse.class)
                     )),
-            @ApiResponse(responseCode = "404", description = "Invalid user credentials",
+            @ApiResponse(responseCode = "401", description = "Invalid user credentials",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
+                    )),
+            @ApiResponse(responseCode = "404", description = "Username not found",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
+                    )),
+            @ApiResponse(responseCode = "423", description = "User account is temporarily locked due to too many failed login attempts",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
                     )),
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(
@@ -83,6 +93,11 @@ public class AuthController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
+                    )),
+            @ApiResponse(responseCode = "403", description = "User is not authorized for this operation",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class)
                     )),
             @ApiResponse(responseCode = "404", description = "Invalid user credentials",
                     content = @Content(

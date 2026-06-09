@@ -1,15 +1,15 @@
 package com.gym.crm.service.impl;
 
-import com.gym.crm.dto.trainee.TraineeInfoDTO;
-import com.gym.crm.dto.trainee.TraineeRequestDTO;
-import com.gym.crm.dto.trainee.TraineeResponseDTO;
-import com.gym.crm.dto.trainee.TraineeUpdateDTO;
-import com.gym.crm.dto.trainee.TrainerAssignmentUpdateDTO;
-import com.gym.crm.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.facade.dto.trainee.TraineeInfoDTO;
+import com.gym.crm.facade.dto.trainee.TraineeRequestDTO;
+import com.gym.crm.facade.dto.trainee.TraineeResponseDTO;
+import com.gym.crm.facade.dto.trainee.TraineeUpdateDTO;
+import com.gym.crm.facade.dto.trainee.TrainerAssignmentUpdateDTO;
+import com.gym.crm.facade.dto.trainer.TrainerInfoDTO;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;
-import com.gym.crm.mapper.TraineeMapper;
-import com.gym.crm.mapper.TrainerMapper;
+import com.gym.crm.facade.mapper.TraineeMapper;
+import com.gym.crm.facade.mapper.TrainerMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.User;

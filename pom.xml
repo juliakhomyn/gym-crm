@@ -201,6 +201,8 @@
                     <excludes>
                         <exclude>**/mapper/**</exclude>
                         <exclude>**/dto/**</exclude>
+                        <exclude>**/facade/mapper/**</exclude>
+                        <exclude>**/facade/dto/**</exclude>
                         <exclude>**/model/**</exclude>
                         <exclude>**/config/**</exclude>
                     </excludes>

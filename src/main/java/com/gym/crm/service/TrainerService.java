@@ -1,11 +1,11 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dto.trainer.TrainerInfoDTO;
-import com.gym.crm.dto.trainer.TrainerRequestDTO;
-import com.gym.crm.dto.trainer.TrainerResponseDTO;
-import com.gym.crm.dto.trainer.TrainerUpdateDTO;
-import com.gym.crm.dto.validation.ValidId;
-import com.gym.crm.dto.validation.ValidUsername;
+import com.gym.crm.facade.dto.trainer.TrainerInfoDTO;
+import com.gym.crm.facade.dto.trainer.TrainerRequestDTO;
+import com.gym.crm.facade.dto.trainer.TrainerResponseDTO;
+import com.gym.crm.facade.dto.trainer.TrainerUpdateDTO;
+import com.gym.crm.facade.dto.validation.ValidId;
+import com.gym.crm.facade.dto.validation.ValidUsername;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 

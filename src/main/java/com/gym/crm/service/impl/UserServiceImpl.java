@@ -1,7 +1,7 @@
 package com.gym.crm.service.impl;
 
-import com.gym.crm.dto.common.PasswordChangeRequest;
-import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.facade.dto.common.PasswordChangeRequest;
+import com.gym.crm.facade.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.ValidationFailedException;
 import com.gym.crm.model.User;

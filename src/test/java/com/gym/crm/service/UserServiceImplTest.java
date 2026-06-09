@@ -1,7 +1,7 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dto.common.PasswordChangeRequest;
-import com.gym.crm.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.facade.dto.common.PasswordChangeRequest;
+import com.gym.crm.facade.dto.common.ToggleActiveRequestDTO;
 import com.gym.crm.exception.BadCredentialsException;
 import com.gym.crm.exception.EntityNotFoundException;
 import com.gym.crm.exception.ValidationFailedException;

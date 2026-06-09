@@ -1,7 +1,7 @@
 package com.gym.crm.service.common;
 
-import com.gym.crm.dto.common.AuthRequestDTO;
-import com.gym.crm.dto.common.AuthResponseDTO;
+import com.gym.crm.facade.dto.common.AuthRequestDTO;
+import com.gym.crm.facade.dto.common.AuthResponseDTO;
 import com.gym.crm.exception.UserAuthenticationException;
 import com.gym.crm.model.User;
 import com.gym.crm.exception.BadCredentialsException;

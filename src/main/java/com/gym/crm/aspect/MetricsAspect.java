@@ -3,7 +3,7 @@ package com.gym.crm.aspect;
 import com.gym.crm.actuator.metrics.RegistrationMetrics;
 import com.gym.crm.actuator.metrics.LoginMetrics;
 import com.gym.crm.actuator.metrics.TrainingMetrics;
-import com.gym.crm.dto.training.TrainingResponseDTO;
+import com.gym.crm.facade.dto.training.TrainingResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

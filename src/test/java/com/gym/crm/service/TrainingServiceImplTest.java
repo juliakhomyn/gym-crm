@@ -1,10 +1,10 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dto.training.TrainingRequestDTO;
-import com.gym.crm.dto.training.TrainingResponseDTO;
-import com.gym.crm.dto.training.TrainingTypeDTO;
+import com.gym.crm.facade.dto.training.TrainingRequestDTO;
+import com.gym.crm.facade.dto.training.TrainingResponseDTO;
+import com.gym.crm.facade.dto.training.TrainingTypeDTO;
 import com.gym.crm.exception.EntityNotFoundException;
-import com.gym.crm.mapper.TrainingMapper;
+import com.gym.crm.facade.mapper.TrainingMapper;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.model.Trainer;
 import com.gym.crm.model.Training;

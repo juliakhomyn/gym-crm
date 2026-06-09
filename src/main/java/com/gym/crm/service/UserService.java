@@ -1,9 +1,9 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dto.common.PasswordChangeRequest;
-import com.gym.crm.dto.common.ToggleActiveRequestDTO;
-import com.gym.crm.dto.validation.ValidId;
-import com.gym.crm.dto.validation.ValidUsername;
+import com.gym.crm.facade.dto.common.PasswordChangeRequest;
+import com.gym.crm.facade.dto.common.ToggleActiveRequestDTO;
+import com.gym.crm.facade.dto.validation.ValidId;
+import com.gym.crm.facade.dto.validation.ValidUsername;
 import com.gym.crm.model.User;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;

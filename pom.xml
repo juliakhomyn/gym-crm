@@ -199,6 +199,8 @@
                 <version>0.8.11</version>
                 <configuration>
                     <excludes>
+                        <exclude>**/mapper/**</exclude>
+                        <exclude>**/dto/**</exclude>
                         <exclude>**/facade/mapper/**</exclude>
                         <exclude>**/facade/dto/**</exclude>
                         <exclude>**/model/**</exclude>

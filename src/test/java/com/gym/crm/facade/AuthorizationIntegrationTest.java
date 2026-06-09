@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
                 "ALTER TABLE trainees ALTER COLUMN id RESTART WITH 100"
         })
 @ActiveProfiles("test")
-public class AuthorizationIntegrationTest {
+class AuthorizationIntegrationTest {
     private static final String TRAINEE_USERNAME = "Simone.Radcliffe";
     private static final String TRAINER_USERNAME = "Owen.Castleberry";
     private static final String NOT_AUTHORIZED_USERNAME = "Nora.Pemberton";
@@ -75,7 +76,7 @@ public class AuthorizationIntegrationTest {
     @Test
     @WithMockUser(username = TRAINEE_USERNAME)
     void deleteTraineeByUsername_shouldSucceed_whenUsernameMatchesPrincipal() {
-        gymFacade.deleteTraineeByUsername(TRAINEE_USERNAME);
+        assertDoesNotThrow(() -> gymFacade.deleteTraineeByUsername(TRAINEE_USERNAME));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class AuthorizationIntegrationTest {
     void changePassword_shouldSucceed_whenUsernameMatchesPrincipal() {
         LoginChangeRequest request = TestDataProvider.buildLoginChangeRequest();
 
-        gymFacade.changePassword(request);
+        assertDoesNotThrow(() -> gymFacade.changePassword(request));
     }
 
     @Test

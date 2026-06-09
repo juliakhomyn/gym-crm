@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository> {
     private static final String EXISTING_USERNAME = "Nora.Pemberton";
-    private static final String EXISTING_PASSWORD = "pass222";
+    private static final String EXISTING_PASSWORD = "$2a$12$EMDlDQnVEV.NCYG6OwO5yOSTV8LruKDXBHuhPYGzvTNTd2d7Py1lC";
     private static final String FIRST_NAME = "Cillian";
     private static final String LAST_NAME = "Mercer";
     private static final String USERNAME = "Cillian.Mercer";

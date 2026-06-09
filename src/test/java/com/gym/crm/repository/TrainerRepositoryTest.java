@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
     private static final String TRAINER_USERNAME = "Callum.Whitfield";
     private static final String TRAINEE_USERNAME = "Owen.Castleberry";
-    private static final String TRAINER_PASSWORD = "pass111";
+    private static final String TRAINER_PASSWORD = "$2a$12$t5uzrr.BRNAzZrEaP/Q5XuBrNaWG.wz277HZLUGI05fB8oUOx4p6a";
     private static final String FIRST_NAME = "Cillian";
     private static final String LAST_NAME = "Mercer";
     private static final String USERNAME = "Cillian.Mercer";

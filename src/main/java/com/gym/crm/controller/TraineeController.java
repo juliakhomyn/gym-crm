@@ -16,7 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,7 +51,6 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @PutMapping("/{username}")
     public ResponseEntity<TraineeUpdateResponse> updateTraineeProfile(@PathVariable(name = "username") String username,
                                                                       @RequestBody @Valid TraineeUpdateRequest request) {
@@ -61,7 +59,6 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @DeleteMapping("/{username}")
     public ResponseEntity<Void> deleteTrainee(@PathVariable(name = "username") String username) {
         facade.deleteTraineeByUsername(username);
@@ -69,7 +66,6 @@ public class TraineeController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @PatchMapping("/{username}/activation")
     public ResponseEntity<Void> toggleActive(@PathVariable(name = "username") String username,
                                              @RequestBody @Valid ActivationStatusRequest request) {
@@ -78,7 +74,6 @@ public class TraineeController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @PutMapping("/{username}/trainers")
     public ResponseEntity<TraineeAssignedTrainersUpdateResponse> updateTraineeTrainers(@PathVariable(name = "username") String username,
                                                                                        @RequestBody @Valid TraineeAssignedTrainersUpdateRequest request) {
@@ -87,7 +82,6 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @GetMapping("/{username}/available-trainers")
     public ResponseEntity<List<AssignedTrainerResponse>> getAvailableTrainers(@PathVariable(name = "username") String username) {
         List<AssignedTrainerResponse> response = facade.getTrainersNotAssignedToTrainee(username);
@@ -95,7 +89,6 @@ public class TraineeController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("#request.username == authentication.principal.username")
     @GetMapping("/{username}/trainings")
     public ResponseEntity<List<GetTraineeTrainingResponse>> getTraineeTrainings(@PathVariable(name = "username") String username,
                                                                                 @RequestParam(name = "fromDate", required = false)

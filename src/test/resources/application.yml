@@ -15,3 +15,7 @@ app:
     base-path: /api/v1
   cors:
     allowed-origins: http://localhost:3000
+
+jwt:
+  secret: TestSecret777mtsbW5vcHFyc3R1dnd4eXo1Njc4OTAxMjM0NTY3OA==
+  expiration: 3600000

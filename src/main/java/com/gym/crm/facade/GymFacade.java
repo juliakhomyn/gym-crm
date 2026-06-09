@@ -47,6 +47,7 @@ import com.gym.crm.service.UserService;
 import com.gym.crm.service.common.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -90,6 +91,7 @@ public class GymFacade {
         return traineeRestMapper.toRest(traineeResponseDTO);
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public TraineeUpdateResponse updateTrainee(TraineeUpdateRequest request, String username) {
         TraineeUpdateDTO dto = traineeRestMapper.toDto(username, request);
         TraineeResponseDTO traineeResponseDTO = traineeService.updateTrainee(dto);
@@ -97,6 +99,7 @@ public class GymFacade {
         return traineeRestMapper.toRestUpdateResponse(traineeResponseDTO);
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public void deleteTraineeByUsername(String username) {
         traineeService.deleteByUsername(username);
     }
@@ -113,6 +116,7 @@ public class GymFacade {
                 .toList();
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public TraineeAssignedTrainersUpdateResponse updateTraineeTrainersList(TraineeAssignedTrainersUpdateRequest request, String username) {
         TrainerAssignmentUpdateDTO dto = TrainerAssignmentUpdateDTO.builder()
                 .traineeUsername(username)
@@ -136,6 +140,7 @@ public class GymFacade {
         return trainerRestMapper.toRest(trainerResponseDTO);
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public TrainerUpdateResponse updateTrainer(TrainerUpdateRequest request, String username) {
         TrainerUpdateDTO dto = trainerRestMapper.toDto(username, request);
         TrainerResponseDTO trainerResponseDTO = trainerService.updateTrainer(dto);
@@ -155,6 +160,7 @@ public class GymFacade {
                 .toList();
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public List<AssignedTrainerResponse> getTrainersNotAssignedToTrainee(String username) {
         List<TrainerInfoDTO> trainers = trainerService.getNotAssignedToTrainee(username);
 
@@ -163,6 +169,7 @@ public class GymFacade {
                 .toList();
     }
 
+    @PreAuthorize("#request.username == authentication.principal.username")
     public void changePassword(LoginChangeRequest request) {
         PasswordChangeRequest requestDTO = PasswordChangeRequest.builder()
                 .username(request.getUsername())
@@ -173,6 +180,7 @@ public class GymFacade {
         userService.changePassword(requestDTO);
     }
 
+    @PreAuthorize("#username == authentication.principal.username")
     public void toggleActiveStatus(ActivationStatusRequest request, String username) {
         ToggleActiveRequestDTO dto = ToggleActiveRequestDTO.builder()
                 .username(username)
@@ -188,12 +196,14 @@ public class GymFacade {
         trainingService.createTraining(dto);
     }
 
+    @PreAuthorize("#filter.username == authentication.principal.username")
     public List<GetTraineeTrainingResponse> getTraineeTrainingsByFilter(TraineeTrainingFilter filter) {
         return trainingService.getTraineeTrainings(filter).stream()
                 .map(trainingRestMapper::toRestTraineeResponse)
                 .toList();
     }
 
+    @PreAuthorize("#filter.username == authentication.principal.username")
     public List<GetTrainerTrainingResponse> getTrainerTrainingsByFilter(TrainerTrainingFilter filter) {
         return trainingService.getTrainerTrainings(filter).stream()
                 .map(trainingRestMapper::toRestTrainerResponse)

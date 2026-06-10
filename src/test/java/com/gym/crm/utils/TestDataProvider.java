@@ -361,7 +361,6 @@ public class TestDataProvider {
 
     public static TraineeUpdateDTO buildNonExistentTraineeUpdateDTO() {
         return TraineeUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
                 .username(NOT_FOUND_USERNAME)
                 .build();
     }
@@ -444,7 +443,6 @@ public class TestDataProvider {
 
     public static TrainerUpdateDTO buildNonExistentTrainerUpdateDTO() {
         return TrainerUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
                 .username(NOT_FOUND_USERNAME)
                 .build();
     }

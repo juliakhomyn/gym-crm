@@ -41,7 +41,6 @@ class TraineeMapperTest {
         Trainee entity = mapper.toEntity(traineeUpdateDTO);
 
         assertEquals(USERNAME, entity.getUser().getUsername());
-        assertEquals(PASSWORD, entity.getUser().getPassword());
         assertEquals(FIRST_NAME, entity.getUser().getFirstName());
         assertEquals(LAST_NAME, entity.getUser().getLastName());
         assertEquals(DATE_OF_BIRTH, entity.getDateOfBirth());
@@ -76,7 +75,6 @@ class TraineeMapperTest {
     private TraineeUpdateDTO buildTraineeUpdateDTO() {
         return TraineeUpdateDTO.builder()
                 .username(USERNAME)
-                .password(PASSWORD)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
                 .dateOfBirth(DATE_OF_BIRTH)

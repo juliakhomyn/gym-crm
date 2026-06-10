@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(of = "id")
+@ToString
 @NoArgsConstructor
 @Entity
 @Table(name = "users")

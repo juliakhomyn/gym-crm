@@ -82,7 +82,7 @@ public class TrainerServiceImpl implements TrainerService {
         TrainingType trainingType = trainingTypeRepository.findByTrainingTypeName(request.getSpecialization()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINING_TYPE_NOT_FOUND_BY_NAME, request.getSpecialization())));
 
-        User user = User.builder()
+        User user = existing.getUser().toBuilder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .isActive(request.getIsActive())

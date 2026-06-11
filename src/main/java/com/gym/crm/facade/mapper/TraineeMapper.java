@@ -21,7 +21,6 @@ public interface TraineeMapper {
     Trainee toEntity(TraineeRequestDTO traineeRequestDTO);
 
     @Mapping(target = "user.username", source = "username")
-    @Mapping(target = "user.password", source = "password")
     @Mapping(target = "user.firstName", source = "firstName")
     @Mapping(target = "user.lastName", source = "lastName")
     @Mapping(target = "user.isActive", source = "isActive")

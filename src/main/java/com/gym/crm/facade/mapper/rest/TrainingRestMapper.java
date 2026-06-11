@@ -15,6 +15,7 @@ public interface TrainingRestMapper {
 
     TrainingRequestDTO toDto(TrainingCreateRequest request);
 
+    @Mapping(target = "name", source = "trainingTypeName")
     TrainingTypeResponse toRest(TrainingTypeDTO dto);
 
     @Mapping(target = "trainingType", source = "trainingTypeName")

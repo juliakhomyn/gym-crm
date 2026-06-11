@@ -3,7 +3,6 @@ package com.gym.crm.facade.dto.trainee;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -17,10 +16,6 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class TraineeUpdateDTO {
-    @NotNull(message = "Id is required")
-    @Positive(message = "Id must be a positive number")
-    private Long id;
-
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name cannot exceed 50 characters")
     private final String firstName;
@@ -32,11 +27,6 @@ public class TraineeUpdateDTO {
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 110, message = "Username must be between 3 and 110 characters long")
     private final String username;
-
-    @NotBlank(message = "Password is required")
-    @Size(min = 10, max = 100, message = "Password must be between 10 and 100 characters long")
-    @ToString.Exclude
-    private final String password;
 
     @Past(message = "Date of birth must be in the past")
     private final LocalDate dateOfBirth;

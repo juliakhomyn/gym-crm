@@ -74,7 +74,6 @@ public class TestDataProvider {
     private static final int TRAINING_DURATION = 60;
     private static final String NOT_FOUND_USERNAME = "Not.Found";
     private static final long VALID_ID = 1L;
-    private static final long NOT_FOUND_ID = 999L;
     private static final LocalDate FROM_DATE = LocalDate.of(2024, 1, 1);
     private static final LocalDate TO_DATE = LocalDate.of(2024, 1, 30);
     private static final String TOKEN = "token";
@@ -361,7 +360,6 @@ public class TestDataProvider {
 
     public static TraineeUpdateDTO buildNonExistentTraineeUpdateDTO() {
         return TraineeUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
                 .username(NOT_FOUND_USERNAME)
                 .build();
     }
@@ -444,7 +442,6 @@ public class TestDataProvider {
 
     public static TrainerUpdateDTO buildNonExistentTrainerUpdateDTO() {
         return TrainerUpdateDTO.builder()
-                .id(NOT_FOUND_ID)
                 .username(NOT_FOUND_USERNAME)
                 .build();
     }

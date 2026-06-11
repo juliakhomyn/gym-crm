@@ -77,7 +77,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee existing = repository.findByUserUsername(request.getUsername()).orElseThrow(
                 () -> new EntityNotFoundException(String.format(TRAINEE_NOT_FOUND_BY_USERNAME, request.getUsername())));
 
-        User user = User.builder()
+        User user = existing.getUser().toBuilder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .isActive(request.getIsActive())
